@@ -13,7 +13,7 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 import {ILoyaltyGift} from "./interfaces/ILoyaltyGift.sol";
 import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
-contract LoyaltyContract is ERC20 {
+contract LoyaltyProgram is ERC20 {
 
     //////////////////////////////////////////////////////////////////
     //                          Errors                              // 
