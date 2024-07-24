@@ -16,10 +16,10 @@ interface ILoyaltyGift is IERC721, IERC721Enumerable {
   
   function HAS_ADDITIONAL_REQUIREMENTS() external view returns (bool);
 
-  function programTransfer(address _card) external; 
+  function programTransfer(address _card, uint256 _giftId) external returns (bool); 
 
-  function requirementsExchangeMet(address _card) external returns (bool); 
+  function requirementsExchangeMet(address payable _card) external returns (bool); 
 
-  function requirementsRedeemMet(address _card) external returns (bool);
+  function requirementsRedeemMet(address payable _card) external returns (bool);
 
 }

@@ -26,7 +26,6 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
     error LoyaltyGift_UnrecognisedFunctionCall(); 
 
     uint256 private _nextTokenId;
-    uint256 public immutable i_giftCost;
     string public i_uri;
 
     //////////////////////////////////////////////////////////////////
@@ -40,12 +39,10 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
         _;
     }
 
-    constructor(string memory _name, string memory _symbol, string memory _uri, uint256 _giftCost)
+    constructor(string memory _name, string memory _symbol, string memory _uri)
         ERC721(_name, _symbol)
-        Ownable(msg.sender)
-        {
+        Ownable(msg.sender) {
             i_uri = _uri; 
-            i_giftCost = _giftCost; 
         }
 
     fallback() external {
@@ -101,12 +98,12 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
     /** 
         @notice currently does not implement a functionality. Always returns true.  
      */
-    function requirementsExchangeMet(address /* _card */) external virtual returns (bool);
+    function requirementsExchangeMet(address payable /* _card */) external virtual returns (bool);
 
     /** 
         @notice currently does not implement a functionality. Always returns true.  
     */
-    function requirementsRedeemMet(address /*_card */) external virtual returns (bool);
+    function requirementsRedeemMet(address payable /*_card */) external virtual returns (bool);
 
     function tokenURI(uint256 tokenId)
         public

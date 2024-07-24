@@ -188,7 +188,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
             })
         );
 
-        cardImplementation = new LoyaltyCard(_entryPoint, address(this));
+        cardImplementation = new LoyaltyCard(_entryPoint, payable(address(this)));
 
         emit LoyaltyProgramDeployed(s_owner, LOYALTY_PROGRAM_VERSION);
     }
@@ -280,14 +280,14 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
 
         // if requerements not met, this function reverts with the reason why. 
         // also checks for balance on card. 
-        ILoyaltyGift(_gift).requirementsExchangeMet(msg.sender); 
+        ILoyaltyGift(_gift).requirementsExchangeMet(payable(msg.sender)); 
 
         // effect 
         // retrieve points
         (bool success) = transferFrom(
             msg.sender, 
             address(this), 
-            ILoyaltyGift(_gift).giftCost()
+            ILoyaltyGift(_gift).GIFT_COST()
         ); 
         if (!success) {
             revert LoyaltyProgram_GiftExchangeFailed(); 
@@ -349,7 +349,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
 
         // Check if requirements for redeem are met. 
         // if requerements not met, this function reverts with the reason why.  
-        ILoyaltyGift(_gift).requirementsRedeemMet(msg.sender); 
+        ILoyaltyGift(_gift).requirementsRedeemMet(payable(msg.sender)); 
 
         // EFFECT 
         // 1) set executed to true
@@ -358,7 +358,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         // INTERACT
         // this function still needs to be written. 
         // the following data should be sufficient... 
-        ILoyaltyGift(_gift).programTransfer(_card); 
+        ILoyaltyGift(_gift).programTransfer(_card, _giftId); 
 
         emit LoyaltyGiftRedeemed(_card, _gift, _giftId); 
     }

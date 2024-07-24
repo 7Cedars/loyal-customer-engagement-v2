@@ -32,7 +32,7 @@ import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializable {
 
     address public s_owner;
-    address public immutable i_loyaltyProgram; // £todo £note that the card itself saves what program it belongs to. Might not have to do this in loyaltyPorgram. See later. 
+    address payable public immutable i_loyaltyProgram; // £todo £note that the card itself saves what program it belongs to. Might not have to do this in loyaltyPorgram. See later. 
     IEntryPoint private immutable _entryPoint;
 
     event LoyaltyCardCreated(IEntryPoint indexed entryPoint, address indexed owner, address indexed loyaltyProgram);
@@ -47,7 +47,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
         _;
     }
 
-    constructor(IEntryPoint anEntryPoint, address _loyaltyProgram) {
+    constructor(IEntryPoint anEntryPoint, address payable _loyaltyProgram) {
         _entryPoint = anEntryPoint;
         i_loyaltyProgram = _loyaltyProgram; 
 
