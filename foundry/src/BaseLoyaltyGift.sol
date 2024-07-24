@@ -35,6 +35,8 @@ contract BaseLoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Pa
     //                       State variables                        // 
     //////////////////////////////////////////////////////////////////
     uint256 private _nextTokenId;
+
+    uint256 public immutable giftCost;
     
     //////////////////////////////////////////////////////////////////
     //                             Events                           // 
@@ -121,7 +123,6 @@ contract BaseLoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Pa
     {
         super._increaseBalance(account, value);
     }
-
 
     //////////////////////////////////////////////////////////////////
     //                          Private                             // 

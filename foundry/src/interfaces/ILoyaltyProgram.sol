@@ -4,59 +4,30 @@
 
 pragma solidity 0.8.26;
 
-import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IERC721Receiver} from  "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /// @dev the ERC-165 identifier for this interface is ... 
-interface ILoyaltyProgram is IERC165, IERC1155 {
+interface ILoyaltyProgram is IERC165, IERC721Receiver, IERC721 {
+    function requestPointsAndCard(address _program, uint256 _points, bytes memory signature) external; 
 
-  function mintLoyaltyCards(uint256 numberOfLoyaltyCards) external; 
+    function exchangePointsForGift(address _gift) external;
 
-  function mintLoyaltyPoints(uint256 numberOfPoints) external;
+    function redeemGift(address _program, address _card, address _gift, uint256 _giftId, bytes memory signature) external;
 
-  function addLoyaltyGift(address loyaltyGiftAddress, uint256 loyaltyGiftId) external;
+    function addLoyaltyGift(address _gift) external;
 
-  function removeLoyaltyGiftClaimable(address loyaltyGiftAddress, uint256 loyaltyGiftId) external; 
    
-  function removeLoyaltyGiftRedeemable(address loyaltyGiftAddress, uint256 loyaltyGiftId) external;
+    function removeLoyaltyGiftExchangable(address _gift) external;
+    
+    function removeLoyaltyGiftRedeemable(address _gift) external;
 
-  function checkRequirementsLoyaltyGiftMet(address loyaltyCard, address loyaltyGiftAddress, uint256 loyaltyGiftId) external returns (bool);
+    function blockCard(address _card) external;
 
-  function mintLoyaltyVouchers(address loyaltyGiftAddress, uint256[] memory loyaltyGiftIds, uint256[] memory numberOfVouchers) external; 
+    function unblockCard(address _card) external;
 
-  function transferLoyaltyVoucher(address from, address to, address loyaltyGiftAddress, uint256 loyaltyGiftId) external; 
+    function payCardPrefund (uint256 missingAccountFunds) external;
 
-  function claimLoyaltyGift(
-        string memory _gift,
-        string memory _cost,
-        address loyaltyGiftAddress,
-        uint256 loyaltyGiftId,
-        uint256 loyaltyCardId,
-        address customerAddress,
-        uint256 loyaltyPoints,
-        bytes memory signature
-    ) external; 
-
-  function redeemLoyaltyVoucher(
-        string memory _voucher,
-        address loyaltyGiftAddress,
-        uint256 loyaltyGiftId,
-        uint256 loyaltyCardId,
-        address customerAddress,
-        bytes memory signature
-    ) external;
-
-  function getOwner() external view returns (address);
-
-  function getTokenBoundAddress(uint256 _loyaltyCardId) external view returns (address);
-
-  function getLoyaltyGiftIsClaimable(address loyaltyGiftAddress, uint256 loyaltyGiftId) external view returns (bool);
-
-  function getLoyaltyGiftIsRedeemable(address loyaltyGiftAddress, uint256 loyaltyGiftId) external view returns (bool);
-
-  function getNumberLoyaltyCardsMinted() external view returns (uint256);
-
-  function getBalanceLoyaltyCard(address loyaltyCardAddress) external view returns (uint256);
-
-  function getNonceLoyaltyCard(address loyaltyCardAddress) external view returns (uint256);
+    
 }

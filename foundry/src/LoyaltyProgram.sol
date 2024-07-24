@@ -13,6 +13,7 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
 
 // local imports // 
+import {LoyaltyCard} from "./LoyaltyCard.sol";
 import {ILoyaltyGift} from "./interfaces/ILoyaltyGift.sol";
 import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
@@ -32,12 +33,14 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     error LoyaltyProgram_GiftNotExchangable(); 
     error LoyaltyProgram_GiftNotRedeemable(); 
     error LoyaltyProgram__IncorrectInterface(address gift); 
-    error LoyaltyContract_BlockedLoyaltyCard(address card); 
+    error LoyaltyContract_BlockedLoyaltyCard(); 
     error LoyaltyProgram__AlreadyExecuted(); 
     error LoyaltyProgram__RequestNotFromOwner(); 
     error LoyaltyProgram__NotRegisteredCard(); 
     error LoyaltyProgram__RequestNotFromCorrectCard();
     error LoyaltyProgram__CardDoesNotOwnGift(); 
+    error LoyaltyProgram_GiftExchangeFailed(); 
+    error LoyaltyProgram_OnlyEntryPoint(); 
 
     //////////////////////////////////////////////////////////////////
     //                   Type declarations                          // 
@@ -79,8 +82,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     mapping(bytes32 => bool) private _executed;  // combines RequestPoints and RedeemGift hashes.
 
     uint256 public s_nonce;
-    address public s_owner;
-    string public s_name;
+    address public s_owner; // £todo  should take this from OpenZeppelin's ownable. 
+    string public s_name; // £todo should this not be immutable? 
     string public s_imageUri;
     ColourScheme public s_colourScheme; 
 
@@ -89,6 +92,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     
     bytes32 private immutable DOMAIN_SEPARATOR;
     IEntryPoint private immutable _entryPoint; 
+    LoyaltyCard public immutable cardImplementation;
 
     uint256 private constant MAX_INCREASE_NONCE = 100;
     uint256 private constant LOYALTY_PROGRAM_VERSION = 2;   
@@ -102,13 +106,13 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     event LoyaltyGiftAdded(address indexed loyaltyGift);
     event LoyaltyGiftNoLongerExchangable(address indexed loyaltyGift);
     event LoyaltyGiftNoLongerRedeemable(address indexed loyaltyGift);
-    event LoyaltyPointsTransferred(address card, uint256 points); 
-    event LoyaltyGiftRedeemed(address card, address gift, uint256 giftId); 
-
+    event LoyaltyPointsTransferred(address indexed card, uint256 indexed points); 
+    event LoyaltyPointsExchangeForGift(address indexed card, address indexed _gift, uint256 indexed giftId); 
+    event LoyaltyGiftRedeemed(address indexed card, address indexed gift, uint256 indexed giftId); 
+    
     //////////////////////////////////////////////////////////////////
     //                        Modifiers                             // 
     //////////////////////////////////////////////////////////////////
-
 
     // £todo: import from OpenZeppelin's Ownable. Cleans up code. 
     modifier onlyOwner() { 
@@ -125,9 +129,9 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         _; 
     }
 
-    modifier noBlockedCard(address _card ) { 
-        if (_blockedCards[_card]) {
-            revert LoyaltyContract_BlockedLoyaltyCard(_card);
+    modifier noBlockedCard() { 
+        if (_blockedCards[msg.sender]) {
+            revert LoyaltyContract_BlockedLoyaltyCard();
         }
         _; 
     }
@@ -137,10 +141,6 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
             revert LoyaltyContract_NoZeroAddress();
         }
         _;
-    }
-
-    function entryPoint() public view returns (IEntryPoint) {
-        return _entryPoint;
     }
 
     //////////////////////////////////////////////////////////////////
@@ -186,7 +186,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     //////////////////////////////////////////////////////////////////
 
     // both these are direct copies from https://solidity-by-example.org/fallback/
-    // £todo: this should transfer directly to deposit! 
+    // this should transfer directly to deposit! / NO! It should go to the balance of this account! 
+    // only the deposits of the _loyalty cards_ need to be filled up! 
     fallback() external payable {
         emit Log("fallback", gasleft());
     }
@@ -194,7 +195,6 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     receive() external payable {
         emit Log("receive", gasleft());
     }
-
 
     //////////////////////////////////////////////////////////////////
     //                          External                            // 
@@ -215,7 +215,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         uint256 _points, 
         bytes memory signature
     ) external {
-        address card = msg.sender;   
+        address card = msg.sender;
         // filling up RequestGift struct with provided data.
         _requestPoints.program = _program; 
         _requestPoints.points = _points;
@@ -235,10 +235,11 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
             revert LoyaltyProgram__RequestNotFromOwner();
         }
         
-        // if msg.sender is not a registered loyalty card, create a new card and continue with this. 
+        // if msg.sender is not a registered loyalty card, create a new card and set owner of card to msg.sender. 
         // this will emit a CardCreated event.  
         if (!_registeredCards[card]) {
-            card = _createLoyaltyCard();
+            s_nonce = s_nonce++;  
+            card = _createLoyaltyCard(msg.sender, s_nonce);
         }
 
         // 1) set executed to true & execute transfer
@@ -254,7 +255,36 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     function exchangePointsForGift(
         address _gift
     ) external onlyLoyaltyCard {
-        // £todo write function.. 
+        // CHECK 
+        // check if request comes from registered loyalty card
+        if (!_registeredCards[_card]) {
+            revert LoyaltyProgram__NotRegisteredCard();
+        }
+
+        // if requerements not met, this function reverts with the reason why. 
+        // also checks for balance on card. 
+        ILoyaltyGift(_gift).requirementsExchangeMet(msg.sender); 
+
+        // effect 
+        // retrieve points
+        (bool success) = transferFrom(
+            msg.sender, 
+            address(this), 
+            ILoyaltyGift(_gift).giftCost()
+        ); 
+        if (!succes) {
+            revert LoyaltyProgram_GiftExchangeFailed(); 
+        }
+
+        // interact
+        // £note: first time I use this function, need to properly try it out.. 
+        // Get a tokenId owned by loyalty program. 
+        // if balance == 0, reverts with ERC721OutOfBoundsIndex
+        uint256 giftId = ILoyaltyGift(_gift).tokenOfOwnerByIndex(address(this), 0); 
+        ILoyaltyGift(_gift).safeTransferFrom(address(this), msg.sender, tokenId); 
+
+        // emit. 
+        emit LoyaltyPointsExchangeForGift(card, _gift, giftId); 
     }
 
 
@@ -300,7 +330,11 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
             revert LoyaltyProgram__CardDoesNotOwnGift();
         }
 
-        // EXECUTE 
+        // Check if requirements for redeem are met. 
+        // if requerements not met, this function reverts with the reason why.  
+        ILoyaltyGift(_gift).requirementsRedeemMet(msg.sender); 
+
+        // EFFECT 
         // 1) set executed to true
         _executed[digest] = true;
 
@@ -365,6 +399,23 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         _blockedCards[_card] = false; 
     }
 
+
+    /**
+     @notice the loyalty program pays for all transactions of its loyalty card - without any checks. 
+     // this is only possible because the transactions of the loyalty cards are highly restricted. 
+     // only 'pre-approved' transactions are allowed. 
+     */
+    function payCardPrefund (uint256 missingAccountFunds, address originalSender) external onlyLoyaltyCard noBlockedCard returns (bool success) {
+        // check if the call origninated from the entrypoint. 
+        if (originalSender != _entryPoint) { 
+            revert LoyaltyProgram_OnlyEntryPoint(); 
+        }
+        // £todo improve error handling.
+        _addDepositCard(msg.sender, missingAccountFunds); 
+        return true; 
+    }
+
+
     //////////////////////////////////////////////////////////////////
     //                           Public                             // 
     /////////////////////////////////////////////////////////////////
@@ -379,7 +430,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     function set_Owner(address _news_Owner) public onlyOwner {
         s_owner = _news_Owner; 
     } 
-    
+
     /**
      @notice increases the s_nonce by a given amount. 
      Allows for efficient creation of unique loyalty point vouchers.  
@@ -391,44 +442,34 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         s_nonce = s_nonce + _increase;
     } 
 
-    /**
-     * check current account deposit in the entryPoint
-     */
-    function getDeposit() public view returns (uint256) {
-        return entryPoint().balanceOf(address(this));
-    }
-
-    /**
-     * deposit more funds for this account in the entryPoint
-     */
-    function addDeposit() public payable {
-        entryPoint().depositTo{value: msg.value}(address(this));
-    }
-
-    /**
-     * withdraw value from the account's deposit
-     * @param withdrawAddress target to send to
-     * @param amount to withdraw
-     */
-    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public onlyOwner() {
-        entryPoint().withdrawTo(withdrawAddress, amount);
-    }
-
     //////////////////////////////////////////////////////////////////
     //                          Internal                           // 
     //////////////////////////////////////////////////////////////////
     
     /**
-        £todo: natspec
+     * exact copy from SimpleAccountFactory.sol, except here it is an internal function. 
+     * create an account, and return its address.
+     * returns the address even if the account is already deployed.
+     * Note that during UserOperation execution, this method is called only if the account is not deployed.
+     * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
-    function _createLoyaltyCard() internal returns (address newCard) {
-        // £todo implement this function. See examples from eth_infinitism. 
+    function _createLoyaltyCard(address newOwner, uint256 salt) internal returns (LoyaltyCard newCard) {
+        address addr = getAddress(owner, salt);
+        uint256 codeSize = addr.code.length;
+        if (codeSize > 0) {
+            return SimpleAccount(payable(addr));
+        }
+        ret = SimpleAccount(payable(new ERC1967Proxy{salt : bytes32(salt)}(
+                address(accountImplementation),
+                abi.encodeCall(SimpleAccount.initialize, (owner))
+            )));
+    }
 
-        // NB! before transferring card to new owner / wallet. Set approve to max. 
-        // this is needed to give loyalty card full power over points. 
-        // approve(address(this), type(uint256).max); 
-
-        return address(0);  
+    /**
+     * deposit more funds for this account in the entryPoint
+     */
+    function _addDepositCard(address _card, uint256 _value) internal {
+        entryPoint().depositTo{value: _value}(_card);
     }
 
     //////////////////////////////////////////////////////////////////
@@ -439,6 +480,34 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     //////////////////////////////////////////////////////////////////
     //                 View & Pure functions                        // 
     //////////////////////////////////////////////////////////////////
+        /**
+     * calculate the counterfactual address of this account as it would be returned by createAccount()
+     * exact copy from SimpleAccountFactory.sol, except here it is an internal function. 
+     */
+    function _getAddress(address owner,uint256 salt) internal view returns (address) {
+        return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(
+                    address(accountImplementation),
+                    abi.encodeCall(SimpleAccount.initialize, (owner))
+                )
+            )));
+    }
+
+    /**
+     * check current account deposit in the entryPoint
+     */
+    function _getDepositCard(address _card) internal view returns (uint256) {
+        return entryPoint().balanceOf(_card);
+    }
+
+    /**
+     * £todo add natspec
+     */
+    function entryPoint() public view returns (IEntryPoint) {
+        return _entryPoint;
+    }
+
 
     /**
      * @notice helper function to create EIP712 Domain separator.

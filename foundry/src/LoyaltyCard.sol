@@ -2,231 +2,192 @@
 pragma solidity 0.8.26;
 
 // OpenZeppelin imports //  
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {IERC721Receiver} from  "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+
+import {console} from "forge-std/Script.sol";
 
 // eth-infinitism imports // 
+import "lib/account-abstraction/contracts/core/Helpers.sol";
+import "lib/account-abstraction/contracts/core/BaseAccount.sol";
 
 // local imports // 
 import {ILoyaltyGift} from "./interfaces/ILoyaltyGift.sol";
 import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
-contract LoyaltyProgram is ERC20 {
+/**
+ * A simplified implementation of eth-infintism's SimpleAccount. 
+ * In comparison to SimpleAccount, this implementation: 
+ * - cannot do batched operations. 
+ * - can only deal with ERC721 tokens. 
+ * - has an additional check that only allows interactions with one address (its loyaltyProgram). - this is still WIP. 
+ * - functions are ordered along order defined below contract. 
+ */
 
-    //////////////////////////////////////////////////////////////////
-    //                          Errors                              // 
-    //////////////////////////////////////////////////////////////////
-    
-    error LoyaltyContract_Only_Owner(); 
-    error LoyaltyContract_OnlyLoyaltyCard(); 
-    error LoyaltyCard_MoreThanMaxIncrease();
-    error LoyaltyContract_NoZeroAddress(); 
-    error LoyaltyProgram_GiftNotExchangable(); 
-    error LoyaltyProgram_GiftNotRedeemable(); 
+contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializable {
 
-    //////////////////////////////////////////////////////////////////
-    //                   Type declarations                          // 
-    //////////////////////////////////////////////////////////////////
-    struct ColourScheme {
-        bytes base;
-        bytes accent;
-    }
+    address public immutable i_owner;
+    address public immutable i_loyaltyProgram;
+    IEntryPoint private immutable _entryPoint;
 
-    // EIP712 domain separator
-    struct EIP712Domain {
-        string name;
-        uint256 version;
-        uint256 chainId;
-        address verifyingContract;
-    }
+    event LoyaltyCardCreated(IEntryPoint indexed entryPoint, address indexed owner, address indexed loyaltyProgram);
 
-    //////////////////////////////////////////////////////////////////
-    //                    State variables                           // 
-    //////////////////////////////////////////////////////////////////
-    
-    mapping(address => bool) public redeemableGifts;
-    mapping(address => bool) public exchangableGifts;
-    mapping(address => bool) private blockedCards; 
-    mapping(address => bool) private loyaltyCards; 
-    
-    uint256 public s_nonce;
-    address public s_owner;
-    string public s_name;
-    string public s_imageUri;
-    ColourScheme public s_colourScheme; 
-
-    bytes32 private immutable DOMAIN_SEPARATOR;
-
-    uint256 private constant MAX_INCREASE_NONCE = 100;
-    uint256 private constant LP_VERSION = 2;   
-
-    //////////////////////////////////////////////////////////////////
-    //                          Events                              // 
-    //////////////////////////////////////////////////////////////////
-
-    event Log(string func, uint256 gas);
-    event LoyaltyProgramDeployed(address indexed s_owner, uint256 indexed version);
-    event LoyaltyGiftAdded(address indexed loyaltyGift);
-    event LoyaltyGiftNoLongerExchangable(address indexed loyaltyGift);
-    event LoyaltyGiftNoLongerRedeemable(address indexed loyaltyGift);
-
-    //////////////////////////////////////////////////////////////////
-    //                        Modifiers                             // 
-    //////////////////////////////////////////////////////////////////
-
-    modifier only_Owner() { 
-        if (msg.sender != s_owner) {
-            revert LoyaltyContract_Only_Owner();
-        }
-        _; 
-    }
-
-    modifier onlyLoyaltyCard() { 
-        if (!loyaltyCards[msg.sender]) {
-            revert LoyaltyContract_OnlyLoyaltyCard();
-        }
-        
-        _; 
-    }
-
-    modifier noZeroAddress(address _address) {
-        if (_address == address(0)) {
-            revert LoyaltyContract_NoZeroAddress();
-        }
+    modifier onlyOwner() {
+        _onlyOwner();
         _;
     }
 
-    //////////////////////////////////////////////////////////////////
-    //                        FUNCTIONS                             // 
-    //////////////////////////////////////////////////////////////////
-
-    constructor(
-        string memory _name, 
-        string memory _cardImageUri, 
-        bytes memory _baseColour, 
-        bytes memory _accentColour
-    ) ERC20("LoyaltyPoints", "LPX") {
-        sets_Owner(msg.sender); 
-        _mint(address(this), type(uint256).max);
-
-        s_name = _name; 
-        s_imageUri = _cardImageUri;
-        s_colourScheme = ColourScheme({
-            base: _baseColour, 
-            accent: _accentColour
-        }); 
-
-        DOMAIN_SEPARATOR = hashDomain(
-            EIP712Domain({
-                name: _name,
-                version: LP_VERSION,
-                chainId: block.chainid,
-                verifyingContract: address(this)
-            })
-        );
-
-        emit LoyaltyProgramDeployed(s_owner, LP_VERSION);
+    modifier onlyLoyaltyProgram() {
+        _onlyLoyaltyProgram();
+        _;
     }
 
-    //////////////////////////////////////////////////////////////////
-    //                  Receive & Fallback                          // 
-    //////////////////////////////////////////////////////////////////
+    constructor(IEntryPoint anEntryPoint, address _owner, address _loyaltyProgram) {
+        _entryPoint = anEntryPoint;
+        i_owner = _owner;
+        i_loyaltyProgram = _loyaltyProgram; 
 
-    // both these are direct copies from https://solidity-by-example.org/fallback/
-    fallback() external payable {
-        emit Log("fallback", gasleft());
+        _disableInitializers();
     }
 
-    receive() external payable {
-        emit Log("receive", gasleft());
-    }
-
-
-    //////////////////////////////////////////////////////////////////
-    //                          External                            // 
-    //////////////////////////////////////////////////////////////////
-    function addLoyaltyGift(address _gift) external only_Owner {
-        // £todo activate later: 
-        // if (!ERC165Checker.supportsInterface(loyaltyGiftAddress, type(ILoyaltyGift).interfaceId)) {
-        //     revert LoyaltyProgram__IncorrectInterface(loyaltyGiftAddress);
-        // }        
-        exchangableGifts[_gift] = true;
-        redeemableGifts[_gift] = true; 
-        
-        emit LoyaltyGiftAdded(_gift); 
-    }
-
-    function removeLoyaltyGiftExchangable(address _gift) external only_Owner {
-        if (!exchangableGifts[_gift]) { 
-            revert LoyaltyProgram_GiftNotExchangable(); 
-        }
-        exchangableGifts[_gift] = false;
-
-        emit LoyaltyGiftNoLongerExchangable(_gift);
-    }
-    
-    function removeLoyaltyGiftRedeemable(address _gift) external only_Owner {
-        if (!redeemableGifts[_gift]) { 
-            revert LoyaltyProgram_GiftNotRedeemable(); 
-        }
-        exchangableGifts[_gift] = false; 
-        redeemableGifts[_gift] = false;
-        
-        emit LoyaltyGiftNoLongerExchangable(_gift);
-        emit LoyaltyGiftNoLongerRedeemable(_gift); 
-    }
-
-    //////////////////////////////////////////////////////////////////
-    //                           Public                             // 
-    /////////////////////////////////////////////////////////////////
-
-    function sets_Owner(address _news_Owner) public only_Owner {
-        s_owner = _news_Owner; 
-    } 
-    
-    /**
-     @notice increases the s_nonce by a given amount. 
-     Allows for efficient creation of unique loyalty point vouchers.  
-     */
-    function increaseNonce(uint256 _increase) public only_Owner {
-        if (_increase > MAX_INCREASE_NONCE) {
-            revert LoyaltyCard_MoreThanMaxIncrease(); 
-        }
-        s_nonce = s_nonce + _increase;
-    } 
-
-    //////////////////////////////////////////////////////////////////
-    //                          Internal                           // 
-    //////////////////////////////////////////////////////////////////
-
-    //////////////////////////////////////////////////////////////////
-    //                          Private                             // 
-    //////////////////////////////////////////////////////////////////
-
-
-    //////////////////////////////////////////////////////////////////
-    //                 View & Pure functions                        // 
-    //////////////////////////////////////////////////////////////////
+    // solhint-disable-next-line no-empty-blocks
+    receive() external payable {}
 
     /**
-     * @notice helper function to create EIP712 Domain separator.
+     * execute a transaction (called directly from owner, or by entryPoint)
+     * @param dest destination address to call
+     * @param value the value to pass in this call
+     * @param func the calldata to pass in this call
      */
-    function hashDomain(EIP712Domain memory domain) private pure returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                keccak256("EIP712Domain(string name,uint256 version,uint256 chainId,address verifyingContract)"),
-                keccak256(bytes(domain.name)),
-                domain.version,
-                domain.chainId,
-                domain.verifyingContract
-            )
-        );
+    function execute(address dest, uint256 value, bytes calldata func) external {
+        _requireFromEntryPointOrOwner();
+        _call(dest, value, func);
+    }
+
+        /**
+     * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
+     * a new implementation of SimpleAccount must be deployed with the new EntryPoint address, then upgrading
+      * the implementation by calling `upgradeTo()`
+      * @param anOwner the owner (signer) of this account
+     */
+    function initialize(address anOwner) public virtual initializer {
+        _initialize(anOwner);
+    }
+
+    /**
+     * allows loyalty program to withdraw value from the loyalty card account's deposit
+     * @param withdrawAddress target to send to
+     * @param amount to withdraw
+     */
+    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) public onlyLoyaltyProgram {
+        entryPoint().withdrawTo(withdrawAddress, amount);
+    }
+
+    function _initialize(address anOwner) internal virtual {
+        i_owner = anOwner;
+        emit LoyaltyCardCreated(_entryPoint, i_owner, i_loyaltyProgram); 
+    }
+
+    // Why not do this in regular way - without writing additional functions? Is this more gass efficient? 
+    function _onlyOwner() internal view {
+        //directly from EOA owner, or through the account itself (which gets redirected through execute())
+        require(msg.sender == i_owner || msg.sender == address(this), "only owner");
+    }
+
+    function _onlyLoyaltyProgram() internal view { 
+        require(msg.sender == i_loyaltyProgram, "only loyalty program");
+    }
+
+    // Require the function call went through EntryPoint or owner
+    function _requireFromEntryPointOrOwner() internal view {
+        require(msg.sender == address(entryPoint()) || msg.sender == i_owner, "account: not Owner or EntryPoint");
     }
 
 
+    /// implement template method of BaseAccount
+    function _validateSignature(
+        PackedUserOperation calldata userOp, 
+        bytes32 userOpHash
+        ) internal override virtual returns (uint256 validationData) {
+            bytes32 hash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
+            if (i_owner != ECDSA.recover(hash, userOp.signature)) {
+                return SIG_VALIDATION_FAILED;
+            } 
+            
+            // check for valid recipient. 
+            (bool success) =  _validateRecipient(userOp);
+            if (!success) {
+                return SIG_VALIDATION_FAILED;
+            } 
 
+            return SIG_VALIDATION_SUCCESS;
+    }
+    
+    /**
+     * £todo This function should retrieve the recipient 'callee' address from callData - this bit is difficult. Check ERC-2771? 
+     * then check if it is the same as address loyalty Program  
+     * if not, revert. 
+     *
+     */
+    function _validateRecipient(
+        PackedUserOperation calldata userOp
+    ) internal returns (bool success) { // £todo implement later: returns (uint256 validationData)
+        // Need to check how callData is encoded. 
+        return true; 
+    }
+
+    function _call(address target, uint256 value, bytes memory data) internal {
+        (bool success, bytes memory result) = target.call{value: value}(data);
+        if (!success) {
+            assembly {
+                revert(add(result, 32), mload(result))
+            }
+        }
+    }
+
+    /**
+     * Overrides _payPrefund from base account. 
+     * all missingAccountFunds are paid - directly, without checks - by loyalty Program. 
+     * this is only possible because permitted transactions by loyalty Cards are very limited. 
+     * They are, in a sense, programatically pre-approved.  
+
+     * @param missingAccountFunds - The minimum value this method should send the entrypoint.
+     *                              This value MAY be zero, in case there is enough deposit,
+     *                              or the userOp has a paymaster.
+     */
+    function _payPrefund(uint256 missingAccountFunds) internal override {
+        if (missingAccountFunds != 0) {
+            // notice: msg.sender == the entrypoint. It is the entryPoint that is calling this function. 
+            ILoyaltyProgram(i_loyaltyProgram).payCardPrefund(missingAccountFunds, msg.sender); 
+            // (success);
+            //ignore failure (its EntryPoint's job to verify, not account.)
+        }
+    }
+
+    /// @inheritdoc BaseAccount
+    function entryPoint() public view virtual override returns (IEntryPoint) {
+        return _entryPoint;
+    }
+    
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external pure override returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
+    }
+
+    // £audit: only LoyaltyProgram can upgrade implementation. 
+    function _authorizeUpgrade(address newImplementation) internal view override {
+        (newImplementation);
+        _onlyLoyaltyProgram(); 
+    }
 
 }
 
@@ -238,6 +199,7 @@ contract LoyaltyProgram is ERC20 {
     /**
         - Patrick Collins & Cyfrin 
         - solidity by example 
+        - accoutn abstraction by eth-infinitism 
     */ 
 
 
