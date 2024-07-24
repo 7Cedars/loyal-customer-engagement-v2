@@ -1,0 +1,27 @@
+{
+  "title": "Fridays Fifteen!",
+  "description": "Get fifteen percent off any item for 2500 points. Only on Fridays.",
+  "image": "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmYbxk3hyS7f5iKvhE5UpTqbc8BjLfokAuzc2vC1QwMm7h",
+  "attributes": [
+    {
+      "trait_type": "additional_requirements",
+      "value": "It needs to be Friday to request this gift."
+    },
+    {
+      "trait_type": "vendor_message_at_claim",
+      "value": "Please apply 15 percent deduction."
+    },
+    {
+      "trait_type": "customer_message_at_claim",
+      "value": "Congrats. You should now receive a fifteen percent deduction."
+    },
+    {
+      "trait_type": "vendor_message_at_voucher_redeem",
+      "value": "none"
+    },
+    {
+      "trait_type": "customer_message_at_voucher_redeem",
+      "value": "none"
+    }
+  ]
+}

@@ -10,12 +10,16 @@ import {IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
 /// @dev the ERC-165 identifier for this interface is ... 
-interface ILoyaltyGift is IERC165, IERC721, IERC721Enumerable, IERC721Metadata {
+interface ILoyaltyGift is IERC721, IERC721Enumerable {
+
+  function GIFT_COST() external view returns (uint256); 
+  
+  function HAS_ADDITIONAL_REQUIREMENTS() external view returns (bool);
 
   function programTransfer(address _card) external; 
 
-  function requirementsExchangeMet(address _card) external view returns (bool); 
+  function requirementsExchangeMet(address _card) external returns (bool); 
 
-  function requirementsRedeemMet(address _card) external view returns (bool);
+  function requirementsRedeemMet(address _card) external returns (bool);
 
 }

@@ -1,0 +1,27 @@
+{
+  "title": "A Free tour for Loyal Customers",
+  "description": "Access to a free tour to one of our shops!",
+  "image": "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC",
+  "attributes": [
+    {
+      "trait_type": "additional_requirements",
+      "value": "none"
+    },
+    {
+      "trait_type": "vendor_message_at_claim",
+      "value": "No further action required. Points have been received and voucher sent."
+    },
+    {
+      "trait_type": "customer_message_at_claim",
+      "value": "Your tour voucher has been send. Show this when you start the tour."
+    },
+    {
+      "trait_type": "vendor_message_at_voucher_redeem",
+      "value": "Valid tour voucher."
+    },
+    {
+      "trait_type": "customer_message_at_voucher_redeem",
+      "value": "Enjoy the tour!"
+    }
+  ]
+}

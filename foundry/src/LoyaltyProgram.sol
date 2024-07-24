@@ -2,12 +2,14 @@
 pragma solidity 0.8.26;
 
 // OpenZeppelin imports //  
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {IERC721Receiver} from  "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {IERC165} from "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
+import {ECDSA} from "lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+import {IERC721Receiver} from  "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
+import {ERC165Checker} from "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165Checker.sol";
+import {MessageHashUtils} from "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ERC1967Proxy} from "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Create2} from "lib/openzeppelin-contracts/contracts/utils/Create2.sol";
 
 // eth-infinitism imports // 
 import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
@@ -45,6 +47,14 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     //////////////////////////////////////////////////////////////////
     //                   Type declarations                          // 
     //////////////////////////////////////////////////////////////////
+    // enum Colours {
+    //     Pending,
+    //     Shipped,
+    //     Accepted,
+    //     Rejected,
+    //     Canceled
+    // }
+    
     struct ColourScheme {
         bytes base;
         bytes accent;
@@ -155,14 +165,14 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         string memory _cardImageUri, 
         bytes memory _baseColour, 
         bytes memory _accentColour, 
-        IEntryPoint _anEntryPoint
+        address _anEntryPoint
     ) ERC20("LoyaltyPoints", "LPX") {
         set_Owner(msg.sender); 
         _mint(address(this), type(uint256).max);
 
         s_name = _name; 
         s_imageUri = _cardImageUri;
-        _entryPoint = _anEntryPoint; 
+        _entryPoint = IEntryPoint(_anEntryPoint); 
 
         s_colourScheme = ColourScheme({
             base: _baseColour, 
@@ -177,6 +187,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
                 verifyingContract: address(this)
             })
         );
+
+        cardImplementation = new LoyaltyCard(_entryPoint, address(this));
 
         emit LoyaltyProgramDeployed(s_owner, LOYALTY_PROGRAM_VERSION);
     }
@@ -215,8 +227,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         uint256 _points, 
         bytes memory signature
     ) external {
-        address card = msg.sender;
         // filling up RequestGift struct with provided data.
+        address sendPointsTo = msg.sender; 
         _requestPoints.program = _program; 
         _requestPoints.points = _points;
 
@@ -237,16 +249,21 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         
         // if msg.sender is not a registered loyalty card, create a new card and set owner of card to msg.sender. 
         // this will emit a CardCreated event.  
-        if (!_registeredCards[card]) {
+        // £improvement: I can check if card belongs to program with an erc-167(?) check + check from card themselves. 
+        // This would enable taking out the _registeredCards mapping. 
+        // £todo: more generally, this code is a bit convoluted now. 
+        if (!_registeredCards[msg.sender]) {
             s_nonce = s_nonce++;  
-            card = _createLoyaltyCard(msg.sender, s_nonce);
+            LoyaltyCard card = _createLoyaltyCard(msg.sender, s_nonce);
+            _registeredCards[address(card)] = true;
+            sendPointsTo = address(card); 
         }
 
         // 1) set executed to true & execute transfer
         _executed[digest] = true;
-        transferFrom(address(this), card, _points);
+        transferFrom(address(this), sendPointsTo, _points);
 
-        emit LoyaltyPointsTransferred(card, _points);   
+        emit LoyaltyPointsTransferred(sendPointsTo, _points);   
     }
 
     /**
@@ -257,7 +274,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     ) external onlyLoyaltyCard {
         // CHECK 
         // check if request comes from registered loyalty card
-        if (!_registeredCards[_card]) {
+        if (!_registeredCards[msg.sender]) {
             revert LoyaltyProgram__NotRegisteredCard();
         }
 
@@ -272,7 +289,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
             address(this), 
             ILoyaltyGift(_gift).giftCost()
         ); 
-        if (!succes) {
+        if (!success) {
             revert LoyaltyProgram_GiftExchangeFailed(); 
         }
 
@@ -281,10 +298,10 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         // Get a tokenId owned by loyalty program. 
         // if balance == 0, reverts with ERC721OutOfBoundsIndex
         uint256 giftId = ILoyaltyGift(_gift).tokenOfOwnerByIndex(address(this), 0); 
-        ILoyaltyGift(_gift).safeTransferFrom(address(this), msg.sender, tokenId); 
+        ILoyaltyGift(_gift).safeTransferFrom(address(this), msg.sender, giftId); 
 
         // emit. 
-        emit LoyaltyPointsExchangeForGift(card, _gift, giftId); 
+        emit LoyaltyPointsExchangeForGift(msg.sender, _gift, giftId); 
     }
 
 
@@ -407,7 +424,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
      */
     function payCardPrefund (uint256 missingAccountFunds, address originalSender) external onlyLoyaltyCard noBlockedCard returns (bool success) {
         // check if the call origninated from the entrypoint. 
-        if (originalSender != _entryPoint) { 
+        if (originalSender != address(_entryPoint)) { 
             revert LoyaltyProgram_OnlyEntryPoint(); 
         }
         // £todo improve error handling.
@@ -454,14 +471,14 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
     function _createLoyaltyCard(address newOwner, uint256 salt) internal returns (LoyaltyCard newCard) {
-        address addr = getAddress(owner, salt);
+        address addr = _getAddress(s_owner, salt);
         uint256 codeSize = addr.code.length;
         if (codeSize > 0) {
-            return SimpleAccount(payable(addr));
+            return LoyaltyCard(payable(addr));
         }
-        ret = SimpleAccount(payable(new ERC1967Proxy{salt : bytes32(salt)}(
-                address(accountImplementation),
-                abi.encodeCall(SimpleAccount.initialize, (owner))
+        newCard = LoyaltyCard(payable(new ERC1967Proxy{salt : bytes32(salt)}(
+                address(cardImplementation),
+                abi.encodeCall(LoyaltyCard.initialize, (s_owner))
             )));
     }
 
@@ -488,8 +505,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(
-                    address(accountImplementation),
-                    abi.encodeCall(SimpleAccount.initialize, (owner))
+                    address(cardImplementation),
+                    abi.encodeCall(LoyaltyCard.initialize, (owner))
                 )
             )));
     }

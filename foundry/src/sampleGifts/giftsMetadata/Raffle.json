@@ -1,0 +1,27 @@
+{
+  "title": "A raffle: get a free coffee, donought or cupcake!",
+  "description": "Exchange 1250 points to enter a pseudo random raffle with three prices: a free coffee, donought or cupcake.",
+  "image": "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmcXvDwaZCrku3Fh79j4aK81SYtgDwRzPGiFKfRu41kxyu",
+  "attributes": [
+    {
+      "trait_type": "additional_requirements",
+      "value": "none"
+    },
+    {
+      "trait_type": "vendor_message_at_claim",
+      "value": "No further action required. Points have been received, raflle has completed and voucher sent."
+    },
+    {
+      "trait_type": "customer_message_at_claim",
+      "value": "Your voucher has been sent. Check your card to see what you received!"
+    },
+    {
+      "trait_type": "vendor_message_at_voucher_redeem",
+      "value": "none"
+    },
+    {
+      "trait_type": "customer_message_at_voucher_redeem",
+      "value": "none"
+    }
+  ]
+}

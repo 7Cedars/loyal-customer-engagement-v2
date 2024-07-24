@@ -1,0 +1,27 @@
+{
+  "title": "Gold Token",
+  "description": "Access to gold tier gifts. A customer cannot request this token: it needs to be transferred by vendor.",
+  "image": "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmUpGnYfQtbbavTJpqmKotQhiL6RnPUo3zQWq4AYiGMwLG",
+  "attributes": [
+    {
+      "trait_type": "additional_requirements",
+      "value": "none"
+    },
+    {
+      "trait_type": "vendor_message_at_claim",
+      "value": "none"
+    },
+    {
+      "trait_type": "customer_message_at_claim",
+      "value": "none"
+    },
+    {
+      "trait_type": "vendor_message_at_voucher_redeem",
+      "value": "none"
+    },
+    {
+      "trait_type": "customer_message_at_voucher_redeem",
+      "value": "none"
+    }
+  ]
+}

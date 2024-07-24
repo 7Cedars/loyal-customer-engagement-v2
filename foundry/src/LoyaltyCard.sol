@@ -31,8 +31,8 @@ import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
 contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializable {
 
-    address public immutable i_owner;
-    address public immutable i_loyaltyProgram;
+    address public s_owner;
+    address public immutable i_loyaltyProgram; // £todo £note that the card itself saves what program it belongs to. Might not have to do this in loyaltyPorgram. See later. 
     IEntryPoint private immutable _entryPoint;
 
     event LoyaltyCardCreated(IEntryPoint indexed entryPoint, address indexed owner, address indexed loyaltyProgram);
@@ -47,9 +47,8 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
         _;
     }
 
-    constructor(IEntryPoint anEntryPoint, address _owner, address _loyaltyProgram) {
+    constructor(IEntryPoint anEntryPoint, address _loyaltyProgram) {
         _entryPoint = anEntryPoint;
-        i_owner = _owner;
         i_loyaltyProgram = _loyaltyProgram; 
 
         _disableInitializers();
@@ -89,14 +88,14 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
     }
 
     function _initialize(address anOwner) internal virtual {
-        i_owner = anOwner;
-        emit LoyaltyCardCreated(_entryPoint, i_owner, i_loyaltyProgram); 
+        s_owner = anOwner;
+        emit LoyaltyCardCreated(_entryPoint, s_owner, i_loyaltyProgram); 
     }
 
     // Why not do this in regular way - without writing additional functions? Is this more gass efficient? 
     function _onlyOwner() internal view {
         //directly from EOA owner, or through the account itself (which gets redirected through execute())
-        require(msg.sender == i_owner || msg.sender == address(this), "only owner");
+        require(msg.sender == s_owner || msg.sender == address(this), "only owner");
     }
 
     function _onlyLoyaltyProgram() internal view { 
@@ -105,7 +104,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
 
     // Require the function call went through EntryPoint or owner
     function _requireFromEntryPointOrOwner() internal view {
-        require(msg.sender == address(entryPoint()) || msg.sender == i_owner, "account: not Owner or EntryPoint");
+        require(msg.sender == address(entryPoint()) || msg.sender == s_owner, "account: not Owner or EntryPoint");
     }
 
 
@@ -115,7 +114,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
         bytes32 userOpHash
         ) internal override virtual returns (uint256 validationData) {
             bytes32 hash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
-            if (i_owner != ECDSA.recover(hash, userOp.signature)) {
+            if (s_owner != ECDSA.recover(hash, userOp.signature)) {
                 return SIG_VALIDATION_FAILED;
             } 
             

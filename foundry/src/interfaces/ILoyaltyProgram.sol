@@ -27,7 +27,7 @@ interface ILoyaltyProgram is IERC165, IERC721Receiver, IERC721 {
 
     function unblockCard(address _card) external;
 
-    function payCardPrefund (uint256 missingAccountFunds) external;
+    function payCardPrefund (uint256 missingAccountFunds, address originalSender) external;
 
-    
+
 }
