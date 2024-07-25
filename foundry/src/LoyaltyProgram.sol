@@ -4,22 +4,28 @@ pragma solidity 0.8.26;
 // OpenZeppelin imports //  
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {IERC165} from "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
+import {ERC165} from "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
 import {ECDSA} from "lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import {IERC721Receiver} from  "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
 import {ERC165Checker} from "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165Checker.sol";
 import {MessageHashUtils} from "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ERC1967Proxy} from "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Create2} from "lib/openzeppelin-contracts/contracts/utils/Create2.sol";
+import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 // eth-infinitism imports // 
 import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
 
 // local imports // 
 import {LoyaltyCard} from "./LoyaltyCard.sol";
+import {LoyaltyGift} from "./LoyaltyGift.sol";
 import {ILoyaltyGift} from "./interfaces/ILoyaltyGift.sol";
 import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
-contract LoyaltyProgram is IERC721Receiver, ERC20 {
+/// ONLY FOR TESTING
+import {console2} from "lib/forge-std/src/Test.sol";
+
+contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
     using ERC165Checker for address;
@@ -27,34 +33,24 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     //////////////////////////////////////////////////////////////////
     //                          Errors                              // 
     //////////////////////////////////////////////////////////////////
-    
-    error LoyaltyContract_OnlyOwner(); 
-    error LoyaltyContract_OnlyLoyaltyCard(); 
-    error LoyaltyCard_MoreThanMaxIncrease();
-    error LoyaltyContract_NoZeroAddress(); 
-    error LoyaltyProgram_GiftNotExchangable(); 
-    error LoyaltyProgram_GiftNotRedeemable(); 
+    error LoyaltyProgram__OnlyLoyaltyCard(); 
+    error LoyaltyProgram__MoreThanMaxIncrease();
+    error LoyaltyProgram__OLoyaltyProgram__NoZeroAddressnlyLoyaltyCard(); 
+    error LoyaltyProgram__GiftNotExchangeable(); 
+    error LoyaltyProgram__GiftNotRedeemable(); 
     error LoyaltyProgram__IncorrectInterface(address gift); 
-    error LoyaltyContract_BlockedLoyaltyCard(); 
+    error LoyaltyProgram__BlockedLoyaltyCard(); 
     error LoyaltyProgram__AlreadyExecuted(); 
-    error LoyaltyProgram__RequestNotFromOwner(); 
+    error LoyaltyProgram__RequestNotFromProgramOwner(); 
     error LoyaltyProgram__NotRegisteredCard(); 
-    error LoyaltyProgram__RequestNotFromCorrectCard();
+    error LoyaltyProgram__NotSignedByOwner();
     error LoyaltyProgram__CardDoesNotOwnGift(); 
-    error LoyaltyProgram_GiftExchangeFailed(); 
-    error LoyaltyProgram_OnlyEntryPoint(); 
+    error LoyaltyProgram__GiftExchangeFailed(); 
+    error LoyaltyProgram__OnlyEntryPoint(); 
 
     //////////////////////////////////////////////////////////////////
     //                   Type declarations                          // 
-    //////////////////////////////////////////////////////////////////
-    // enum Colours {
-    //     Pending,
-    //     Shipped,
-    //     Accepted,
-    //     Rejected,
-    //     Canceled
-    // }
-    
+    //////////////////////////////////////////////////////////////////  
     struct ColourScheme {
         bytes base;
         bytes accent;
@@ -76,26 +72,30 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
 
     // RedeemGift message struct
     struct RedeemGift {
-        address card;
+        address program; 
+        address owner;
         address gift;
         uint256 giftId;
+    }
+
+    // RedeemGift message struct
+    struct AccessGift {
+        bool redeemable;
+        bool exchangeable;
     }
 
     //////////////////////////////////////////////////////////////////
     //                    State variables                           // 
     //////////////////////////////////////////////////////////////////
-    
-    mapping(address => bool) public s_redeemableGifts;
-    mapping(address => bool) public s_exchangableGifts;
+    mapping(address => AccessGift) public s_AccessGifts;
     mapping(address => bool) private _blockedCards; 
-    mapping(address => bool) private _registeredCards; 
-    mapping(bytes32 => bool) private _executed;  // combines RequestPoints and RedeemGift hashes.
+    mapping(bytes => bool) private _executed;  // combines RequestPoints and RedeemGift hashes.
 
     uint256 public s_nonce;
-    address public s_owner; // £todo  should take this from OpenZeppelin's ownable. 
     string public s_name; // £todo should this not be immutable? 
     string public s_imageUri;
     ColourScheme public s_colourScheme; 
+    bool public s_allowCreationCards = true; 
 
     RequestPoints private _requestPoints; 
     RedeemGift private _redeemGift;  
@@ -105,50 +105,43 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     LoyaltyCard public immutable cardImplementation;
 
     uint256 private constant MAX_INCREASE_NONCE = 100;
-    uint256 private constant LOYALTY_PROGRAM_VERSION = 2;   
-
+    uint256 private constant LOYALTY_PROGRAM_VERSION = 2;
+    uint256 private constant SALT = 123456; 
+    
     //////////////////////////////////////////////////////////////////
     //                          Events                              // 
     //////////////////////////////////////////////////////////////////
-
     event Log(string func, uint256 gas);
-    event LoyaltyProgramDeployed(address indexed s_owner, uint256 indexed version);
-    event LoyaltyGiftAdded(address indexed loyaltyGift);
-    event LoyaltyGiftNoLongerExchangable(address indexed loyaltyGift);
-    event LoyaltyGiftNoLongerRedeemable(address indexed loyaltyGift);
-    event LoyaltyPointsTransferred(address indexed card, uint256 indexed points); 
-    event LoyaltyPointsExchangeForGift(address indexed card, address indexed _gift, uint256 indexed giftId); 
-    event LoyaltyGiftRedeemed(address indexed card, address indexed gift, uint256 indexed giftId); 
-    
+    event LoyaltyProgramDeployed(address indexed owner, uint256 indexed version);
+    event LoyaltyGiftListed(address indexed loyaltyGift, bool indexed exchangeable, bool indexed redeemable);
+    event LoyaltyPointsExchangeForGift(address indexed owner, address indexed _gift, uint256 indexed giftId); 
+    event LoyaltyGiftRedeemed(address indexed owner, address indexed gift, uint256 indexed giftId); 
+    event LoyaltyCardBlocked (address indexed owner, bool indexed blocked);
+    event CreationCardsAllowed(bool indexed allowed); 
+    event GiftsMinted(address gift, uint256 amount); 
+
     //////////////////////////////////////////////////////////////////
     //                        Modifiers                             // 
     //////////////////////////////////////////////////////////////////
-
-    // £todo: import from OpenZeppelin's Ownable. Cleans up code. 
-    modifier onlyOwner() { 
-        if (msg.sender != s_owner) {
-            revert LoyaltyContract_OnlyOwner();
-        }
-        _; 
-    }
-
-    modifier onlyLoyaltyCard() { 
-        if (!_registeredCards[msg.sender]) {
-            revert LoyaltyContract_OnlyLoyaltyCard();
+    modifier onlyLoyaltyCard(address owner) {
+        address addr = getAddress(owner, SALT);
+        uint256 codeSize = addr.code.length;
+        if (codeSize == 0) {
+            revert LoyaltyProgram__OnlyLoyaltyCard();
         }
         _; 
     }
 
     modifier noBlockedCard() { 
         if (_blockedCards[msg.sender]) {
-            revert LoyaltyContract_BlockedLoyaltyCard();
+            revert LoyaltyProgram__BlockedLoyaltyCard();
         }
         _; 
     }
 
     modifier noZeroAddress(address _address) {
         if (_address == address(0)) {
-            revert LoyaltyContract_NoZeroAddress();
+            revert LoyaltyProgram__OLoyaltyProgram__NoZeroAddressnlyLoyaltyCard();
         }
         _;
     }
@@ -156,7 +149,6 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     //////////////////////////////////////////////////////////////////
     //                        FUNCTIONS                             // 
     //////////////////////////////////////////////////////////////////
-    
     /**
         £todo: natspec
     */
@@ -166,8 +158,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         bytes memory _baseColour, 
         bytes memory _accentColour, 
         address _anEntryPoint
-    ) ERC20("LoyaltyPoints", "LPX") {
-        set_Owner(msg.sender); 
+    ) ERC20("LoyaltyPoints", "LPX") Ownable(msg.sender) {
         _mint(address(this), type(uint256).max);
 
         s_name = _name; 
@@ -190,7 +181,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
 
         cardImplementation = new LoyaltyCard(_entryPoint, payable(address(this)));
 
-        emit LoyaltyProgramDeployed(s_owner, LOYALTY_PROGRAM_VERSION);
+        emit LoyaltyProgramDeployed(owner(), LOYALTY_PROGRAM_VERSION);
     }
 
     //////////////////////////////////////////////////////////////////
@@ -213,95 +204,79 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     //////////////////////////////////////////////////////////////////
     /**
         £todo: natspec
-        // receives signedMessage, should have been signed by owner of this loyalty prgram. 
-        // check if signature is from this address. 
-        // check if account is a LoyaltyCard
-            - if yes: continue with adress 
-            - if no : create a LoyaltyCard - and use this address. 
-        // read amount of points to be given. 
-        // transfer points to loyalty card/ 
-        // emit event pointsTransferred(address card, uint256 points).  
+
+        £ NB: this function is called by loyaltyCard that calls this function.  
     */
     function requestPointsAndCard(
         address _program,
         uint256 _points, 
-        bytes memory signature
+        bytes memory programSignature, 
+        address _ownerCard
     ) external {
         // filling up RequestGift struct with provided data.
-        address sendPointsTo = msg.sender; 
         _requestPoints.program = _program; 
         _requestPoints.points = _points;
 
         // creating digest & using it to recover loyalty program  address. 
         bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashRequestPoints(_requestPoints));
-        address signer = digest.recover(signature);
+        address signer = digest.recover(programSignature);
 
-        // Checks. 
+        // Checks.
+        if (signer != owner()) {
+            revert LoyaltyProgram__RequestNotFromProgramOwner();
+        }
+
         // Check that digest has not already been executed.
-        if (_executed[digest]) {
+        if (_executed[programSignature]) {
             revert LoyaltyProgram__AlreadyExecuted();
         }
 
-        // Check if signer is owner. 
-        if (signer != s_owner) {
-            revert LoyaltyProgram__RequestNotFromOwner();
-        }
-        
         // if msg.sender is not a registered loyalty card, create a new card and set owner of card to msg.sender. 
-        // this will emit a CardCreated event.  
-        // £improvement: I can check if card belongs to program with an erc-167(?) check + check from card themselves. 
-        // This would enable taking out the _registeredCards mapping. 
-        // £todo: more generally, this code is a bit convoluted now. 
-        if (!_registeredCards[msg.sender]) {
-            s_nonce = s_nonce++;  
-            LoyaltyCard card = _createLoyaltyCard(msg.sender, s_nonce);
-            _registeredCards[address(card)] = true;
-            sendPointsTo = address(card); 
-        }
+        LoyaltyCard card = _getLoyaltyCard(_ownerCard, SALT);
 
         // 1) set executed to true & execute transfer
-        _executed[digest] = true;
-        transferFrom(address(this), sendPointsTo, _points);
-
-        emit LoyaltyPointsTransferred(sendPointsTo, _points);   
+        _executed[programSignature] = true;
+        _update(address(this), address(card), _points); // emits a transfer event 
     }
 
     /**
         £todo outline internal function 
+
+        £ NB: it is the loyaltyCard that calls this function.
     */
     function exchangePointsForGift(
-        address _gift
-    ) external onlyLoyaltyCard {
+        address _gift,
+        address _owner
+    ) external onlyLoyaltyCard(_owner) {
         // CHECK 
-        // check if request comes from registered loyalty card
-        if (!_registeredCards[msg.sender]) {
-            revert LoyaltyProgram__NotRegisteredCard();
+        // check if gift eexchangeable. 
+        if (!s_AccessGifts[_gift].exchangeable){ 
+            revert LoyaltyProgram__GiftNotExchangeable(); 
         }
+
+        address cardAddress = getAddress(_owner, SALT);
 
         // if requerements not met, this function reverts with the reason why. 
         // also checks for balance on card. 
-        ILoyaltyGift(_gift).requirementsExchangeMet(payable(msg.sender)); 
+        ILoyaltyGift(_gift).requirementsExchangeMet(payable(cardAddress)); 
 
         // effect 
         // retrieve points
-        (bool success) = transferFrom(
-            msg.sender, 
+        _update(
+            cardAddress, 
             address(this), 
             ILoyaltyGift(_gift).GIFT_COST()
-        ); 
-        if (!success) {
-            revert LoyaltyProgram_GiftExchangeFailed(); 
-        }
+        ); // emits a transfer event
 
         // interact
         // £note: first time I use this function, need to properly try it out.. 
         // Get a tokenId owned by loyalty program. 
         // if balance == 0, reverts with ERC721OutOfBoundsIndex
         uint256 giftId = ILoyaltyGift(_gift).tokenOfOwnerByIndex(address(this), 0); 
-        ILoyaltyGift(_gift).safeTransferFrom(address(this), msg.sender, giftId); 
+        ILoyaltyGift(_gift).safeTransferFrom(address(this), cardAddress, giftId); 
 
         // emit. 
-        emit LoyaltyPointsExchangeForGift(msg.sender, _gift, giftId); 
+        emit LoyaltyPointsExchangeForGift(_owner, _gift, giftId); 
     }
 
 
@@ -309,16 +284,18 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         £todo: natspec
 
         £todo outline internal function 
+        £ NB: it is the owner of the loyalty program that calls this function. 
     */
     function redeemGift(
         address _program,
-        address _card, 
+        address _ownerCard, 
         address _gift,
         uint256 _giftId,  
         bytes memory signature
     ) external {   
-        // filling up RequestGift struct with provided data.
-        _redeemGift.card = _card; 
+        // filling up RequestGift struct with provided data. 
+        _redeemGift.program = _program; 
+        _redeemGift.owner = _ownerCard; 
         _redeemGift.gift = _gift;
         _redeemGift.giftId = _giftId;
 
@@ -328,104 +305,102 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
 
         // CHECK. 
         // Check that digest has not already been executed.
-        if (_executed[digest]) {
+        if (_executed[signature]) {
             revert LoyaltyProgram__AlreadyExecuted();
         }
 
+        // Check if signer is loyalty card. 
+        if (signer != _ownerCard) {
+            revert LoyaltyProgram__NotSignedByOwner();
+        }
+
         // check if request comes from registered loyalty card
-        if (!_registeredCards[_card]) {
+        address cardAddress = getAddress(_ownerCard, SALT);
+        uint256 codeSize = cardAddress.code.length;
+        if (codeSize == 0) {
             revert LoyaltyProgram__NotRegisteredCard();
         }
 
-        // Check if signer is loyalty card. 
-        if (signer != _card) {
-            revert LoyaltyProgram__RequestNotFromCorrectCard();
+        // check if gift is redeemable.         
+        if (!s_AccessGifts[_gift].redeemable) {
+            revert LoyaltyProgram__GiftNotRedeemable();
         }
 
         // Check if loyalty card owns the gift to be redeemed. 
-        if (ILoyaltyGift(_gift).ownerOf(_giftId) != _card) {
+        if (ILoyaltyGift(_gift).ownerOf(_giftId) != cardAddress) {
             revert LoyaltyProgram__CardDoesNotOwnGift();
         }
 
         // Check if requirements for redeem are met. 
         // if requerements not met, this function reverts with the reason why.  
-        ILoyaltyGift(_gift).requirementsRedeemMet(payable(msg.sender)); 
+        ILoyaltyGift(_gift).requirementsRedeemMet(payable(cardAddress)); 
 
         // EFFECT 
         // 1) set executed to true
-        _executed[digest] = true;
+        _executed[signature] = true;
 
         // INTERACT
-        // this function still needs to be written. 
-        // the following data should be sufficient... 
-        ILoyaltyGift(_gift).programTransfer(_card, _giftId); 
+        ILoyaltyGift(_gift).retrieveGiftFromCard(cardAddress, _giftId); 
 
-        emit LoyaltyGiftRedeemed(_card, _gift, _giftId); 
+        emit LoyaltyGiftRedeemed(_ownerCard, _gift, _giftId); 
     }
 
     /**
         £todo: natspec
      */
-    function addLoyaltyGift(address _gift) external onlyOwner { 
+    function setLoyaltyGift(address _gift, bool exchangeable, bool redeemable) external onlyOwner { 
         if (!ERC165Checker.supportsInterface(_gift, type(ILoyaltyGift).interfaceId)) {
             revert LoyaltyProgram__IncorrectInterface(_gift);
-        }        
-        s_exchangableGifts[_gift] = true;
-        s_redeemableGifts[_gift] = true; 
-        
-        emit LoyaltyGiftAdded(_gift); 
-    }
-
-    /**
-        £todo: natspec
-     */
-    function removeLoyaltyGiftExchangable(address _gift) external onlyOwner {
-        if (!s_exchangableGifts[_gift]) { 
-            revert LoyaltyProgram_GiftNotExchangable(); 
         }
-        s_exchangableGifts[_gift] = false;
-
-        emit LoyaltyGiftNoLongerExchangable(_gift);
-    }
-    
-    /**
-        £todo: natspec
-     */
-    function removeLoyaltyGiftRedeemable(address _gift) external onlyOwner {
-        if (!s_redeemableGifts[_gift]) { 
-            revert LoyaltyProgram_GiftNotRedeemable(); 
-        }
-        s_exchangableGifts[_gift] = false; 
-        s_redeemableGifts[_gift] = false;
+        s_AccessGifts[_gift].exchangeable = exchangeable; 
+        s_AccessGifts[_gift].redeemable = redeemable; 
         
-        emit LoyaltyGiftNoLongerExchangable(_gift);
-        emit LoyaltyGiftNoLongerRedeemable(_gift); 
+        emit LoyaltyGiftListed(_gift, exchangeable, redeemable); 
     }
 
     /**
         £todo: natspec
      */
-    function blockCard(address _card) external onlyOwner {
-        _blockedCards[_card] = true; 
+    function mintGifts(address _gift, uint256 amount) external onlyOwner {
+        if (!ERC165Checker.supportsInterface(_gift, type(ILoyaltyGift).interfaceId)) {
+            revert LoyaltyProgram__IncorrectInterface(_gift);
+        }
+        // Note: no other checks. The owner of the loyalty program can mint gifts that are not exchangeable and/or redeemable. 
+        // this is _very_ inefficient / expensive...
+        for (uint256 i; i < amount; i++) {
+            LoyaltyGift(_gift).safeMint(); 
+        }
+        emit GiftsMinted(_gift, amount); 
     }
 
     /**
         £todo: natspec
      */
-    function unblockCard(address _card) external onlyOwner {
-        _blockedCards[_card] = false; 
+    function setCardBlocked(address _owner, bool blocked) external onlyOwner {
+        address cardAddress = getAddress(_owner, SALT); 
+        _blockedCards[cardAddress] = blocked; 
+
+        emit LoyaltyCardBlocked(_owner, blocked); 
     }
 
+    /**
+        £todo: natspec
+     */
+    function setAllowCreationCards(bool allowed) external onlyOwner {
+        s_allowCreationCards = allowed; 
+
+        emit CreationCardsAllowed(allowed); 
+    }
 
     /**
      @notice the loyalty program pays for all transactions of its loyalty card - without any checks. 
      // this is only possible because the transactions of the loyalty cards are highly restricted. 
      // only 'pre-approved' transactions are allowed. 
      */
-    function payCardPrefund (uint256 missingAccountFunds, address originalSender) external onlyLoyaltyCard noBlockedCard returns (bool success) {
+    function payCardPrefund (uint256 missingAccountFunds, address originalSender, address ownerCard) external onlyLoyaltyCard(ownerCard) noBlockedCard returns (bool success) {
         // check if the call origninated from the entrypoint. 
         if (originalSender != address(_entryPoint)) { 
-            revert LoyaltyProgram_OnlyEntryPoint(); 
+            revert LoyaltyProgram__OnlyEntryPoint(); 
         }
         // £todo improve error handling.
         _addDepositCard(msg.sender, missingAccountFunds); 
@@ -443,10 +418,6 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         (bool success) = super.transfer(to, value); 
         return success; 
     }
-    
-    function set_Owner(address _news_Owner) public onlyOwner {
-        s_owner = _news_Owner; 
-    } 
 
     /**
      @notice increases the s_nonce by a given amount. 
@@ -454,7 +425,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
      */
     function increaseNonce(uint256 _increase) public onlyOwner {
         if (_increase > MAX_INCREASE_NONCE) {
-            revert LoyaltyCard_MoreThanMaxIncrease(); 
+            revert LoyaltyProgram__MoreThanMaxIncrease(); 
         }
         s_nonce = s_nonce + _increase;
     } 
@@ -470,15 +441,18 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
      * Note that during UserOperation execution, this method is called only if the account is not deployed.
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
-    function _createLoyaltyCard(address newOwner, uint256 salt) internal returns (LoyaltyCard newCard) {
-        address addr = _getAddress(s_owner, salt);
+    function _getLoyaltyCard(address owner, uint256 salt) internal returns (LoyaltyCard newCard) {
+        address addr = getAddress(owner, salt);
         uint256 codeSize = addr.code.length;
         if (codeSize > 0) {
             return LoyaltyCard(payable(addr));
         }
+        if (!s_allowCreationCards) {
+            revert LoyaltyProgram__NotRegisteredCard(); 
+        }
         newCard = LoyaltyCard(payable(new ERC1967Proxy{salt : bytes32(salt)}(
                 address(cardImplementation),
-                abi.encodeCall(LoyaltyCard.initialize, (s_owner))
+                abi.encodeCall(LoyaltyCard.initialize, (owner))
             )));
     }
 
@@ -487,6 +461,10 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
      */
     function _addDepositCard(address _card, uint256 _value) internal {
         entryPoint().depositTo{value: _value}(_card);
+    }
+
+    function _update(address from, address to, uint256 value) internal override (ERC20) {
+        super._update(from, to, value); 
     }
 
     //////////////////////////////////////////////////////////////////
@@ -501,7 +479,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      * exact copy from SimpleAccountFactory.sol, except here it is an internal function. 
      */
-    function _getAddress(address owner,uint256 salt) internal view returns (address) {
+    function getAddress(address owner,uint256 salt) public view returns (address) {
         return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(
@@ -509,13 +487,6 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
                     abi.encodeCall(LoyaltyCard.initialize, (owner))
                 )
             )));
-    }
-
-    /**
-     * check current account deposit in the entryPoint
-     */
-    function _getDepositCard(address _card) internal view returns (uint256) {
-        return entryPoint().balanceOf(_card);
     }
 
     /**
@@ -560,8 +531,9 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
     function hashRedeemGift(RedeemGift memory message) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256(bytes("RedeemGift(address card,address gift,uint256 giftId)")),
-                message.card,
+                keccak256(bytes("RedeemGift(address program,address owner,address gift,uint256 giftId)")),
+                message.program,
+                message.owner,
                 message.gift,
                 message.giftId
             )
@@ -575,6 +547,17 @@ contract LoyaltyProgram is IERC721Receiver, ERC20 {
         bytes calldata
     ) external pure override returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC165)
+        returns (bool)
+    {
+        return 
+            interfaceId == type(ILoyaltyProgram).interfaceId || 
+            super.supportsInterface(interfaceId);
     }
 
 

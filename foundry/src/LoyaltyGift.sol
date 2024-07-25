@@ -52,7 +52,7 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
     /**
         £todo natspec 
      */
-    function programTransfer(address _card, uint256 _giftId) external onlyLoyaltyProgram returns (bool success) {
+    function retrieveGiftFromCard(address _card, uint256 _giftId) external onlyLoyaltyProgram returns (bool success) {
         if (ownerOf(_giftId) != _card) {
             revert LoyaltyGift_CardDoesNotOwnGift(); 
         }
@@ -71,12 +71,15 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
 
     /**
      * @notice the uri linked to NFTs is imutable: cannot be changed.
+       @notice you mint tokens to msg.sender. 
      */
-    function safeMint(address to) public onlyLoyaltyProgram onlyOwner {
+    function safeMint() public onlyLoyaltyProgram {
         uint256 tokenId = _nextTokenId++;
-        _safeMint(to, tokenId);
+        _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, i_uri);
     }
+
+    // batchMint = TBI. 
     
     // The following functions are overrides required by Solidity.
     function _update(address to, uint256 tokenId, address auth)
@@ -117,10 +120,12 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, IERC165, ERC721Enumerable, ERC721URIStorage)
+        override(IERC165, ERC721, ERC721Enumerable, ERC721URIStorage)
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return 
+            interfaceId == type(ILoyaltyGift).interfaceId || 
+            super.supportsInterface(interfaceId);
     }
 }
 

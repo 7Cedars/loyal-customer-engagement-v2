@@ -10,7 +10,7 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-import {console} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
 
 // eth-infinitism imports // 
 import "lib/account-abstraction/contracts/core/Helpers.sol";
@@ -28,14 +28,14 @@ import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
  * - has an additional check that only allows interactions with one address (its loyaltyProgram). - this is still WIP. 
  * - functions are ordered along order defined below contract. 
  */
-
 contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializable {
 
     address public s_owner;
     address payable public immutable i_loyaltyProgram; // £todo £note that the card itself saves what program it belongs to. Might not have to do this in loyaltyPorgram. See later. 
     IEntryPoint private immutable _entryPoint;
 
-    event LoyaltyCardCreated(IEntryPoint indexed entryPoint, address indexed owner, address indexed loyaltyProgram);
+    event LoyaltyCardCreated(address indexed entryPoint, address indexed owner, address indexed loyaltyProgram);
+    event Testing(bytes4 indexed returnData); 
 
     modifier onlyOwner() {
         _onlyOwner();
@@ -65,7 +65,16 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
      */
     function execute(address dest, uint256 value, bytes calldata func) external {
         _requireFromEntryPointOrOwner();
+
+        /// testing
+        bytes4 ret = bytes4(func[:4]);
+        emit Testing(ret); 
+        
+        
+        /// testing
+        
         _call(dest, value, func);
+
     }
 
         /**
@@ -89,7 +98,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
 
     function _initialize(address anOwner) internal virtual {
         s_owner = anOwner;
-        emit LoyaltyCardCreated(_entryPoint, s_owner, i_loyaltyProgram); 
+        emit LoyaltyCardCreated(address(_entryPoint), s_owner, i_loyaltyProgram); 
     }
 
     // Why not do this in regular way - without writing additional functions? Is this more gass efficient? 
@@ -100,6 +109,10 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
 
     function _onlyLoyaltyProgram() internal view { 
         require(msg.sender == i_loyaltyProgram, "only loyalty program");
+    }
+
+    function _requireDestIsLoyaltyProgram(address dest) internal view { 
+        require(dest == i_loyaltyProgram, "only calls to loyalty program.");
     }
 
     // Require the function call went through EntryPoint or owner
@@ -117,27 +130,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             if (s_owner != ECDSA.recover(hash, userOp.signature)) {
                 return SIG_VALIDATION_FAILED;
             } 
-            
-            // check for valid recipient. 
-            (bool success) =  _validateRecipient(userOp);
-            if (!success) {
-                return SIG_VALIDATION_FAILED;
-            } 
-
             return SIG_VALIDATION_SUCCESS;
-    }
-    
-    /**
-     * £todo This function should retrieve the recipient 'callee' address from callData - this bit is difficult. Check ERC-2771? 
-     * then check if it is the same as address loyalty Program  
-     * if not, revert. 
-     *
-     */
-    function _validateRecipient(
-        PackedUserOperation calldata userOp
-    ) internal returns (bool success) { // £todo implement later: returns (uint256 validationData)
-        // Need to check how callData is encoded. 
-        return true; 
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
