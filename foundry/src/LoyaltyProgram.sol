@@ -92,7 +92,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     mapping(bytes => bool) private _executed;  // combines RequestPoints and RedeemGift hashes.
 
     uint256 public s_nonce;
-    string public s_name; // £todo should this not be immutable? 
+    string public s_name;
     string public s_imageUri;
     ColourScheme public s_colourScheme; 
     bool public s_allowCreationCards = true; 
@@ -100,6 +100,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     RequestPoints private _requestPoints; 
     RedeemGift private _redeemGift;  
     
+     
     bytes32 private immutable DOMAIN_SEPARATOR;
     IEntryPoint private immutable _entryPoint; 
     LoyaltyCard public immutable cardImplementation;
@@ -118,7 +119,9 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     event LoyaltyGiftRedeemed(address indexed owner, address indexed gift, uint256 indexed giftId); 
     event LoyaltyCardBlocked (address indexed owner, bool indexed blocked);
     event CreationCardsAllowed(bool indexed allowed); 
-    event GiftsMinted(address gift, uint256 amount); 
+    event GiftsMinted(address indexed gift, uint256 indexed amount); 
+    event ColourSchemeChanged(bytes indexed base, bytes indexed accent);
+    event ImageUriChanged(); 
 
     //////////////////////////////////////////////////////////////////
     //                        Modifiers                             // 
@@ -345,18 +348,6 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         emit LoyaltyGiftRedeemed(_ownerCard, _gift, _giftId); 
     }
 
-    /**
-        £todo: natspec
-     */
-    function setLoyaltyGift(address _gift, bool exchangeable, bool redeemable) external onlyOwner { 
-        if (!ERC165Checker.supportsInterface(_gift, type(ILoyaltyGift).interfaceId)) {
-            revert LoyaltyProgram__IncorrectInterface(_gift);
-        }
-        s_AccessGifts[_gift].exchangeable = exchangeable; 
-        s_AccessGifts[_gift].redeemable = redeemable; 
-        
-        emit LoyaltyGiftListed(_gift, exchangeable, redeemable); 
-    }
 
     /**
         £todo: natspec
@@ -376,6 +367,20 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     /**
         £todo: natspec
      */
+    function setLoyaltyGift(address _gift, bool exchangeable, bool redeemable) external onlyOwner { 
+        if (!ERC165Checker.supportsInterface(_gift, type(ILoyaltyGift).interfaceId)) {
+            revert LoyaltyProgram__IncorrectInterface(_gift);
+        }
+        s_AccessGifts[_gift].exchangeable = exchangeable; 
+        s_AccessGifts[_gift].redeemable = redeemable; 
+        
+        emit LoyaltyGiftListed(_gift, exchangeable, redeemable); 
+    }
+
+
+    /**
+        £todo: natspec
+     */
     function setCardBlocked(address _owner, bool blocked) external onlyOwner {
         address cardAddress = getAddress(_owner, SALT); 
         _blockedCards[cardAddress] = blocked; 
@@ -391,6 +396,27 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
 
         emit CreationCardsAllowed(allowed); 
     }
+
+    /**
+        £todo: natspec
+     */
+    function setColourScheme(bytes memory base, bytes memory accent) external onlyOwner {
+        s_colourScheme.base = base; 
+        s_colourScheme.accent = accent; 
+
+        emit ColourSchemeChanged(base, accent); 
+    }
+
+    /**
+        £todo: natspec
+     */
+    function setImageUri(string memory imageUri) external onlyOwner {
+        s_imageUri = imageUri; 
+
+        emit ImageUriChanged(); // £note to self: cannot save string as is in event. it's hex is of no use.  
+    }
+
+
 
     /**
      @notice the loyalty program pays for all transactions of its loyalty card - without any checks. 
