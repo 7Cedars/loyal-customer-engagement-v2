@@ -22,12 +22,53 @@ import {DeployLoyaltyProgram} from "../../script/DeployLoyaltyProgram.s.sol";
 import {DeployFridayFifteen} from "../../script/DeployLoyaltyGifts.s.sol";
 
 contract LoyaltyCardTest is Test {
+  using ECDSA for bytes32;
+  using MessageHashUtils for bytes32;
 
   /* Type declarations */
   LoyaltyProgram loyaltyProgram; 
   HelperConfig helperConfig;
   FridayFifteen fridayFifteen; 
   HelperConfig.NetworkConfig config; 
+      bytes32 internal DOMAIN_SEPARATOR; 
+
+    // EIP712 domain separator
+    struct EIP712Domain {
+        string name;
+        uint256 version;
+        uint256 chainId;
+        address verifyingContract;
+    }
+
+    // RequestPoints message struct
+    struct RequestPoints {
+        address program;
+        uint256 points;
+    }
+
+    struct RequestPointsVoucher {
+        address program;
+        uint256 points;
+        bytes signature; 
+    }
+    RequestPointsVoucher requestPointsVoucher; 
+
+    // RedeemGift message struct
+    struct RedeemGift {
+        address program; 
+        address owner;
+        address gift;
+        uint256 giftId;
+    }
+
+    struct RedeemGiftRequest {
+        address program;
+        address owner;
+        address gift;
+        uint256 giftId;
+        bytes signature; 
+    }
+    RedeemGiftRequest requestRedeemGift; 
 
   /* State variables */
   uint256 vendorKey = vm.envUint("DEFAULT_ANVIL_KEY_0");
@@ -43,7 +84,49 @@ contract LoyaltyCardTest is Test {
   bytes executeCallData; 
 
 
-  function setup() public {
+  modifier giveCustomerCardAndPoints(address customer) {
+    DOMAIN_SEPARATOR =_hashDomain(
+          EIP712Domain({
+              name: "Highstreet Hopes",
+              version: LOYALTY_PROGRAM_VERSION,
+              chainId: block.chainid,
+              verifyingContract: address(loyaltyProgram)
+          })
+      );
+    uint256 points = 50000; 
+      
+    // loyalty program owner creates voucher for 5000 points. 
+    RequestPoints memory message = RequestPoints({
+        program: address(loyaltyProgram),
+        points: points
+    });
+
+    // vender signs the voucher
+    bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashRequestPoints(message));
+    console2.logBytes32(digest);
+
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
+    bytes memory signature = abi.encodePacked(r, s, v);
+    
+    requestPointsVoucher = RequestPointsVoucher({
+      program: address(loyaltyProgram),
+      points: points,
+      signature: signature
+    }); 
+
+    vm.prank(customer); 
+    loyaltyProgram.requestPointsAndCard(
+      requestPointsVoucher.program, 
+      requestPointsVoucher.points, 
+      requestPointsVoucher.signature, 
+      customerAddress
+    ); 
+
+    _; 
+  }
+
+
+  function setUp() public {
       DeployLoyaltyProgram deployer = new DeployLoyaltyProgram();
       (loyaltyProgram, helperConfig) = deployer.run();
 
@@ -60,15 +143,23 @@ contract LoyaltyCardTest is Test {
       loyaltyProgram.transferOwnership(vendorAddress);
   }
 
-  function testRetrieveAddressFromCalldata() public {
+  function testRetrieveAddressFromCalldata() public giveCustomerCardAndPoints(customerAddress) {
     DeployLoyaltyProgram deployer = new DeployLoyaltyProgram();
     (loyaltyProgram, helperConfig) = deployer.run();
 
     address dest = address(loyaltyProgram);
-    uint256 value = 10;
+    uint256 value = 0;
 
     bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, address(fridayFifteen), customerAddress);
     executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
+
+    address cardAddress = _getAddress(customerAddress, SALT);
+    vm.prank(config.entryPoint); 
+    (bool success , bytes memory returnData) = cardAddress.call{value: 0}(executeCallData);
+
+    console2.logBytes(returnData); 
+    
+    // (bytes4 sig, address target, address sender)  = cardImplementation.funcParams(); 
 
     // logCalldata(abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData)); 
 
@@ -97,9 +188,64 @@ contract LoyaltyCardTest is Test {
     console2.logBytes4(selector); 
   }
 
+  ///////////////////////////////////////////////////////////////////////
+  //                        Helper Functions                           //
+  /////////////////////////////////////////////////////////////////////// 
+  function _getAddress(address owner, uint256 salt) internal view returns (address) {
+      return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
+              type(ERC1967Proxy).creationCode,
+              abi.encode(
+                  address(cardImplementation),
+                  abi.encodeCall(LoyaltyCard.initialize, (owner))
+              )
+          )));
+  }
+
+  function _hashDomain(EIP712Domain memory domain) private pure returns (bytes32) {
+      return keccak256(
+          abi.encode(
+              keccak256("EIP712Domain(string name,uint256 version,uint256 chainId,address verifyingContract)"),
+              keccak256(bytes(domain.name)),
+              domain.version,
+              domain.chainId,
+              domain.verifyingContract
+          )
+      );
+  }
+
+  /**
+    * @notice helper function to create digest hash from RequestPoints struct.
+    */
+  function hashRequestPoints(RequestPoints memory message) private pure returns (bytes32) {
+      return keccak256(
+          abi.encode(
+              keccak256(bytes("RequestPoints(address program,uint256 points)")),
+              message.program,
+              message.points
+          )
+      );
+  }
+
+  /**
+    * @notice helper function to create digest hash from RedeemGift struct.
+    */
+  function hashRedeemGift(RedeemGift memory message) private pure returns (bytes32) {
+      return keccak256(
+          abi.encode(
+              keccak256(bytes("RedeemGift(address program,address owner,address gift,uint256 giftId)")),
+              message.program,
+              message.owner,
+              message.gift,
+              message.giftId
+          )
+      );
+  }
+
 }
 
 contract testExternalCallContract is Test {
+
+
    /* Type declarations */
   LoyaltyProgram loyaltyProgram; 
   HelperConfig helperConfig;
@@ -119,6 +265,7 @@ contract testExternalCallContract is Test {
   uint256 private constant SALT = 123456; 
   bytes executeCallData; 
 
+
   function setup() public {
     DeployLoyaltyProgram deployer = new DeployLoyaltyProgram();
     (loyaltyProgram, helperConfig) = deployer.run();
@@ -137,15 +284,15 @@ contract testExternalCallContract is Test {
   }
 
 
-  function testCallOtherContract() public {
+  function testCallOtherContract() public  {
     address dest = address(loyaltyProgram);
     uint256 value = 1;
-
 
     bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, address(fridayFifteen), customerAddress);
     bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
 
-    (bool success , bytes memory returnData) = address(cardImplementation).call{value: 0}(executeCallData);
+
 
   }
+
 }

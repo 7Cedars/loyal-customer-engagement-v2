@@ -29,13 +29,12 @@ import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
  * - functions are ordered along order defined below contract. 
  */
 contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializable {
-
     address public s_owner;
     address payable public immutable i_loyaltyProgram; // £todo £note that the card itself saves what program it belongs to. Might not have to do this in loyaltyPorgram. See later. 
+    bytes public ret; 
     IEntryPoint private immutable _entryPoint;
 
     event LoyaltyCardCreated(address indexed entryPoint, address indexed owner, address indexed loyaltyProgram);
-    event Testing(bytes4 indexed returnData); 
 
     modifier onlyOwner() {
         _onlyOwner();
@@ -63,18 +62,57 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
      * @param value the value to pass in this call
      * @param func the calldata to pass in this call
      */
-    function execute(address dest, uint256 value, bytes calldata func) external {
+    function execute(address dest, uint256 value, bytes calldata func) external returns (bytes4 sig, address target, address sender) {
         _requireFromEntryPointOrOwner();
 
         /// testing
-        bytes4 ret = bytes4(func[:4]);
-        emit Testing(ret); 
-        
-        
+
+         
+        // address recipientAddress; 
+        // uint256 lenRecipientAddress; 
+        // uint256 amount; 
+        // ret = bytes(func);
+
+        // within onTransferReceived: decode the calldata:
+        // £Question: Why am I getting all 0 data back?!  
+        (sig, target, sender) = abi.decode(
+            func,
+            (bytes4, address, address)
+        );
+
+        // bytes memory sender = calldata func; //[0 : 4]
+        // if (sender != bytes(0x0)) {
+        //     revert("not address zero!"); 
+        // }
+        // assembly {
+            // ret = bytes32(func[:32]);
+            // amount := calldataload(0xC4)   // **why get data from 0xC4？
+
+            // recipientAddress := mload(0x40)
+            // lenRecipientAddress := calldataload(0xe4)   // offset 0x20 beside amount is the length variable, I know that.
+            // mstore(0x40, add(0x20, add(recipientAddress, lenRecipientAddress)))  // load address to the free memory
+
+ 
+            // sender := calldataload(sub(calldatasize(), 4))
+  
+            // ret := mload(0x40)
+        //     .slot(3) := calldataload(0x20)
+        // }
+
+        //
+
         /// testing
         
         _call(dest, value, func);
 
+    }
+
+    function decode(bytes memory data) private pure returns(bytes4 selector, bytes memory target) {
+        assembly {
+        // load 32 bytes into `selector` from `data` skipping the first 32 bytes
+        selector := mload(add(data, 32))
+        target := mload(add(data, 64))
+        }
     }
 
         /**

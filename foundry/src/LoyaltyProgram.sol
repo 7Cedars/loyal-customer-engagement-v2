@@ -33,7 +33,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     //////////////////////////////////////////////////////////////////
     //                          Errors                              // 
     //////////////////////////////////////////////////////////////////
-    error LoyaltyProgram__OnlyLoyaltyCard(); 
+    error LoyaltyProgram__OnlyCardHolder(); 
     error LoyaltyProgram__MoreThanMaxIncrease();
     error LoyaltyProgram__OLoyaltyProgram__NoZeroAddressnlyLoyaltyCard(); 
     error LoyaltyProgram__GiftNotExchangeable(); 
@@ -126,12 +126,13 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     //////////////////////////////////////////////////////////////////
     //                        Modifiers                             // 
     //////////////////////////////////////////////////////////////////
-    modifier onlyLoyaltyCard(address owner) {
-        address addr = getAddress(owner, SALT);
+    modifier onlyCardHolder(address caller) {
+        address addr = getAddress(caller, SALT);
         uint256 codeSize = addr.code.length;
         if (codeSize == 0) {
-            revert LoyaltyProgram__OnlyLoyaltyCard();
+        revert LoyaltyProgram__OnlyCardHolder();
         }
+
         _; 
     }
 
@@ -250,7 +251,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     function exchangePointsForGift(
         address _gift,
         address _owner
-    ) external onlyLoyaltyCard(_owner) {
+    ) external onlyCardHolder(_owner) {
         // CHECK 
         // check if gift eexchangeable. 
         if (!s_AccessGifts[_gift].exchangeable){ 
@@ -422,8 +423,9 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
      @notice the loyalty program pays for all transactions of its loyalty card - without any checks. 
      // this is only possible because the transactions of the loyalty cards are highly restricted. 
      // only 'pre-approved' transactions are allowed. 
+     // £todo rename ownerCard prop 
      */
-    function payCardPrefund (uint256 missingAccountFunds, address originalSender, address ownerCard) external onlyLoyaltyCard(ownerCard) noBlockedCard returns (bool success) {
+    function payCardPrefund (uint256 missingAccountFunds, address originalSender, address ownerCard) external onlyCardHolder(ownerCard) noBlockedCard returns (bool success) {
         // check if the call origninated from the entrypoint. 
         if (originalSender != address(_entryPoint)) { 
             revert LoyaltyProgram__OnlyEntryPoint(); 
