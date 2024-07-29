@@ -88,8 +88,9 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     //                    State variables                           // 
     //////////////////////////////////////////////////////////////////
     mapping(address => AccessGift) public s_AccessGifts;
+    mapping(bytes => bool) public s_executed;  // combines RequestPoints and RedeemGift hashes.
     mapping(address => bool) private _blockedCards; 
-    mapping(bytes => bool) private _executed;  // combines RequestPoints and RedeemGift hashes.
+    
 
     uint256 public s_nonce;
     string public s_name;
@@ -231,7 +232,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         }
 
         // Check that digest has not already been executed.
-        if (_executed[programSignature]) {
+        if (s_executed[programSignature]) {
             revert LoyaltyProgram__AlreadyExecuted();
         }
 
@@ -239,7 +240,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         LoyaltyCard card = _getLoyaltyCard(_ownerCard, SALT);
 
         // 1) set executed to true & execute transfer
-        _executed[programSignature] = true;
+        s_executed[programSignature] = true;
         _update(address(this), address(card), _points); // emits a transfer event 
     }
 
@@ -309,7 +310,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
 
         // CHECK. 
         // Check that digest has not already been executed.
-        if (_executed[signature]) {
+        if (s_executed[signature]) {
             revert LoyaltyProgram__AlreadyExecuted();
         }
 
@@ -341,7 +342,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
 
         // EFFECT 
         // 1) set executed to true
-        _executed[signature] = true;
+        s_executed[signature] = true;
 
         // INTERACT
         ILoyaltyGift(_gift).retrieveGiftFromCard(cardAddress, _giftId); 
