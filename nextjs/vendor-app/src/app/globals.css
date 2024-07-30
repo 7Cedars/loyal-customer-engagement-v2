@@ -32,6 +32,10 @@ body {
   }
 }
 
+.accent {
+  color: #123eee
+}
+
 .embla {
   overflow: hidden;
 }
@@ -42,3 +46,8 @@ body {
   flex: 0 0 100%;
   min-width: 0;
 }
+
+.responsive-width .react-colorful {
+  width: auto;
+}
+

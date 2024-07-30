@@ -1,9 +1,10 @@
 import type { Config } from "tailwindcss";
 
 // £NB: this is how to implement CUSTOM COLORS in customer app.
-// read colour here from local storage... and then will be implemented throughout the app. -- will this be possible? 
+// read colour here from local storage... and then will be implemented throughout the app. -- will this be possible? Nope: localStorage not defined. 
 // NB: dark theming not implemented for now. 
-let accent = "#0f172a"
+// let temp = window.localStorage.getItem("colourAccent")
+let accent = "#00ee00"
 let base = "#f1f5f9"
 
 const config: Config = {

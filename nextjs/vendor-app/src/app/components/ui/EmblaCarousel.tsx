@@ -8,6 +8,7 @@ import {
 } from './EmblaCarouselArrowButtons'
 import useEmblaCarousel from 'embla-carousel-react'
 import '../../embla.css'
+import { Button } from './Button'
 
 type PropType = {
   slides: React.JSX.Element[]
@@ -29,25 +30,27 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
   } = usePrevNextButtons(emblaApi)
 
   return (
-    <section className="embla flex-col w-96 border border-red-500">
-      <div className="embla__viewport" ref={emblaRef}>
+    <section className="embla grow flex flex-col m-4">
+      <div className="embla__viewport grow" ref={emblaRef}>
         <div className="embla__container">
           
           {slides.map((slide, i) => (
             <div className="embla__slide" key={i}>
-              {slide}
+              <div className='w-full h-full grid grid-cols-1 content-between'>
+                {slide}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="embla__controls">
-        <div className="embla__buttons">
+      <div className=" grid grid-cols-1 justify-items-center">
+        {/* <div className="embla__buttons">
           <PrevButton onClick={onPrevButtonClick} disabled={prevBtnDisabled} />
           <NextButton onClick={onNextButtonClick} disabled={nextBtnDisabled} />
-        </div>
+        </div> */}
 
-        <div className="embla__dots">
+        <div className="embla__dots grid grid-cols-1 justify-items-center">
           {scrollSnaps.map((_, index) => (
             <DotButton
               key={index}
@@ -57,6 +60,16 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
               )}
             />
           ))}
+        </div>
+        <div className="w-full flex flex-row p-2"> 
+          <div className='w-full grid grid-cols-2 gap-2'> 
+            <Button onClick = {onPrevButtonClick} >
+              Previous
+            </Button>
+            <Button onClick = {onNextButtonClick} >
+              Next
+            </Button>
+          </div> 
         </div>
       </div>
     </section>
