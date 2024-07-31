@@ -1,25 +1,54 @@
 "use client"; 
 
-import { Button } from "./components/ui/Button";
+import { Button } from "../components/ui/Button";
 import { useAccount } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { Program } from "../types";
 import Image from "next/image";
 import { useAppSelector } from "@/redux/hooks";
 import { DeployProgram } from "./DeployProgram";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation'
+import { useDispatch } from "react-redux";
+import { resetProgram, setProgram } from "@/redux/reducers/programReducer";
 
 export default function Home() {
+  // FOR DEV ONLY // 
+  const programsForLocalStorage: Program[] = [{ 
+    address: "0x5FbDB2315678afecb367f032d93F642f64180aa3", 
+    name: "Highstreet Hopes",
+    colourBase: "#3d5769",
+    colourAccent: "#c8cf0c", 
+    uriImage: "" 
+  }]
+  localStorage.setItem("clp_v_programs", JSON.stringify(programsForLocalStorage)); 
+  // FOR DEV ONLY // 
+
   const { open } = useWeb3Modal()
   const { status, address } = useAccount()
-  const [ mode, SetMode ] = useState<string>("deploy") // for testing purposes, should be "home" normally. 
+  const [ mode, SetMode ] = useState<string>("home") 
   const {selectedProgram} = useAppSelector(state => state.selectedProgram) 
-  let temp = localStorage.getItem("clp_v_programs")
-  const savedPrograms: Program[] = temp ? JSON.parse(temp) : []
+  const router = useRouter()
+  const [savedPrograms, setSavedPrograms] = useState<Program[]>([]); 
+  const dispatch = useDispatch() 
 
-  // see https://blog.logrocket.com/storing-retrieving-javascript-objects-localstorage/ for explanation - it's super logical. 
-  // localStorage.setItem("clp_v_programs", JSON.stringify(newProgram)); 
-  // localStorage.setItem("colourAccent", "#1d4ed8"); 
+  useEffect(()=>{
+    let localStore = localStorage.getItem("clp_v_programs")
+    const saved: Program[] = localStore ? JSON.parse(localStore) : []
+    setSavedPrograms(saved)
+    dispatch(resetProgram(true)) 
+  }, [, mode])
+
+  const handleSelectionProgram = (program: Program) => {
+    dispatch(setProgram({
+      address: program.address, 
+      name: program.name, 
+      colourBase: program.colourBase, 
+      colourAccent: program.colourAccent,
+      uriImage: program.uriImage
+    }))
+    router.push('/home')
+  }
 
   return (
     <main className="flex flex-col w-full h-dvh bg-slate-100 dark:bg-slate-900 place-content-center items-center">
@@ -33,9 +62,6 @@ export default function Home() {
             <div className={`w-full grid grid-cols-1 text-3xl text-center pb-8`}> 
                 hi there! this is loyal
             </div>  
-            {/* <div className={`w-full grid grid-cols-1 text-3xl text-center pb-8`}> 
-                this is Loyal.
-            </div>  */}
             <div className="grid grid-cols-1 content-between place-items-center"> 
               <Image
                 className="self-center rounded-t-lg text-center"
@@ -45,7 +71,6 @@ export default function Home() {
                 alt="Logo"
               />
             </div>
-            {/* <Image src="/public/iconLoyaltyProgram.png" alt="Logo" width="100" height="100" /> */}
             <div className={`w-full grid grid-cols-1 text-sm text-center pt-8`}> 
               A lightweight, composable, app for customer engagement programs.   
             </div> 
@@ -64,12 +89,22 @@ export default function Home() {
           className={`w-full grow aria-disabled:grow-0 h-fit aria-disabled:h-2 aria-disabled:opacity-0 opacity-100 transition:all ease-in-out duration-300 delay-700 grid grid-cols-1 max-w-lg gap-4 px-2`}
           aria-disabled={status != "connected"}
           >
-          {/* <Button  customColours = {dummyData[0].bgColour + dummyData[0].textColour + dummyData[0].borderColour}>
-            {dummyData[0].name}
-          </Button>
-          <Button  customColours = {dummyData[1].bgColour + dummyData[1].textColour + dummyData[1].borderColour}>
-            {dummyData[1].name}
-          </Button> */}
+           { 
+           savedPrograms.map(program => 
+              <button 
+                key = {program.address}
+                className={`w-full h-full grid grid-cols-1 disabled:opacity-50 text-md text-center border content-center rounded-lg p-2 mt-1 h-12`} 
+                style = {{
+                  color: program.colourAccent, 
+                  borderColor: program.colourAccent, 
+                  backgroundColor: program.colourBase
+                }}
+                onClick={() => handleSelectionProgram(program)}
+                >
+                {program.name}
+              </button>
+            )
+          }
           <Button 
             onClick = {() => {SetMode("deploy") }}
             >

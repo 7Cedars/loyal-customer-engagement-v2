@@ -1,6 +1,6 @@
 import { Hex } from "viem";
 import loyaltyProgram from "../../../../foundry/out/LoyaltyProgram.sol/LoyaltyProgram.json"
-import { parseHex } from "@/app/utils/parsers";
+import { parseHex } from "@/utils/parsers";
 
 // during dev
 export const loyaltyProgramBytecode: Hex = parseHex(loyaltyProgram.bytecode.object)

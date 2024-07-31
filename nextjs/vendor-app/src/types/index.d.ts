@@ -1,4 +1,5 @@
 export type Program = {
+  address?: Hex; 
   name?: string;
   balance?: int;  
   colourBase: string; 

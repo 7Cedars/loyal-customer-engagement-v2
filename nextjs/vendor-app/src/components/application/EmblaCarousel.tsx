@@ -7,7 +7,8 @@ import {
   usePrevNextButtons
 } from './EmblaCarouselArrowButtons'
 import useEmblaCarousel from 'embla-carousel-react'
-import '../../embla.css'
+import "../../app/embla.css"
+// import '../../../embla.css'
 import { Button } from '../ui/Button'
 
 type PropType = {

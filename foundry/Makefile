@@ -29,3 +29,13 @@ snapshot :; forge snapshot
 format :; forge fmt
 
 anvil :; anvil --steps-tracing --block-time 1
+
+#####################################################
+# 						Anvil: Deploy Contracts								# 
+#####################################################
+ANVIL_ARGS_0 := --rpc-url http://localhost:8545 --private-key $(DEFAULT_ANVIL_KEY_0) --broadcast
+
+anvilDeployProgram: 
+	@forge script script/DeployLoyaltyProgram.s.sol:DeployLoyaltyProgram $(ANVIL_ARGS_0)
+	
+

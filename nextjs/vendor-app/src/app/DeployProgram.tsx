@@ -1,47 +1,46 @@
-import EmblaCarousel from './components/app/EmblaCarousel'
+import EmblaCarousel from '../components/application/EmblaCarousel'
 import { EmblaOptionsType } from 'embla-carousel'
 import { ChangeEvent, useState } from "react"
-import { NoteText, TitleText } from "./components/ui/StandardisedFonts"
-import { TabChoice } from "./components/ui/TabChoice"
+import { NoteText, TitleText } from "../components/ui/StandardisedFonts"
+import { TabChoice } from "../components/ui/TabChoice"
 import { HexColorPicker } from "react-colorful"
-import { InputBox } from "./components/ui/InputBox"
+import { InputBox } from "../components/ui/InputBox"
 import Image from "next/image";
-import { Button } from "./components/ui/Button"
+import { Button } from "../components/ui/Button"
 import { Hex, toHex, toBytes } from "viem"
-import { useAccount, useWalletClient } from "wagmi"
+import { useAccount, useWalletClient, useDeployContract } from "wagmi"
 import { loyaltyProgramAbi } from "@/context/abi"
 import { loyaltyProgramBytecode } from "@/context/bytecode"
-import { parseEthAddress, parseHex } from "./utils/parsers"
+import { parseEthAddress, parseHex } from "../utils/parsers"
+import { fromHexColourToBytes } from '../utils/transformData'
 
 export const DeployProgram = () => {
   const [ name, setName ] = useState<string | undefined>() 
   const [ base, setBase ] = useState<string>("#2f4632") 
   const [ accent, setAccent ] = useState<string>("#a9b9e8") 
-  const [ uri, setUri ] = useState<string>("") 
+  const [ uri, setUri ] = useState<string>("www.somewhere.io") 
   const [ tab, setTab ] = useState<string>("Base") 
   const { data: walletClient } = useWalletClient();
-  // const { deployContract } = useDeployContract()
+  const { deployContract } = useDeployContract()
   const { chain, address } = useAccount() 
   const [transactionHash, setTransactionHash] = useState<Hex>(); 
 
   const OPTIONS: EmblaOptionsType = {}
 
-  const handleDeploy = async() => {
-    if (walletClient) {
-      const hash = await walletClient.deployContract({
-        abi: loyaltyProgramAbi,
-        args: [
-          name,
-          uri,
-          toBytes(base),  // NB! needs to be bytes! 
-          toBytes(accent), // NB! needs to be bytes! 
-          parseEthAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
-        ],
-        bytecode: loyaltyProgramBytecode,
+  const handleDeploy = async () => {
+    if (walletClient)
+    walletClient.deployContract({
+      abi: loyaltyProgramAbi,
+      args: [
+        name,
+        uri,
+        hexBase,  // NB! needs to be bytes! 
+        hexAccent, // NB! needs to be bytes! 
+        "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
+      ],
+      bytecode: loyaltyProgramBytecode,
       })
-      setTransactionHash(hash)
-    }
-  }
+  }  
   
   const nameProgram: React.JSX.Element = (
     <>
@@ -144,6 +143,9 @@ export const DeployProgram = () => {
 
   const SLIDES = [nameProgram, colourProgram, uriProgram]
 
+  const hexBase = fromHexColourToBytes(base)
+  const hexAccent = fromHexColourToBytes(accent)
+  
   return (
     <>
         <div className={`w-full h-[50vh] flex flex-col content-center max-w-lg gap-4 p-2`}> 
@@ -151,18 +153,19 @@ export const DeployProgram = () => {
         </div>
         <div className={`w-full h-fit grid grid-cols-1 max-w-lg gap-4 px-2`}>
           <Button 
-            onClick = {() => handleDeploy()}   
-            //   deployContract({ // this is a new hook that does not seem to work properly yet. £todo: File bug report? 
-            //     abi: loyaltyProgramAbi,
-            //     args: [
-            //       name,
-            //       uri,
-            //       base, 
-            //       accent, 
-            //       parseEthAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
-            //     ],
-            //     bytecode: loyaltyProgramBytecode,
-            //   })
+            onClick = {() => handleDeploy() } 
+              
+              // deployContract({ // this is a new hook that does not seem to work properly yet. £todo: File bug report? 
+              // abi: loyaltyProgramAbi,
+              // args: [
+              //   name,
+              //   uri,
+              //   fromHexColourToBytes(base),  // NB! needs to be bytes! 
+              //   fromHexColourToBytes(accent), // NB! needs to be bytes! 
+              //   parseEthAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
+              // ],
+              // bytecode: loyaltyProgramBytecode,
+              // })
             // }
             disabled = { name == undefined } 
             >

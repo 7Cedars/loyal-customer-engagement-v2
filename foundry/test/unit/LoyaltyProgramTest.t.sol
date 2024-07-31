@@ -275,8 +275,8 @@ contract LoyaltyProgramTest is Test {
     function testDeployEmitsevent() public {
         string memory name = "Highstreet Hopes";
         string memory cardImageUri = "";
-        string memory baseColour = "#3d5769";
-        string memory accentColour = "#c8cf0c"; 
+        bytes memory baseColour = hex"3d5769";
+        bytes memory accentColour = hex"c8cf0c"; 
 
         vm.expectEmit(true, false, false, false);
         emit LoyaltyProgramDeployed(vendorAddress, LOYALTY_PROGRAM_VERSION);
