@@ -51,11 +51,6 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     //////////////////////////////////////////////////////////////////
     //                   Type declarations                          // 
     //////////////////////////////////////////////////////////////////  
-    struct ColourScheme {
-        bytes base;
-        bytes accent;
-    }
-
     // EIP712 domain separator
     struct EIP712Domain {
         string name;
@@ -95,7 +90,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     uint256 public s_nonce;
     string public s_name;
     string public s_imageUri;
-    ColourScheme public s_colourScheme; 
+    string public s_colourBaseAccent; 
     bool public s_allowCreationCards = true; 
 
     RequestPoints private _requestPoints; 
@@ -121,7 +116,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     event LoyaltyCardBlocked (address indexed owner, bool indexed blocked);
     event CreationCardsAllowed(bool indexed allowed); 
     event GiftsMinted(address indexed gift, uint256 indexed amount); 
-    event ColourSchemeChanged(bytes indexed base, bytes indexed accent);
+    event ColourSchemeChanged();
     event ImageUriChanged(); 
 
     //////////////////////////////////////////////////////////////////
@@ -160,21 +155,17 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     constructor(
         string memory _name, 
         string memory _cardImageUri, 
-        bytes memory _baseColour, 
-        bytes memory _accentColour, 
+        string memory _baseColour, 
+        string memory _accentColour, 
         address _anEntryPoint
     ) ERC20("LoyaltyPoints", "LPX") Ownable(msg.sender) {
         _mint(address(this), type(uint256).max);
 
         s_name = _name; 
+        s_colourBaseAccent = string.concat(_baseColour,";",_accentColour); 
         s_imageUri = _cardImageUri;
         _entryPoint = IEntryPoint(_anEntryPoint); 
-
-        s_colourScheme = ColourScheme({
-            base: _baseColour, 
-            accent: _accentColour
-        }); 
-
+        
         DOMAIN_SEPARATOR = hashDomain(
             EIP712Domain({
                 name: _name,
@@ -402,11 +393,9 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     /**
         £todo: natspec
      */
-    function setColourScheme(bytes memory base, bytes memory accent) external onlyOwner {
-        s_colourScheme.base = base; 
-        s_colourScheme.accent = accent; 
-
-        emit ColourSchemeChanged(base, accent); 
+    function setColourScheme(string memory base, string memory accent) external onlyOwner {
+        s_colourBaseAccent = string.concat(base, ";", accent); 
+        emit ColourSchemeChanged(); 
     }
 
     /**

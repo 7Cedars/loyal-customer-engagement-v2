@@ -13,8 +13,8 @@ contract DeployLoyaltyProgram is Script {
 
         string memory name = "Highstreet Hopes";
         string memory cardImageUri = "";
-        bytes memory baseColour = hex"3d5769";
-        bytes memory accentColour = hex"c8cf0c"; 
+        string memory baseColour = "#3d5769";
+        string memory accentColour = "#c8cf0c"; 
 
         vm.startBroadcast();
             LoyaltyProgram loyaltyProgram = new LoyaltyProgram(

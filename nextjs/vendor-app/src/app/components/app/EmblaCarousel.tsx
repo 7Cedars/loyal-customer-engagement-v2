@@ -8,7 +8,7 @@ import {
 } from './EmblaCarouselArrowButtons'
 import useEmblaCarousel from 'embla-carousel-react'
 import '../../embla.css'
-import { Button } from './Button'
+import { Button } from '../ui/Button'
 
 type PropType = {
   slides: React.JSX.Element[]

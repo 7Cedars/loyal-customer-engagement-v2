@@ -1,4 +1,5 @@
-import { Hex, Log, ReadContractErrorType, getAddress } from "viem";
+import { Hex, Log, ReadContractErrorType, getAddress, isHex } from "viem";
+import { toHex } from "viem";
 
 // simple checks // 
 const isString = (text: unknown): text is string => {
@@ -41,20 +42,29 @@ export const parseBoolean = (bool: unknown): boolean => {
   return bool as boolean;
 }
 
-const parseName = (name: unknown): string => {
-  if (!isString(name)) {
-    throw new Error(`Incorrect name, not a string: ${name}`);
+export const parseHex = (hex: unknown): Hex => {
+  if (!isHex(hex)) {
+    throw new Error(`Incorrect hex, not a hex: ${hex}`);
   }
-  // here can additional checks later. 
+  if (/0x/.test(hex) == false) {
+    throw new Error(`Incorrect hex, 0x prefix missing: ${hex}`);
+  }
+  const hex2 = toHex(hex)
 
-  return name as string;
+  return hex2 as Hex;
 };
 
-const parseDescription = (description: unknown): string => {
-  if (!isString(description)) {
-    throw new Error(`Incorrect description, not a string: ${description}`);
+export const parseEthAddress = (address: unknown): Hex => {
+  if (!isString(address)) {
+    throw new Error(`Incorrect address, not a string: ${address}`);
   }
-  // here can additional checks later. 
-
-  return description as string;
+  if (/0x/.test(address) == false) {
+    throw new Error(`Incorrect address, 0x prefix missing: ${address}`);
+  }
+  if (address.length != 42) {
+    throw new Error(`Incorrect address length: ${address}`);
+  }
+  // in case I need stricter check: 
+  // const returnAddress = getAddress(address) 
+  return address as Hex;
 };

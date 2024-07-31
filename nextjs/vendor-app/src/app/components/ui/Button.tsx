@@ -18,7 +18,7 @@ export const Button = ({
 
   return (
     <button 
-      className={`w-full h-full grid grid-cols-1 text-md text-center border content-center rounded-lg p-2 h-12`} 
+      className={`w-full h-full grid grid-cols-1 disabled:opacity-50 text-md text-center border content-center rounded-lg p-2 h-12`} 
       style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} // can add background, but should not be necessary.  
       onClick={onClick} 
       disabled={disabled}
