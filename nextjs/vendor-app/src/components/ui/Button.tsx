@@ -1,6 +1,3 @@
-// I am using this as an example for now to create modular range slider (and modal). 
-// Taken from react-graph-gallery github repo.  
-
 import { useAppSelector } from "@/redux/hooks";
 
 type ButtonProps = {

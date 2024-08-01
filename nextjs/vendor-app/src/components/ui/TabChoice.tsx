@@ -20,19 +20,18 @@ const appearance = [
 export const TabChoice = ({
   optionOne = "choiceOne", 
   optionTwo = "choiceTwo", 
-  initialChoice = 0, 
   onChange,
 }: TabChoiceProps) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const choices: string[] = [optionOne, optionTwo]
-  const [choice, setChoice] = useState<string | undefined>(choices[initialChoice])
+  const [choice, setChoice] = useState<string | undefined>()
 
   const handleChange = ({target}: {target:string}) => {
     setChoice(target)
     
     if(typeof onChange === 'function'){
       onChange( target )
-    }   
+    } 
   }
 
   return (
@@ -41,7 +40,7 @@ export const TabChoice = ({
         className={`text-sm text-center border-b-2 content-center h-8`} 
         style = {{
           color: selectedProgram.colourAccent, 
-          borderColor: choice == optionOne ? selectedProgram.colourAccent : undefined 
+          borderColor: choice == optionOne ? selectedProgram.colourAccent : selectedProgram.colourBase 
         }} 
         onClick={() => handleChange({target: choices[0]})} 
         >
@@ -52,7 +51,7 @@ export const TabChoice = ({
         className={`text-sm text-center border-b-2 content-center h-8`} 
         style = {{
           color: selectedProgram.colourAccent, 
-          borderColor: choice == optionTwo ? selectedProgram.colourAccent : undefined 
+          borderColor: choice == optionTwo ? selectedProgram.colourAccent : selectedProgram.colourBase
         }} 
         onClick={() => handleChange({target: choices[1]})} 
       >
