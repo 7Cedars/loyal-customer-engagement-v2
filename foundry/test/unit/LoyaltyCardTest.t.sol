@@ -44,11 +44,13 @@ contract LoyaltyCardTest is Test {
     struct RequestPoints {
         address program;
         uint256 points;
+        uint256 uniqueNumber; 
     }
 
     struct RequestPointsVoucher {
         address program;
         uint256 points;
+        uint256 uniqueNumber; 
         bytes signature; 
     }
     RequestPointsVoucher requestPointsVoucher; 
@@ -59,6 +61,7 @@ contract LoyaltyCardTest is Test {
         address owner;
         address gift;
         uint256 giftId;
+        uint256 uniqueNumber; 
     }
 
     struct RedeemGiftRequest {
@@ -66,6 +69,7 @@ contract LoyaltyCardTest is Test {
         address owner;
         address gift;
         uint256 giftId;
+        uint256 uniqueNumber; 
         bytes signature; 
     }
     RedeemGiftRequest requestRedeemGift; 
@@ -94,11 +98,13 @@ contract LoyaltyCardTest is Test {
           })
       );
     uint256 points = 50000; 
+    uint256 uniqueNumber = block.number; 
       
     // loyalty program owner creates voucher for 5000 points. 
     RequestPoints memory message = RequestPoints({
         program: address(loyaltyProgram),
-        points: points
+        points: points, 
+        uniqueNumber: uniqueNumber
     });
 
     // vender signs the voucher
@@ -111,6 +117,7 @@ contract LoyaltyCardTest is Test {
     requestPointsVoucher = RequestPointsVoucher({
       program: address(loyaltyProgram),
       points: points,
+      uniqueNumber: uniqueNumber, 
       signature: signature
     }); 
 
@@ -118,6 +125,7 @@ contract LoyaltyCardTest is Test {
     loyaltyProgram.requestPointsAndCard(
       requestPointsVoucher.program, 
       requestPointsVoucher.points, 
+      requestPointsVoucher.uniqueNumber,
       requestPointsVoucher.signature, 
       customerAddress
     ); 

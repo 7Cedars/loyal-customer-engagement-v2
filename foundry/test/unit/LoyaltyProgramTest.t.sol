@@ -62,11 +62,13 @@ contract LoyaltyProgramTest is Test {
     struct RequestPoints {
         address program;
         uint256 points;
+        uint256 uniqueNumber;
     }
 
     struct RequestPointsVoucher {
         address program;
         uint256 points;
+        uint256 uniqueNumber;
         bytes signature; 
     }
     RequestPointsVoucher requestPointsVoucher; 
@@ -77,6 +79,7 @@ contract LoyaltyProgramTest is Test {
         address owner;
         address gift;
         uint256 giftId;
+        uint256 uniqueNumber;
     }
 
     struct RedeemGiftRequest {
@@ -84,6 +87,7 @@ contract LoyaltyProgramTest is Test {
         address owner;
         address gift;
         uint256 giftId;
+        uint256 uniqueNumber;
         bytes signature; 
     }
     RedeemGiftRequest requestRedeemGift; 
@@ -95,6 +99,7 @@ contract LoyaltyProgramTest is Test {
     address customerAddress = vm.addr(customerKey);
     uint256 customerKey2 = vm.envUint("DEFAULT_ANVIL_KEY_2");
     address customerAddress2 = vm.addr(customerKey2);
+    uint256 uniqueNumber = 3; 
 
     LoyaltyCard public cardImplementation;
     uint256 private constant LOYALTY_PROGRAM_VERSION = 2; 
@@ -123,11 +128,13 @@ contract LoyaltyProgramTest is Test {
             })
         );
       uint256 points = 5000; 
+       
         
       // loyalty program owner creates voucher for 5000 points. 
       RequestPoints memory message = RequestPoints({
           program: address(loyaltyProgram),
-          points: points
+          points: points,
+          uniqueNumber: uniqueNumber
       });
 
       // vender signs the voucher
@@ -136,10 +143,11 @@ contract LoyaltyProgramTest is Test {
 
       (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
       bytes memory signature = abi.encodePacked(r, s, v);
-      
+
       requestPointsVoucher = RequestPointsVoucher({
         program: address(loyaltyProgram),
         points: points,
+        uniqueNumber: uniqueNumber,  
         signature: signature
       }); 
 
@@ -156,11 +164,13 @@ contract LoyaltyProgramTest is Test {
             })
         );
       uint256 points = 5000; 
+       
         
       // loyalty program owner creates voucher for 5000 points. 
       RequestPoints memory message = RequestPoints({
           program: address(loyaltyProgram),
-          points: points
+          points: points, 
+          uniqueNumber: uniqueNumber
       });
 
       // vender signs the voucher
@@ -173,6 +183,7 @@ contract LoyaltyProgramTest is Test {
       requestPointsVoucher = RequestPointsVoucher({
         program: address(loyaltyProgram),
         points: points,
+        uniqueNumber: uniqueNumber, 
         signature: signature
       }); 
 
@@ -180,6 +191,7 @@ contract LoyaltyProgramTest is Test {
       loyaltyProgram.requestPointsAndCard(
         requestPointsVoucher.program, 
         requestPointsVoucher.points, 
+        requestPointsVoucher.uniqueNumber, 
         requestPointsVoucher.signature, 
         customerAddress
       ); 
@@ -199,11 +211,13 @@ contract LoyaltyProgramTest is Test {
             })
         );
       uint256 points = 50000; 
+       
         
       // loyalty program owner creates voucher for 5000 points. 
       RequestPoints memory message = RequestPoints({
           program: address(loyaltyProgram),
-          points: points
+          points: points, 
+          uniqueNumber: uniqueNumber
       });
 
       // vender signs the voucher
@@ -216,6 +230,7 @@ contract LoyaltyProgramTest is Test {
       requestPointsVoucher = RequestPointsVoucher({
         program: address(loyaltyProgram),
         points: points,
+        uniqueNumber: uniqueNumber, 
         signature: signature
       }); 
 
@@ -224,6 +239,7 @@ contract LoyaltyProgramTest is Test {
       loyaltyProgram.requestPointsAndCard(
         requestPointsVoucher.program, 
         requestPointsVoucher.points, 
+        requestPointsVoucher.uniqueNumber, 
         requestPointsVoucher.signature, 
         customer
       ); 
@@ -342,6 +358,7 @@ contract LoyaltyProgramTest is Test {
       loyaltyProgram.requestPointsAndCard(
         requestPointsVoucher.program, 
         requestPointsVoucher.points, 
+        requestPointsVoucher.uniqueNumber, 
         requestPointsVoucher.signature, 
         customerAddress
       ); 
@@ -390,13 +407,15 @@ contract LoyaltyProgramTest is Test {
 
     function testRedeemGift() public giveCustomerCardPointsAndGift(customerAddress) {
       uint256 giftId = 0; // I can also programatically search this. TBI. 
-
+       
+      
       // customer owner creates & signs request to redeem gift. 
       RedeemGift memory message = RedeemGift({
           program: address(loyaltyProgram),
           owner: customerAddress, 
           gift: address(fridayFifteen), 
-          giftId: giftId
+          giftId: giftId, 
+          uniqueNumber: uniqueNumber 
       });
 
       // vender signs the voucher
@@ -412,6 +431,7 @@ contract LoyaltyProgramTest is Test {
         owner: customerAddress, 
         gift: address(fridayFifteen), 
         giftId: giftId,
+        uniqueNumber: uniqueNumber, 
         signature: signature
       }); 
 
@@ -420,6 +440,7 @@ contract LoyaltyProgramTest is Test {
         requestRedeemGift.owner,
         requestRedeemGift.gift,
         requestRedeemGift.giftId,
+        requestRedeemGift.uniqueNumber,
         requestRedeemGift.signature
       ); 
 

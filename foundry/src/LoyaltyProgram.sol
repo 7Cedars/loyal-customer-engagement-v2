@@ -68,6 +68,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     struct RequestPoints {
         address program;
         uint256 points;
+        uint256 uniqueNumber; // this can be any number - as long as it makes the request (and its signature) unique. 
     }
 
     // RedeemGift message struct
@@ -76,6 +77,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         address owner;
         address gift;
         uint256 giftId;
+        uint256 uniqueNumber;  // this can be any number - as long as it makes the request (and its signature) unique. 
     }
 
     // RedeemGift message struct
@@ -91,8 +93,6 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     mapping(bytes => bool) public s_executed;  // combines RequestPoints and RedeemGift hashes.
     mapping(address => bool) private _blockedCards; 
     
-
-    uint256 public s_nonce;
     string public s_name;
     string public s_imageUri;
     ColourScheme public s_colourScheme; 
@@ -215,12 +215,14 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     function requestPointsAndCard(
         address _program,
         uint256 _points, 
+        uint256 _uniqueNumber, 
         bytes memory programSignature, 
         address _ownerCard
     ) external {
         // filling up RequestGift struct with provided data.
         _requestPoints.program = _program; 
         _requestPoints.points = _points;
+        _requestPoints.uniqueNumber = _uniqueNumber; 
 
         // creating digest & using it to recover loyalty program  address. 
         bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashRequestPoints(_requestPoints));
@@ -295,7 +297,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         address _program,
         address _ownerCard, 
         address _gift,
-        uint256 _giftId,  
+        uint256 _giftId,
+        uint256 _uniqueNumber, 
         bytes memory signature
     ) external {   
         // filling up RequestGift struct with provided data. 
@@ -303,6 +306,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         _redeemGift.owner = _ownerCard; 
         _redeemGift.gift = _gift;
         _redeemGift.giftId = _giftId;
+        _redeemGift.uniqueNumber = _uniqueNumber; 
 
         // creating digest & using it to recover loyalty program  address. 
         bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashRedeemGift(_redeemGift));
@@ -448,17 +452,6 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         return success; 
     }
 
-    /**
-     @notice increases the s_nonce by a given amount. 
-     Allows for efficient creation of unique loyalty point vouchers.  
-     */
-    function increaseNonce(uint256 _increase) public onlyOwner {
-        if (_increase > MAX_INCREASE_NONCE) {
-            revert LoyaltyProgram__MoreThanMaxIncrease(); 
-        }
-        s_nonce = s_nonce + _increase;
-    } 
-
     //////////////////////////////////////////////////////////////////
     //                          Internal                           // 
     //////////////////////////////////////////////////////////////////
@@ -549,7 +542,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
             abi.encode(
                 keccak256(bytes("RequestPoints(address program,uint256 points)")),
                 message.program,
-                message.points
+                message.points, 
+                message.uniqueNumber
             )
         );
     }
@@ -564,7 +558,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
                 message.program,
                 message.owner,
                 message.gift,
-                message.giftId
+                message.giftId, 
+                message.uniqueNumber
             )
         );
     }
