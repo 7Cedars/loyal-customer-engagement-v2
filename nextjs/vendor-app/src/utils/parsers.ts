@@ -68,3 +68,16 @@ export const parseEthAddress = (address: unknown): Hex => {
   // const returnAddress = getAddress(address) 
   return address as Hex;
 };
+
+export const parseUri = (uri: unknown): string => {
+  if (!isString(uri)) {
+    throw new Error(`Incorrect uri, not a string: ${uri}`);
+  }
+  
+  if (!isValidUrl(uri)) {
+    throw new Error(`Incorrect uri, not a uri: ${uri}`);
+  }
+  // here can additional checks later. 
+
+  return uri as string;
+};

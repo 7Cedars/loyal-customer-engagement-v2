@@ -32,7 +32,7 @@ export const InputBox = ({
     <div className="w-full flex flex-row p-2">
       <input 
         className={`w-full h-full grid grid-cols-1 text-md text-center border place-items-center rounded-lg p-1 h-12`}
-        style={{borderColor: selectedProgram.colourAccent}}
+        style={{borderColor: selectedProgram.colourAccent, background: selectedProgram.colourBase}}
         disabled={disabled}
         type="text" 
         placeholder={placeholder}

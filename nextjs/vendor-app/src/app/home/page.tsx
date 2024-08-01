@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { TransferFunds } from "./TransferFunds";
 import { setBalanceProgram } from "@/redux/reducers/programReducer";
 import { useDispatch } from "react-redux";
+import { GivePoints } from "./GivePoints";
+import { RedeemGifts } from "./RedeemGift";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -33,16 +35,17 @@ export default function Page() {
   return (
     <Layout> 
       <TitleText title = {prog.name ? prog.name : "Home"} size = {2} /> 
-      <div className="grow flex flex-col justify-start items-center border border-red-500">
+      <div className="grow flex flex-col justify-start items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
           <Button onClick={() => {setTransferMode(true)}}>
             {prog.balance ? `Balance: ${prog.balance}` : "Fetching balance..."} 
           </Button>
         </div>
         <section 
-          className="h-full w-full flex flex-col justify-start items-center mb-12 border border-green-500">
+          className="h-full w-full flex flex-col justify-start items-center mb-16 md:mb-0">
+          
           <div 
-            className="grow-0 opacity-0 aria-selected:grow aria-selected:opacity-100 transition:all ease-in-out duration-300 delay-300 h-2 border border-purple-500"
+            className="grow-0 opacity-0 aria-selected:grow aria-selected:opacity-100 transition:all ease-in-out duration-300 delay-300 h-2"
             aria-selected={mode == undefined} 
             >
             <div className="w-full h-full grid grid-cols-1 content-center "> 
@@ -73,10 +76,12 @@ export default function Page() {
               }
             </div> 
           </div>
-          <div 
+
+          {/* Top bar, always visible */}
+          <section 
             className="z-10 h-12 flex flex-row justify-between items-center w-full border rounded-t-full"
-            style = {{borderColor: prog.colourAccent}}
-            >       
+            style = {{borderColor: prog.colourAccent, borderBottom: prog.colourBase}}
+            >
                <button onClick={() => mode == undefined? setMode("Give Points") : setMode(undefined)} > 
                   <div 
                   className="ms-8 h-8 w-8 rotate-180 aria-selected:rotate-0 transition:all ease-in-out duration-300 delay-300"
@@ -98,6 +103,20 @@ export default function Page() {
               {/* empty box to help with outline */}
               <div className="me-8 h-8 w-8" >  
             </div>
+          </section>
+
+          
+          <div 
+            className="flex flex-col grow-0 w-full opacity-0 aria-selected:opacity-100 aria-selected:grow transition:all ease-in-out duration-300 delay-300 h-2 border-x"
+            aria-selected={mode != undefined} 
+            style={{borderColor: prog.colourAccent}}
+          > 
+            {
+              mode == 'Give Points' ?
+              <GivePoints />  
+              : 
+              <RedeemGifts /> 
+            }
           </div> 
         </section>
       </div>

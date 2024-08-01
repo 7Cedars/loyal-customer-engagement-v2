@@ -2,7 +2,12 @@
 
 import { useScreenDimensions } from '@/hooks/useScreenDimensions';
 import { useAppSelector } from '@/redux/hooks';
-import { GiftIcon, HomeIcon, SquaresPlusIcon } from '@heroicons/react/24/outline';
+import { 
+  GiftIcon, 
+  HomeIcon, 
+  Cog6ToothIcon, 
+  ShoppingCartIcon
+} from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { PropsWithChildren } from "react";
@@ -17,7 +22,7 @@ type NavbarProps = {
  
 const NavbarTop = ({path, base, accent}: NavbarProps) => {
   return (
-    <header className="absolute w-screen top-0 z-10 flex flex-row justify-around h-18 text-sm px-6 pt-2">
+    <header className="absolute w-screen top-0 z-20 flex flex-row justify-around h-18 text-sm px-6 pt-2">
       <Link 
         href='/about' 
         aria-selected={path == `/about`}
@@ -30,7 +35,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
       <Link 
         href='/home' 
         aria-selected={path == `/home`}
-        className={"p-3 px-6"}
+        className={"p-3 px-6"} 
         style={{color:accent}}
         >
         Home 
@@ -81,8 +86,8 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
     
       return (
         <header 
-          className="absolute bottom-0 z-10 flex justify-between h-16 w-full text-sm px-4"
-          style={{color:accent}}
+          className="absolute bottom-0 z-20 flex justify-between h-16 w-full text-sm px-4"
+          style={{color:accent, backgroundColor:base}}
           >
         <Link 
           href={"/home"}
@@ -107,7 +112,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
               className={layoutIcons}
               style={{color:accent}}
               />
-            Claim           
+            Gifts           
             </div>  
          </Link>
          <Link 
@@ -116,7 +121,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
           className={"p-3 px-6"}
           >
             <div className={layoutIconBox}> 
-              <SquaresPlusIcon
+              <ShoppingCartIcon
               className={layoutIcons}
               style={{color:accent}}
               />
@@ -129,7 +134,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
           className={"p-3 px-6"}
           >
             <div className={layoutIconBox}> 
-              <SquaresPlusIcon
+              <Cog6ToothIcon
               className={layoutIcons}
               style={{color:accent}}
               />
@@ -158,13 +163,13 @@ export const Layout = ( props: PropsWithChildren<{}> ) => {
       style={{backgroundColor: prog.colourBase}}
       > 
 
-      {dimensions.width > 896  ? 
+      {dimensions.width > 765  ? // = md  
         <NavbarTop path = {path} base = {prog.colourBase} accent = {prog.colourAccent} /> 
         :
         <NavbarBottom path = {path} base = {prog.colourBase} accent = {prog.colourAccent} /> 
       }
 
-      <div className='h-full w-full max-w-4xl flex flex-col justify-start pt-12 border border-green-500'> 
+      <div className='h-full w-full max-w-4xl flex flex-col justify-start pt-24'> 
         {children}
       </div>
 

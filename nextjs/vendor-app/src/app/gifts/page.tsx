@@ -2,17 +2,60 @@
 
 import { Layout } from "@/components/application/Layout"
 import { TitleText } from "@/components/ui/StandardisedFonts"
-import { useAppSelector } from "@/redux/hooks"
+import { GiftInfo } from "./Gift";
+import { InputBox } from "@/components/ui/InputBox";
+import { TabChoice } from "@/components/ui/TabChoice";
+import { useState } from "react";
 
 export default function Page() {
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-    
+  const [mode, setMode] = useState<string>()
+
   return (
-    <Layout> 
+    <Layout>  
       <TitleText title = "Gifts" size = {2} /> 
-      <div className="grow grid grid-cols-1 justify-items-center p-2 border border-red-500">
-        This is the gifts page
+      
+      <TabChoice 
+        optionOne="Selected"
+        optionTwo="Available"
+        onChange={(choice) => setMode(choice)}
+      /> 
+
+      <div className="w-full md:w-96 self-center"> 
+        <InputBox nameId = {"searchGifts"} placeholder="Search gifts" /> 
       </div>
+      
+      <section className="flex flex-col divide-y justify-start p-2 overflow-auto">
+        <GiftInfo 
+            imageUri = {"https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"}  
+            title = {"This is a test gift"}  
+            points = {2500}
+            description = {"Take a free tour of our shop in the UK! Maybe here add a caveat." } 
+            claim = {"This is a dummy claim requirement description. This description can be nice and lengthy without any problem."}
+            redeem = {"This is a dummy redeem requirement description. This description can be nice and lengthy without any problem."}  
+        />
+        
+        <GiftInfo 
+            imageUri = {"https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"}  
+            title = {"This is a test gift"}  
+            points = {2500}
+            description = {"Take a free tour of our shop in the UK! Maybe here add a caveat." } 
+            claim = {"This is a dummy claim requirement description. This description can be nice and lengthy without any problem."}
+            redeem = {"This is a dummy redeem requirement description. This description can be nice and lengthy without any problem."}  
+        />
+        
+        <GiftInfo 
+            imageUri = {"https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"}  
+            title = {"This is a test gift"}  
+            points = {2500}
+            description = {"Take a free tour of our shop in the UK! Maybe here add a caveat." } 
+            claim = {"This is a dummy claim requirement description. This description can be nice and lengthy without any problem."}
+            redeem = {"This is a dummy redeem requirement description. This description can be nice and lengthy without any problem."}  
+        />
+        
+      
+        
+        
+      </section>
     </Layout>
   )
 }
