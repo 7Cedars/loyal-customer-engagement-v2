@@ -74,7 +74,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     // RedeemGift message struct
     struct RedeemGift {
         address program; 
-        address owner;
+        address owner; // = owner loyalty card. 
         address gift;
         uint256 giftId;
         uint256 uniqueNumber;  // this can be any number - as long as it makes the request (and its signature) unique. 

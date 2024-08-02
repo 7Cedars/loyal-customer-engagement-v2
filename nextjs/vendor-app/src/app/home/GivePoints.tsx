@@ -60,7 +60,7 @@ export const GivePoints = () => {
     <section className="grow flex flex-col items-center justify-center">
         <div className="p-1">
           <QRCode 
-            value={`${process.env.NEXT_PUBLIC_C_URI}?${prog.address}&${amountPoints}&${uniqueNumber.current}&${signature}`}
+            value={`${process.env.NEXT_PUBLIC_C_URI};${prog.address};${amountPoints};${uniqueNumber.current};${signature}`}
             style={{ 
               height: "350px", 
               width: "350px", 

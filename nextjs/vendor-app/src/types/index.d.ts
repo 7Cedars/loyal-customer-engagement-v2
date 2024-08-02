@@ -15,3 +15,12 @@ export type GiftProps = {
   claim?: string; 
   redeem?: string; 
 };
+
+export type QrData = undefined | {
+  program: Hex; 
+  owner: Hex; 
+  gift: Hex; 
+  giftId: BigInt; 
+  uniqueNumber: BigInt; 
+  signature?: Hex; 
+}
