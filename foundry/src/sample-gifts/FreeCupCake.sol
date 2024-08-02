@@ -13,7 +13,7 @@ contract FreeCupCake is LoyaltyGift {
     LoyaltyGift(
       "Free Cupcake", 
       "LPX", 
-      "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmXm7whZN17URgz2Y6APeo9uQDRoRMNK1fXzmyp6sAavvX"
+      "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmbVT4ud4ABEXtjckzRLEGhGouPJyJKJ2mRAsC2UQug1nG"
     ) {}
 
   function requirementsExchangeMet(address payable _card) external override returns (bool) {

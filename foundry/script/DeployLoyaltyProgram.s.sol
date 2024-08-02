@@ -7,6 +7,8 @@ import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPo
 import {HelperConfig} from "script/HelperConfig.s.sol";
 
 contract DeployLoyaltyProgram is Script {
+    bytes32 SALT = bytes32(hex'7ceda5'); 
+
     function run() external returns (LoyaltyProgram, HelperConfig) {
         HelperConfig helperConfig = new HelperConfig();
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
@@ -17,7 +19,7 @@ contract DeployLoyaltyProgram is Script {
         bytes memory accentColour = hex"c8cf0c"; 
 
         vm.startBroadcast();
-            LoyaltyProgram loyaltyProgram = new LoyaltyProgram{salt: bytes32(hex'123454')}(
+            LoyaltyProgram loyaltyProgram = new LoyaltyProgram{salt: SALT}(
             name, 
             cardImageUri,
             baseColour,

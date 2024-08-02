@@ -38,4 +38,7 @@ ANVIL_ARGS_0 := --rpc-url http://localhost:8545 --private-key $(DEFAULT_ANVIL_KE
 anvilDeployProgram: 
 	@forge script script/DeployLoyaltyProgram.s.sol:DeployLoyaltyProgram $(ANVIL_ARGS_0)
 	
-
+anvilDeploySampleGifts: 
+	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCoffee $(ANVIL_ARGS_0)
+	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCupCake $(ANVIL_ARGS_0)
+	@forge script script/DeployLoyaltyGifts.s.sol:DeployFridayFifteen $(ANVIL_ARGS_0)

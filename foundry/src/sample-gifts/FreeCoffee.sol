@@ -13,7 +13,7 @@ contract FreeCoffee is LoyaltyGift {
     LoyaltyGift(
       "Free Coffee", 
       "LPX", 
-      "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmRqnAtzL4fpm3vAFYxf9hMexMRHd1s7nDp3LC1RG6eB4Y"
+      "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmUfs1osq6KFJzHRdWEnrsmLq68CSgKJfTpSKXcTYuaNbd"
     ) {}
 
   function requirementsExchangeMet(address payable _card) external override returns (bool) {

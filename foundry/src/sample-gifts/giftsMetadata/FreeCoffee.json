@@ -1,27 +1,14 @@
 {
-  "title": "A voucher for a free coffee!",
-  "description": "Exchange 2500 points for a voucher that can later be redeemed for a free coffee.",
   "image": "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/Qmay9q7tubcXgKrXyq13Pw6ae8NmfnRvccVgqEG8ArafmC",
+  "description": "Exchange 2500 points for a voucher that can later be redeemed for a free coffee.",
   "attributes": [
     {
-      "trait_type": "additional_requirements",
+      "trait_type": "claim_requirements",
       "value": "none"
     },
     {
-      "trait_type": "vendor_message_at_claim",
-      "value": "No further action required. Points have been received and voucher sent."
-    },
-    {
-      "trait_type": "customer_message_at_claim",
-      "value": "Your free coffee voucher has been send. You can use this to get a fere coffee at a later date."
-    },
-    {
-      "trait_type": "vendor_message_at_voucher_redeem",
-      "value": "Valid voucher. Give free coffee to customer."
-    },
-    {
-      "trait_type": "customer_message_at_voucher_redeem",
-      "value": "Enjoy your coffee!"
+      "trait_type": "redeem_requirements",
+      "value": "none"
     }
   ]
 }

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { NumLine } from "@/components/ui/NumLine";
 import { useAppSelector } from "@/redux/hooks";
-import { GiftProps } from "@/types";
+import { Gift } from "@/types";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -10,9 +10,9 @@ export const GiftInfo = ({
   title,
   description, 
   points,
-  claim = "",
-  redeem = "", 
-}: GiftProps) => {
+  claimReq = "",
+  redeemReq = "", 
+}: Gift) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
 
@@ -45,7 +45,7 @@ export const GiftInfo = ({
               {points} points
             </a>
             <a className="">
-              Additional requirements: {String(claim.length > 0 || String(redeem.length > 0)) ? "yes" : "no"}
+              Additional requirements: {String(claimReq.length > 0 || String(redeemReq.length > 0)) ? "yes" : "no"}
             </a>
         </section>
       </button>
@@ -57,16 +57,16 @@ export const GiftInfo = ({
         > 
         {selected ? 
         <>
-          {String(claim.length > 0 ) ?  
+          {String(claimReq.length > 0 ) ?  
             <div>
-              Claim requirement: {claim}
+              claimReq requirement: {claimReq}
             </div>
             : 
             null
           }
-          {String(redeem.length > 0 ) ?  
+          {String(redeemReq.length > 0 ) ?  
             <div>
-              Redeem requirement: {claim}
+              Redeem requirement: {claimReq}
             </div>
             : 
             null

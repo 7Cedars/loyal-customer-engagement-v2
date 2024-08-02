@@ -14,7 +14,7 @@ contract FridayFifteen is LoyaltyGift {
     LoyaltyGift(
       "Friday Fifteen Percent Off!", 
       "LPX", 
-      "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmPZpvRAyHD1h66ftdvCQAKjwu3yXzXB4Td7epVb38EYjF"
+      "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmcbmQKjEFUVrUCwY5hF1bVYb4f2Cb1UTRUXZuYFn7VjiW"
     ) {}
 
   function requirementsExchangeMet(address payable _card) external override returns (bool) {

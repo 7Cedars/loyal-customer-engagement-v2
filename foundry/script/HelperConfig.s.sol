@@ -22,6 +22,7 @@ contract HelperConfig is Script {
   uint256 constant OPS_SEPOLIA_CHAIN_ID = 11155420; 
   uint256 constant ARB_SEPOLIA_CHAIN_ID = 421614; 
   uint256 constant BASE_SEPOLIA_CHAIN_ID = 84532; 
+  bytes32 SALT = bytes32(hex'7ceda5'); 
 
   address constant ANVIL_DEFAULT_ACCOUNT = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266; 
 
@@ -78,11 +79,13 @@ contract HelperConfig is Script {
     // deploy mock entrypoint contract.
     console2.log("Deploying Mock EntryPoint..."); 
     vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT); 
-    EntryPoint entryPoint = new EntryPoint();  
+    EntryPoint entryPoint = new EntryPoint{salt: SALT}();  
     vm.stopBroadcast(); 
 
+    console2.log(address(entryPoint)); 
+
     localNetworkConfig =  NetworkConfig({entryPoint: address(entryPoint)}); 
-    return localNetworkConfig; 
+    return localNetworkConfig;
   }
 }
 

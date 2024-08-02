@@ -15,7 +15,7 @@ import { resetProgram, setProgram } from "@/redux/reducers/programReducer";
 export default function Home() {
   // FOR DEV ONLY // 
   const programsForLocalStorage: Program[] = [{ 
-    address: "0x5FbDB2315678afecb367f032d93F642f64180aa3", 
+    address: "0x4b27bB1024a18B0aAa8a48d2E14AED275D46aa0a", 
     name: "Highstreet Hopes",
     colourBase: "#3d5769",
     colourAccent: "#c8cf0c", 

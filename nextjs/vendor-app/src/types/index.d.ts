@@ -7,13 +7,15 @@ export type Program = {
   uriImage?: string; 
 }
 
-export type GiftProps = {
+export type Gift = {
+  address: Hex;
+  id: Hex;
   imageUri: string; 
   title: string; 
   points: number; 
   description: string; 
-  claim?: string; 
-  redeem?: string; 
+  claimReq?: string; 
+  redeemReq?: string; 
 };
 
 export type QrData = undefined | {
@@ -24,3 +26,5 @@ export type QrData = undefined | {
   uniqueNumber: BigInt; 
   signature?: Hex; 
 }
+
+export type Status = "isIdle" | "isLoading" | "isError" | "isSuccess" 

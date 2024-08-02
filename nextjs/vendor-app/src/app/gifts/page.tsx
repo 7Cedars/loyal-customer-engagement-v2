@@ -5,10 +5,25 @@ import { TitleText } from "@/components/ui/StandardisedFonts"
 import { GiftInfo } from "./Gift";
 import { InputBox } from "@/components/ui/InputBox";
 import { TabChoice } from "@/components/ui/TabChoice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Gift } from "@/types";
 
 export default function Page() {
   const [mode, setMode] = useState<string>()
+  const [savedGifts, setSavedGifts] = useState<Gift[]>([])
+
+  // clp_v_gifts
+  useEffect(()=>{
+    let localStore = localStorage.getItem("clp_v_gifts")
+    const saved: Gift[] = localStore ? JSON.parse(localStore) : []
+    setSavedGifts(saved)
+  }, [, mode])
+
+  useEffect(()=>{
+    let localStore = localStorage.getItem("clp_v_gifts")
+    const saved: Gift[] = localStore ? JSON.parse(localStore) : []
+    setSavedGifts(saved)
+  }, [, mode])
 
   return (
     <Layout>  
