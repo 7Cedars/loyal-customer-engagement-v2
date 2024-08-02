@@ -52,33 +52,39 @@ export const GiftInfo = ({
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}
       <div 
-        className="z-1 w-full grid grid-cols-1 ps-3 p-2 md:p-8 p-1 h-0 opacity-0 aria-selected:opacity-100 aria-selected:h-80 ease-in-out duration-300 delay-300"
+        className="z-1 w-full grid grid-cols-1 ps-3 p-2 md:px-8 p-1 h-1 opacity-0 aria-selected:opacity-100 aria-selected:h-80 ease-in-out duration-300 delay-300"
         aria-selected = {selected}
         > 
-        {String(claim.length > 0) ?  
-          <div>
-            Claim requirement: {claim}
-          </div>
-          : 
-          null
-        }
-        {String(redeem.length > 0) ?  
-          <div>
-            Redeem requirement: {claim}
-          </div>
-          : 
-          null
-        }
+        {selected ? 
+        <>
+          {String(claim.length > 0 ) ?  
+            <div>
+              Claim requirement: {claim}
+            </div>
+            : 
+            null
+          }
+          {String(redeem.length > 0 ) ?  
+            <div>
+              Redeem requirement: {claim}
+            </div>
+            : 
+            null
+          }
 
-        <div> 
-          <NumLine onClick={() => {}} />
-        </div>
+          <div> 
+            <NumLine onClick={() => {}} />
+          </div>
 
-        <div className="h-12 p-1"> 
-          <Button>
-            Select gift  
-          </Button>
-        </div>
+          <div className="h-12 p-1"> 
+            <Button>
+              Select gift  
+            </Button>
+          </div>
+        </>
+        :
+        null
+        }
       </div> 
     </div>
   );
