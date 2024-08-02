@@ -1,20 +1,25 @@
 import { Button } from "@/components/ui/Button";
 import { NumLine } from "@/components/ui/NumLine";
+import { loyaltyProgramAbi } from "@/context/abi";
 import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
 import Image from "next/image";
 import { useState } from "react";
+import { useWriteContract } from "wagmi";
 
 export const GiftInfo = ({
-  imageUri, 
-  title,
-  description, 
+  address,  
+  name,
+  symbol, 
   points,
-  claimReq = "",
-  redeemReq = "", 
+  additionalReq, 
+  metadata, 
 }: Gift) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
+  const { writeContract, error } = useWriteContract()
+  console.log("error: ", error)
+
 
   return (
     <div 
@@ -31,21 +36,21 @@ export const GiftInfo = ({
           width={90}
           height={90}
           style = {{ objectFit: "fill" }} 
-          src={imageUri} 
+          src={metadata?.imageUri ? metadata.imageUri : ""} 
           alt="No valid image detected."
         />
         <section className="grow flex flex-col p-1 text-left text-md">
             <a className="font-bold">
-              {title}
+              {name}
             </a>
             <a className="">
-              {description}
+              {metadata?.description}
             </a>
             <a className="">
               {points} points
             </a>
             <a className="">
-              Additional requirements: {String(claimReq.length > 0 || String(redeemReq.length > 0)) ? "yes" : "no"}
+              Additional requirements: {additionalReq ? "yes" : "no"}
             </a>
         </section>
       </button>
@@ -57,27 +62,37 @@ export const GiftInfo = ({
         > 
         {selected ? 
         <>
-          {String(claimReq.length > 0 ) ?  
+          {additionalReq && String(metadata?.attributes[0].value).length > 0 ?  
             <div>
-              claimReq requirement: {claimReq}
+              Claim requirement: {metadata?.attributes[0].value}
             </div>
             : 
             null
           }
-          {String(redeemReq.length > 0 ) ?  
+          {additionalReq && String(metadata?.attributes[1].value).length > 0 ?  
             <div>
-              Redeem requirement: {claimReq}
+              Redeem requirement: {metadata?.attributes[1].value}
             </div>
             : 
             null
           }
 
           <div> 
-            <NumLine onClick={() => {}} />
+            <NumLine onClick={( ) => {}} />
           </div>
 
           <div className="h-12 p-1"> 
-            <Button>
+            <Button onClick={() =>  writeContract({ 
+                abi: loyaltyProgramAbi,
+                address: selectedProgram.address,
+                functionName: 'setLoyaltyGift',
+                args: [
+                  address,
+                  true,
+                  true
+                ]
+              })
+            }>
               Select gift  
             </Button>
           </div>

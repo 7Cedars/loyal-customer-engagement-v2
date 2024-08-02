@@ -15,7 +15,7 @@ import { resetProgram, setProgram } from "@/redux/reducers/programReducer";
 export default function Home() {
   // FOR DEV ONLY // 
   const programsForLocalStorage: Program[] = [{ 
-    address: "0x4b27bB1024a18B0aAa8a48d2E14AED275D46aa0a", 
+    address: "0x82b6311bDC316636Af8546891A380333a3CE0B8E", 
     name: "Highstreet Hopes",
     colourBase: "#3d5769",
     colourAccent: "#c8cf0c", 
@@ -26,8 +26,7 @@ export default function Home() {
 
   const { open } = useWeb3Modal()
   const { status, address } = useAccount()
-  const [ mode, SetMode ] = useState<string>("home") 
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram) 
+  const [ mode, SetMode ] = useState<string>("home")  
   const router = useRouter()
   const [savedPrograms, setSavedPrograms] = useState<Program[]>([]); 
   const dispatch = useDispatch() 

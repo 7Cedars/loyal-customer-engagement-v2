@@ -21,6 +21,10 @@ export default function Page() {
   const {data: balanceData, refetch, fetchStatus} = useBalance({ address: prog.address })
   const dispatch = useDispatch() 
 
+  console.log("prog.address:", prog.address)
+  console.log("balanceData:", balanceData)
+  console.log("prog.balance:", prog.balance)
+
   // updating balance of program. 
   useEffect(() => {
     if (

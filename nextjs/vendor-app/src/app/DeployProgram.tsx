@@ -36,7 +36,7 @@ export const DeployProgram = () => {
         uri,
         hexBase,  // NB! needs to be bytes! 
         hexAccent, // NB! needs to be bytes! 
-        "0x83A21828248Ef1DEcbfd6070148FeB7FA9a78cc1" // I had the incorrect address. Using create2 to deploy now on Anvil - should always be same address...  
+        '0x83A21828248Ef1DEcbfd6070148FeB7FA9a78cc1' // I had the incorrect address. Using create2 to deploy now on Anvil - should always be same address...  
       ],
       bytecode: loyaltyProgramBytecode,
       })

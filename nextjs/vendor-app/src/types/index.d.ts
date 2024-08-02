@@ -9,13 +9,12 @@ export type Program = {
 
 export type Gift = {
   address: Hex;
-  id: Hex;
-  imageUri: string; 
-  title: string; 
+  name: string; 
+  symbol: string; 
   points: number; 
-  description: string; 
-  claimReq?: string; 
-  redeemReq?: string; 
+  uri: string;
+  additionalReq: boolean; 
+  metadata?: Metadata; 
 };
 
 export type QrData = undefined | {
@@ -25,6 +24,67 @@ export type QrData = undefined | {
   giftId: BigInt; 
   uniqueNumber: BigInt; 
   signature?: Hex; 
+}
+
+// NB 0 = claim req
+// 1 = redeem req 
+export type Attribute = {  
+  trait_type: string | number ;  
+  value: string;
+}
+
+export type Metadata = { 
+  description: string; 
+  imageUri: string;
+  attributes: Attribute[]
+}
+
+export type Event = {
+  address: EthAddress;
+  blockNumber: BigInt;
+  logIndex: number; 
+  event?:
+    GiftListed | 
+    PointsExchanged | 
+    GiftRedeemed | 
+    CardBlocked | 
+    CreationCardsAllowed | 
+    GiftsMinted | 
+    ColourSchemeChanged |
+    ImageUriChanged;
+  blockData?: Any
+}
+
+type GiftListed = {
+
+}
+
+type PointsExchanged = {
+  
+}
+
+type GiftRedeemed = {
+  
+}
+
+type CardBlocked = {
+  
+}
+
+type CreationCardsAllowed = {
+  
+}
+
+type GiftsMinted = {
+  
+}
+
+type ColourSchemeChanged = {
+  
+}
+
+type ImageUriChanged = {
+  
 }
 
 export type Status = "isIdle" | "isLoading" | "isError" | "isSuccess" 

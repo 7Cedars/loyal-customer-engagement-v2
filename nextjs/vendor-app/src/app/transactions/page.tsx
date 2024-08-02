@@ -4,10 +4,18 @@ import { Layout } from "@/components/application/Layout"
 import { InputBox } from "@/components/ui/InputBox"
 import { TitleText } from "@/components/ui/StandardisedFonts"
 import { useAppSelector } from "@/redux/hooks"
-import { GiftInfo } from "../gifts/Gift"
+import { GiftInfo } from "../gifts/GiftInfo"
+import useEvents from "@/hooks/useEvents"
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+    // Number(await publicClient?.getBlockNumber
+  const {status, events} = useEvents({fromBlock: BigInt(0), toBlock: BigInt(100)})
+
+  console.log({
+    status: status, 
+    events: events
+  })
 
   return (
     <Layout> 
@@ -21,48 +29,7 @@ export default function Page() {
         className="flex flex-col divide-y justify-start p-2 overflow-auto border border-red-500"
         style = {{color: prog.colourAccent}}
       >
-
-        <GiftInfo 
-            imageUri = {"https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"}  
-            title = {"This is a test gift"}  
-            points = {2500}  
-            claim = {"This is a dummy claim requirement description."}
-            redeem = {"This is a dummy redeem requirement description."}  
-        />
         
-        <GiftInfo 
-            imageUri = {"https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"}  
-            title = {"This is a test gift"}  
-            points = {2500}  
-            claim = {"This is a dummy claim requirement description."}
-            redeem = {"This is a dummy redeem requirement description."}  
-        />
-
-        <GiftInfo 
-            imageUri = {"https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"}  
-            title = {"This is a test gift"}  
-            points = {2500}  
-            claim = {"This is a dummy claim requirement description."}
-            redeem = {"This is a dummy redeem requirement description."}  
-        />
-
-        <GiftInfo 
-            imageUri = {"https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"}  
-            title = {"This is a test gift"}  
-            points = {2500}  
-            claim = {"This is a dummy claim requirement description."}
-            redeem = {"This is a dummy redeem requirement description."}  
-        />
-
-        <GiftInfo 
-            imageUri = {"https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"}  
-            title = {"This is a test gift"}  
-            points = {2500}  
-            claim = {"This is a dummy claim requirement description."}
-            redeem = {"This is a dummy redeem requirement description."}  
-        />
-
-
       </section>
     </Layout>
   )
