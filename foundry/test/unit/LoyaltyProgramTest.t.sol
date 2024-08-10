@@ -16,6 +16,7 @@ import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPo
 // local imports // 
 import {LoyaltyProgram} from "../../src/LoyaltyProgram.sol";
 import {LoyaltyCard} from  "../../src/LoyaltyCard.sol";
+import {FactoryCards} from  "../../src/FactoryCards.sol";
 import {FridayFifteen} from "../../src/sample-gifts/FridayFifteen.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {DeployLoyaltyProgram} from "../../script/DeployLoyaltyProgram.s.sol";
@@ -47,6 +48,7 @@ contract LoyaltyProgramTest is Test {
     HelperConfig helperConfig;
     FridayFifteen fridayFifteen; 
     HelperConfig.NetworkConfig config; 
+    FactoryCards factoryCards; 
     address ownerProgram; 
     bytes32 internal DOMAIN_SEPARATOR; 
 
@@ -200,7 +202,7 @@ contract LoyaltyProgramTest is Test {
     }
 
     modifier giveCustomerCardPointsAndGift(address customer) {
-      address loyaltyCard = loyaltyProgram.getAddress(customer, SALT);
+      address loyaltyCard = factoryCards.getAddress(customer, payable(address(loyaltyProgram)), SALT);
       uint256 amountGifts = 20; 
       DOMAIN_SEPARATOR =_hashDomain(
             EIP712Domain({
@@ -270,7 +272,8 @@ contract LoyaltyProgramTest is Test {
         (loyaltyProgram, helperConfig) = deployer.run();
           
         config = helperConfig.getConfig();
-        cardImplementation = new LoyaltyCard(IEntryPoint(config.entryPoint), payable(address(this)));
+        cardImplementation = new LoyaltyCard(IEntryPoint(config.entryPoint));
+        factoryCards = FactoryCards(config.factoryCards); 
 
         DeployFridayFifteen deployerFridayFifteen = new DeployFridayFifteen(); 
         fridayFifteen = deployerFridayFifteen.run();
@@ -290,9 +293,8 @@ contract LoyaltyProgramTest is Test {
     
     function testDeployEmitsevent() public {
         string memory name = "Highstreet Hopes";
+        string memory colourScheme = '#3d5769;#c8cf0c'; 
         string memory cardImageUri = "";
-        bytes memory baseColour = hex"3d5769";
-        bytes memory accentColour = hex"c8cf0c"; 
 
         vm.expectEmit(true, false, false, false);
         emit LoyaltyProgramDeployed(vendorAddress, LOYALTY_PROGRAM_VERSION);
@@ -300,10 +302,10 @@ contract LoyaltyProgramTest is Test {
         vm.prank(vendorAddress);
         loyaltyProgram = new LoyaltyProgram(
             name, 
+            colourScheme, 
             cardImageUri,
-            baseColour,
-            accentColour, 
-            config.entryPoint
+            config.entryPoint, 
+            config.factoryCards
         );
     }
 
@@ -349,7 +351,7 @@ contract LoyaltyProgramTest is Test {
     ///////////////////////////////////////////////////////////////////////////
 
     function testRequestPointsAndCardCreatesCardWithPoints() public giveVoucher5000Points(customerAddress) {
-      address loyaltyCard = loyaltyProgram.getAddress(customerAddress, SALT);
+      address loyaltyCard = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
       
       vm.expectEmit(true, false, false, false);
       emit LoyaltyCardCreated(config.entryPoint, customerAddress, address(loyaltyProgram));
@@ -374,7 +376,7 @@ contract LoyaltyProgramTest is Test {
     ///////////////////////////////////////////////////////////////////////////
 
     function testExchangePointsForGift() public giveCustomerCardAndPoints(customerAddress) {
-      address loyaltyCard = loyaltyProgram.getAddress(customerAddress, SALT);
+      address loyaltyCard = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
       uint256 amountGifts = 20; 
       uint256 balanceCardBefore = loyaltyProgram.balanceOf(loyaltyCard);
       uint256 giftCost = fridayFifteen.GIFT_COST();
@@ -450,12 +452,12 @@ contract LoyaltyProgramTest is Test {
     ///////////////////////////////////////////////////////////////////////
     //                        Helper Functions                           //
     /////////////////////////////////////////////////////////////////////// 
-    function _getAddress(address owner, uint256 salt) internal view returns (address) {
+    function _getAddress(address owner, address payable loyaltyProgram, uint256 salt) internal view returns (address) {
         return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(
                     address(cardImplementation),
-                    abi.encodeCall(LoyaltyCard.initialize, (owner))
+                    abi.encodeCall(LoyaltyCard.initialize, (owner, loyaltyProgram))
                 )
             )));
     }

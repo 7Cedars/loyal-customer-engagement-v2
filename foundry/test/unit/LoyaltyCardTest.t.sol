@@ -141,7 +141,7 @@ contract LoyaltyCardTest is Test {
       console2.logAddress(address(loyaltyProgram)); 
         
       config = helperConfig.getConfig();
-      cardImplementation = new LoyaltyCard(IEntryPoint(config.entryPoint), payable(address(this)));
+      cardImplementation = new LoyaltyCard(IEntryPoint(config.entryPoint));
 
       DeployFridayFifteen deployerFridayFifteen = new DeployFridayFifteen(); 
       fridayFifteen = deployerFridayFifteen.run();
@@ -161,7 +161,7 @@ contract LoyaltyCardTest is Test {
     bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, address(fridayFifteen), customerAddress);
     executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
 
-    address cardAddress = _getAddress(customerAddress, SALT);
+    address cardAddress = _getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
     vm.prank(config.entryPoint); 
     (bool success , bytes memory returnData) = cardAddress.call{value: 0}(executeCallData);
 
@@ -199,12 +199,12 @@ contract LoyaltyCardTest is Test {
   ///////////////////////////////////////////////////////////////////////
   //                        Helper Functions                           //
   /////////////////////////////////////////////////////////////////////// 
-  function _getAddress(address owner, uint256 salt) internal view returns (address) {
+  function _getAddress(address owner, address payable loyaltyProgram, uint256 salt) internal view returns (address) {
       return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
               type(ERC1967Proxy).creationCode,
               abi.encode(
                   address(cardImplementation),
-                  abi.encodeCall(LoyaltyCard.initialize, (owner))
+                  abi.encodeCall(LoyaltyCard.initialize, (owner, loyaltyProgram))
               )
           )));
   }
@@ -281,7 +281,7 @@ contract testExternalCallContract is Test {
     console2.logAddress(address(loyaltyProgram)); 
       
     config = helperConfig.getConfig();
-    cardImplementation = new LoyaltyCard(IEntryPoint(config.entryPoint), payable(address(this)));
+    cardImplementation = new LoyaltyCard(IEntryPoint(config.entryPoint));
 
     DeployFridayFifteen deployerFridayFifteen = new DeployFridayFifteen(); 
     fridayFifteen = deployerFridayFifteen.run();

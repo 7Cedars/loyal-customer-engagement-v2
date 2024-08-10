@@ -14,17 +14,16 @@ contract DeployLoyaltyProgram is Script {
         HelperConfig.NetworkConfig memory config = helperConfig.getConfig();
 
         string memory name = "Highstreet Hopes";
+        string memory colourScheme = '#3d5769;#c8cf0c'; 
         string memory cardImageUri = "";
-        bytes memory baseColour = hex"3d5769";
-        bytes memory accentColour = hex"c8cf0c"; 
 
         vm.startBroadcast();
             LoyaltyProgram loyaltyProgram = new LoyaltyProgram{salt: SALT}(
             name, 
+            colourScheme, 
             cardImageUri,
-            baseColour,
-            accentColour, 
-            config.entryPoint
+            config.entryPoint, 
+            config.factoryCards
         );
         vm.stopBroadcast();
 

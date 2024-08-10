@@ -4,6 +4,7 @@ pragma solidity 0.8.26;
 import {Script, console2} from "lib/forge-std/src/Script.sol";
 import {LoyaltyCard} from "../src/LoyaltyCard.sol"; 
 import {LoyaltyProgram} from "../src/LoyaltyProgram.sol"; 
+import {FactoryCards} from "../src/FactoryCards.sol"; 
 import {EntryPoint} from "lib/account-abstraction/contracts/core/EntryPoint.sol"; 
 
 contract HelperConfig is Script {
@@ -11,6 +12,7 @@ contract HelperConfig is Script {
 
   struct NetworkConfig {
     address entryPoint;
+    address factoryCards; 
     // I can add more configs as needed later on.  
   }
   
@@ -49,25 +51,29 @@ contract HelperConfig is Script {
 
   function getEthSepoliaConfig() public pure returns(NetworkConfig memory){ 
     return NetworkConfig({
-      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
+      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
+      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 // to be filled out after first deployment. 
     });
   }
 
   function getOpsSepoliaConfig() public pure returns(NetworkConfig memory){ 
     return NetworkConfig({
-      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
+      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
+      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 // to be filled out after first deployment. 
     });
   }
 
   function getArbSepoliaConfig() public pure returns(NetworkConfig memory){ 
     return NetworkConfig({
-      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
+      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
+      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 // to be filled out after first deployment. 
     });
   }
 
   function getBaseSepoliaConfig() public pure returns(NetworkConfig memory){ 
     return NetworkConfig({
-      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
+      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
+      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 // to be filled out after first deployment. 
     });
   }
 
@@ -76,15 +82,24 @@ contract HelperConfig is Script {
       return localNetworkConfig; 
     }
     
-    // deploy mock entrypoint contract.
+    // deploy mock entrypoint and factoryCards contracts.
+    // (separated the broadcasts for clarity.)
     console2.log("Deploying Mock EntryPoint..."); 
     vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT); 
-    EntryPoint entryPoint = new EntryPoint{salt: SALT}();  
+    EntryPoint entryPoint = new EntryPoint{salt: SALT}();
     vm.stopBroadcast(); 
-
     console2.log(address(entryPoint)); 
 
-    localNetworkConfig =  NetworkConfig({entryPoint: address(entryPoint)}); 
+    console2.log("Deploying Mock FactoryCards..."); 
+    vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT); 
+    FactoryCards factoryCards = new FactoryCards{salt: SALT}(entryPoint);  
+    vm.stopBroadcast(); 
+    console2.log(address(factoryCards)); 
+
+    localNetworkConfig =  NetworkConfig({
+        entryPoint: address(entryPoint), 
+        factoryCards: address(factoryCards)
+        }); 
     return localNetworkConfig;
   }
 }

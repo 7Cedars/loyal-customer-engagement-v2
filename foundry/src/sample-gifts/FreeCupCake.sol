@@ -17,7 +17,7 @@ contract FreeCupCake is LoyaltyGift {
     ) {}
 
   function requirementsExchangeMet(address payable _card) external override returns (bool) {
-    address payable loyaltyProgram = LoyaltyCard(_card).i_loyaltyProgram(); 
+    address payable loyaltyProgram = LoyaltyCard(_card).s_loyaltyProgram(); 
     uint256 balance = LoyaltyProgram(loyaltyProgram).balanceOf(_card);
     if (balance < GIFT_COST) {
          revert ("Not enough points.");

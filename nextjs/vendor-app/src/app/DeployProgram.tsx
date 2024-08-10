@@ -33,9 +33,8 @@ export const DeployProgram = () => {
       abi: loyaltyProgramAbi,
       args: [
         name,
-        uri,
-        hexBase,  // NB! needs to be bytes! 
-        hexAccent, // NB! needs to be bytes! 
+        `${base};${accent}`, // = colour scheme
+        uri, 
         '0x83A21828248Ef1DEcbfd6070148FeB7FA9a78cc1' // I had the incorrect address. Using create2 to deploy now on Anvil - should always be same address...  
       ],
       bytecode: loyaltyProgramBytecode,

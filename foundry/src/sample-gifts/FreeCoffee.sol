@@ -17,7 +17,7 @@ contract FreeCoffee is LoyaltyGift {
     ) {}
 
   function requirementsExchangeMet(address payable _card) external override returns (bool) {
-    address payable loyaltyProgram = LoyaltyCard(_card).i_loyaltyProgram(); // gets the card's loyalty program. 
+    address payable loyaltyProgram = LoyaltyCard(_card).s_loyaltyProgram(); // gets the card's loyalty program. 
     uint256 balance = LoyaltyProgram(loyaltyProgram).balanceOf(_card); 
     if (balance < GIFT_COST) {
          revert ("Not enough points.");
