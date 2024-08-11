@@ -39,7 +39,7 @@ function deployLoyaltyProgram(
 ) public returns (LoyaltyProgram loyaltyProgram) {
     loyaltyProgram = new LoyaltyProgram(
       _name, _colourScheme, _cardImageUri, s_entryPoint, s_factoryCards
-    );
+    ); 
   } 
 }
 

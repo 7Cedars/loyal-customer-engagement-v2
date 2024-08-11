@@ -15,11 +15,12 @@ import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPo
 
 // local imports // 
 import {LoyaltyProgram} from "../../src/LoyaltyProgram.sol";
+import {FactoryPrograms} from "../../src/FactoryPrograms.sol";
 import {LoyaltyCard} from  "../../src/LoyaltyCard.sol";
 import {FactoryCards} from  "../../src/FactoryCards.sol";
 import {FridayFifteen} from "../../src/sample-gifts/FridayFifteen.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
-import {DeployLoyaltyProgram} from "../../script/DeployLoyaltyProgram.s.sol";
+import {DeployFactoryPrograms} from "../../script/DeployFactoryPrograms.s.sol";
 import {DeployFridayFifteen} from "../../script/DeployLoyaltyGifts.s.sol";
 
 contract LoyaltyProgramTest is Test {
@@ -44,6 +45,7 @@ contract LoyaltyProgramTest is Test {
     error LoyaltyProgram_OnlyEntryPoint(); 
 
     /* Type declarations */
+    FactoryPrograms factoryPrograms; 
     LoyaltyProgram loyaltyProgram; 
     HelperConfig helperConfig;
     FridayFifteen fridayFifteen; 
@@ -109,7 +111,7 @@ contract LoyaltyProgramTest is Test {
 
     /* Events */
     event Log(string func, uint256 gas);
-    event LoyaltyProgramDeployed(address indexed s_owner, uint256 indexed LOYALTY_PROGRAM_VERSION);
+    event LoyaltyProgramDeployed(address indexed s_owner, address indexed loyaltyProgramAddress, uint256 indexed LOYALTY_PROGRAM_VERSION);
     event LoyaltyGiftAdded(address indexed loyaltyGift);
     event LoyaltyGiftNoLongerExchangable(address indexed loyaltyGift);
     event LoyaltyGiftNoLongerRedeemable(address indexed loyaltyGift);
@@ -268,19 +270,26 @@ contract LoyaltyProgramTest is Test {
     ///////////////////////////////////////////////
 
     function setUp() external {
-        DeployLoyaltyProgram deployer = new DeployLoyaltyProgram();
-        (loyaltyProgram, helperConfig) = deployer.run();
-          
-        config = helperConfig.getConfig();
-        cardImplementation = new LoyaltyCard(IEntryPoint(config.entryPoint));
-        factoryCards = FactoryCards(config.factoryCards); 
+      string memory name = "Highstreet Hopes";
+      string memory colourScheme = '#3d5769;#c8cf0c'; 
+      string memory cardImageUri = "";
 
-        DeployFridayFifteen deployerFridayFifteen = new DeployFridayFifteen(); 
-        fridayFifteen = deployerFridayFifteen.run();
-        
-        ownerProgram = loyaltyProgram.owner();
-        vm.prank(ownerProgram); 
-        loyaltyProgram.transferOwnership(vendorAddress);
+      DeployFactoryPrograms deployer = new DeployFactoryPrograms();
+      (factoryPrograms, helperConfig) = deployer.run();
+      config = helperConfig.getConfig();
+
+      loyaltyProgram = factoryPrograms.deployLoyaltyProgram(
+        name, 
+        colourScheme, 
+        cardImageUri
+      );
+      
+      DeployFridayFifteen deployerFridayFifteen = new DeployFridayFifteen(); 
+      fridayFifteen = deployerFridayFifteen.run();
+      
+      ownerProgram = loyaltyProgram.owner();
+      vm.prank(ownerProgram); 
+      loyaltyProgram.transferOwnership(vendorAddress);
     }
 
     function testLoyaltyProgramHasOwner() public view {
@@ -297,7 +306,7 @@ contract LoyaltyProgramTest is Test {
         string memory cardImageUri = "";
 
         vm.expectEmit(true, false, false, false);
-        emit LoyaltyProgramDeployed(vendorAddress, LOYALTY_PROGRAM_VERSION);
+        emit LoyaltyProgramDeployed(vendorAddress, address(loyaltyProgram), LOYALTY_PROGRAM_VERSION);
 
         vm.prank(vendorAddress);
         loyaltyProgram = new LoyaltyProgram(
@@ -347,7 +356,7 @@ contract LoyaltyProgramTest is Test {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    //                    Test Funciton RequestPointsAndCard                 //
+    //                    Test Function RequestPointsAndCard                 //
     ///////////////////////////////////////////////////////////////////////////
 
     function testRequestPointsAndCardCreatesCardWithPoints() public giveVoucher5000Points(customerAddress) {
@@ -480,9 +489,10 @@ contract LoyaltyProgramTest is Test {
     function hashRequestPoints(RequestPoints memory message) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256(bytes("RequestPoints(address program,uint256 points)")),
+                keccak256(bytes("RequestPoints(address program,uint256 points,uint256 uniqueNumber)")),
                 message.program,
-                message.points
+                message.points, 
+                message.uniqueNumber
             )
         );
     }
@@ -493,11 +503,12 @@ contract LoyaltyProgramTest is Test {
     function hashRedeemGift(RedeemGift memory message) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256(bytes("RedeemGift(address program,address owner,address gift,uint256 giftId)")),
+                keccak256(bytes("RedeemGift(address program,address owner,address gift,uint256 giftId,uint256 uniqueNumber)")),
                 message.program,
                 message.owner,
                 message.gift,
-                message.giftId
+                message.giftId, 
+                message.uniqueNumber
             )
         );
     }

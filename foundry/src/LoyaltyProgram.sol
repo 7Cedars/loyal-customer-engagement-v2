@@ -106,7 +106,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     //                          Events                              // 
     //////////////////////////////////////////////////////////////////
     event Log(string func, uint256 gas);
-    event LoyaltyProgramDeployed(address indexed owner, uint256 indexed version);
+    event LoyaltyProgramDeployed(address indexed owner, address indexed program, uint256 indexed version);
     event LoyaltyGiftListed(address indexed loyaltyGift, bool indexed exchangeable, bool indexed redeemable);
     event LoyaltyPointsExchangeForGift(address indexed owner, address indexed _gift, uint256 indexed giftId); 
     event LoyaltyGiftRedeemed(address indexed owner, address indexed gift, uint256 indexed giftId); 
@@ -171,7 +171,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
             })
         );
 
-        emit LoyaltyProgramDeployed(owner(), LOYALTY_PROGRAM_VERSION);
+        emit LoyaltyProgramDeployed(owner(), address(this), LOYALTY_PROGRAM_VERSION);
     }
 
     //////////////////////////////////////////////////////////////////
@@ -480,7 +480,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     function hashRequestPoints(RequestPoints memory message) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256(bytes("RequestPoints(address program,uint256 points)")),
+                keccak256(bytes("RequestPoints(address program,uint256 points,uint256 uniqueNumber)")),
                 message.program,
                 message.points, 
                 message.uniqueNumber
@@ -494,7 +494,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     function hashRedeemGift(RedeemGift memory message) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256(bytes("RedeemGift(address program,address owner,address gift,uint256 giftId)")),
+                keccak256(bytes("RedeemGift(address program,address owner,address gift,uint256 giftId,uint256 uniqueNumber)")),
                 message.program,
                 message.owner,
                 message.gift,
