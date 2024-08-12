@@ -51,9 +51,9 @@ export const parseHex = (hex: unknown): Hex => {
   if (/0x/.test(hex) == false) {
     throw new Error(`Incorrect hex, 0x prefix missing: ${hex}`);
   }
-  const hex2 = toHex(hex)
+  // const hex2 = toHex(hex)
 
-  return hex2 as Hex;
+  return hex as Hex;
 };
 
 export const parseEthAddress = (address: unknown): Hex => {

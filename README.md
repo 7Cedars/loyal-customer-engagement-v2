@@ -6,7 +6,8 @@ Currently stands at around 9 days to get PoC done. (about two weeks).
   - [x] Create loyalty program factory. 
   - [x] Create Bespoke Abstract Account factory.
   - [x] Revise tests (as limited as possible) - check differences in gas consumption. 
-- [ ] Customer App: Implement Privy login. 
+- [x] Customer App: Implement Privy login.
+  - [x] Implement reading QrCode points.  
 - [ ] Customer App: Implement basic app. 
   - [ ] Copy as much as possible from vendor app.
   - [ ] Implement scanner. 
@@ -22,8 +23,8 @@ Currently stands at around 9 days to get PoC done. (about two weeks).
     - [x] Redeeming gifts.  
 - [ ] Foundry: fix selected execution of account abstraction
   - [ ] This is the hardest part still to be done. But should be possible. 
-- [ ] Vendor app: Implement basic Cyprus tests
-- [ ] Customer app: Implement basic Cyprus tests
+- [ ] Vendor app: Implement basic Cypress tests
+- [ ] Customer app: Implement basic Cypress tests
 - [ ] Vendor & customer app: Implement settings (keep as limited as possible) 
   - [ ] Do vendor app. 
   - [ ] Immediately also do customer app.
