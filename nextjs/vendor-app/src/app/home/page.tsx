@@ -42,7 +42,7 @@ export default function Page() {
       <div className="grow flex flex-col justify-start items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
           <Button onClick={() => {setTransferMode(true)}}>
-            {prog.balance ? `Balance: ${prog.balance}` : "Fetching balance..."} 
+            {prog.balance == undefined ? `Fetching balance...`:`Balance: ${prog.balance} Eth` } 
           </Button>
         </div>
         <section 
