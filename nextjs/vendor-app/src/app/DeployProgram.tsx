@@ -1,36 +1,105 @@
 import EmblaCarousel from '../components/application/EmblaCarousel'
 import { EmblaOptionsType } from 'embla-carousel'
-import { ChangeEvent, useEffect, useState } from "react"
+import { ChangeEvent, useEffect, useRef, useState } from "react"
 import { NoteText, TitleText } from "../components/ui/StandardisedFonts"
 import { TabChoice } from "../components/ui/TabChoice"
 import { HexColorPicker } from "react-colorful"
 import { InputBox } from "../components/ui/InputBox"
 import Image from "next/image";
 import { Button } from "../components/ui/Button"
-import { Hex, toHex, toBytes } from "viem"
+import { Hex, toHex, toBytes, WriteContractErrorType, TransactionExecutionError, Log } from "viem"
 import { useAccount, useWriteContract, useWatchContractEvent } from "wagmi"
-import { factoryProgramsAbi, loyaltyGiftAbi } from "@/context/abi"
-import { parseEthAddress, parseDeployProgramLogs } from "../utils/parsers"
+import { factoryProgramsAbi, loyaltyGiftAbi, loyaltyProgramAbi } from "@/context/abi"
+import { parseEthAddress, parseDeployLogs, parseString } from "../utils/parsers"
 import { fromHexColourToBytes } from '../utils/transformData'
+import { Program, Status } from '@/types'
+import { readContracts } from '@wagmi/core'
+import { wagmiConfig } from '../../wagmi-config'
 
 export const DeployProgram = () => {
   const [ name, setName ] = useState<string | undefined>() 
   const [ base, setBase ] = useState<string>("#2f4632") 
-  const [ accent, setAccent ] = useState<string>("#a9b9e8") 
+  const [ status, setStatus ] = useState<Status>("isIdle") 
+  const [ accent, setAccent ] = useState<string>("#a9b9e8")
   const [ uri, setUri ] = useState<string>("www.somewhere.io") 
   const [ tab, setTab ] = useState<string>("Base") 
   const { writeContract } = useWriteContract()
 
   const OPTIONS: EmblaOptionsType = {}
+  const savedPrograms = useRef<Program[]>([]) ; 
+
+  useEffect(()=>{
+    let localStore = localStorage.getItem("clp_v_programs")
+    savedPrograms.current = localStore ? JSON.parse(localStore) : []
+  }, [])
+
+  const handlePostDeployment = async (logs: Log[]) => {
+    const deployEvents = parseDeployLogs(logs)
+    console.log("deployEvents: ", deployEvents)
+
+    const deployedProgram = {
+      address: deployEvents[0].args.programAddress,
+      abi: loyaltyProgramAbi,
+    } as const
+    
+    const programInfo = await readContracts(wagmiConfig, {
+      contracts: [
+        {
+          ...deployedProgram, 
+            functionName: 'name', 
+        },
+        {
+          ...deployedProgram, 
+            functionName: 'symbol', 
+        },
+        {
+          ...deployedProgram, 
+          functionName: 's_imageUri', 
+        }
+      ], 
+    })
+
+    console.log("programInfo: ", programInfo)
+
+      if (
+        programInfo[0].status == "success" && 
+        programInfo[1].status == "success" && 
+        programInfo[2].status == "success"
+      ) {
+        savedPrograms.current.push({
+          address: deployEvents[0].args.programAddress, 
+          name: parseString(programInfo[0].result), 
+          colourBase: parseString(programInfo[1].result).split(`;`)[0], 
+          colourAccent: parseString(programInfo[1].result).split(`;`)[1], 
+          uriImage: parseString(programInfo[2].result), 
+        })
+        localStorage.setItem("clp_v_programs", JSON.stringify(savedPrograms.current)); 
+        console.log("savedPrograms:", savedPrograms.current)
+        setStatus("isSuccess")
+      } else {
+        setStatus("isError")
+        console.log("error data: ", programInfo)
+      }
+  }
+
+  const handleDeploymentError = (error: any) => {
+    setStatus("isError")
+    console.log("Deploy contract error:", error)
+  }
 
   useWatchContractEvent({
     address: '0xD4eA33DF95698E5240C35c81e7a5FeA6164D842b',
     abi: factoryProgramsAbi,
+    batch: false, 
     eventName: 'ProgramDeployed',
     onLogs(logs) {
-      console.log('New logs!', logs) // parseDeployProgramLogs(logs)
+      handlePostDeployment(logs) 
     },
   })
+
+  useEffect(() => {
+
+  }, [])
 
   const nameProgram: React.JSX.Element = (
     <>
@@ -139,28 +208,39 @@ export const DeployProgram = () => {
           <EmblaCarousel slides={SLIDES} options={OPTIONS} />
         </div>
         <div className={`w-full h-fit grid grid-cols-1 max-w-lg gap-4 px-2`}>
-          <Button 
-            onClick = {() =>  writeContract({ 
-              abi: factoryProgramsAbi,
-              address: '0xD4eA33DF95698E5240C35c81e7a5FeA6164D842b',
-              functionName: 'deployLoyaltyProgram',
-              args: [
-                name,
-                `${base};${accent}`,
-                uri,
-              ],
-           }, 
-           {
-            onSuccess: (data => console.log("Deploy contract success:", data)), 
-            onError:  (error => console.log("Deploy contract error:", error)), 
-           }
-          )
-        } 
-
-            disabled = { name == undefined } 
-            >
-            Deploy
+          { 
+          status == "isLoading" ? 
+            <Button disabled = {true}> 
+              Loading...  
+            </Button>
+          :
+          status == "isError" ? 
+            <Button disabled = {true}> 
+              Error.  
+            </Button>
+          :
+            <Button 
+              onClick = {() =>  writeContract({ 
+                  abi: factoryProgramsAbi,
+                  address: '0xD4eA33DF95698E5240C35c81e7a5FeA6164D842b',
+                  functionName: 'deployLoyaltyProgram',
+                  args: [
+                    name,
+                    `${base};${accent}`,
+                    uri,
+                  ],
+                }, 
+                {
+                  onSuccess: () => setStatus('isLoading'), 
+                  onError:  (error => handleDeploymentError(error)), 
+                }
+                )
+              }
+                disabled = { name == undefined } 
+              >
+              Deploy
           </Button>
+        } 
         </div>
       </>
   )

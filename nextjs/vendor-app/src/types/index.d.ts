@@ -1,10 +1,13 @@
+import { Hex } from "viem";
+
 export type Program = {
-  address?: Hex; 
-  name?: string;
+  address: Hex; 
+  name: string;
   balance?: int;  
   colourBase: string; 
   colourAccent: string; 
-  uriImage?: string; 
+  uriImage?: string;
+  owner?: Hex; 
 }
 
 export type Gift = {
@@ -43,6 +46,7 @@ export type Event = {
   address: EthAddress;
   blockNumber: BigInt;
   logIndex: number; 
+  args?: any; // this has to be fixed later. 
   event?:
     GiftListed | 
     PointsExchanged | 

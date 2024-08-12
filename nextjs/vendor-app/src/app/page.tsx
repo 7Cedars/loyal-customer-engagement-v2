@@ -71,7 +71,7 @@ export default function Home() {
               />
             </div>
             <div className={`w-full grid grid-cols-1 text-sm text-center pt-8`}> 
-              A lightweight, composable, app for customer engagement programs.   
+              A lightweight modular dApp for customer engagement programs.   
             </div> 
           </div> 
           

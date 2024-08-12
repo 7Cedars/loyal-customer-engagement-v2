@@ -229,7 +229,7 @@ export const parseMetadata = (metadata: unknown): Metadata => {
        throw new Error('Incorrect data at program Metadata: some fields are missing or incorrect');
 };
 
-const parseArgsDeployProgram = (args: unknown): {programAddress: Hex} => {
+const parseArgsDeploy = (args: unknown): {programAddress: Hex} => {
   if ( !args || typeof args !== 'object' ) {
     throw new Error('Incorrect or missing data at args');
   }
@@ -278,7 +278,7 @@ export const parseEventLogs = (logs: Log[]): Event[] => {
   }
 };
 
-export const parseDeployProgramLogs = (logs: Log[]): Event[] => {
+export const parseDeployLogs = (logs: Log[]): Event[] => {
   if (!isArray(logs)) {
     throw new Error(`Incorrect deploy program logs, not an array: ${logs}`);
   }
@@ -299,7 +299,7 @@ export const parseDeployProgramLogs = (logs: Log[]): Event[] => {
           address: parseEthAddress(log.address),
           blockNumber: parseBigInt(log.blockNumber),
           logIndex: parseNumber(log.logIndex),
-          args: parseArgsDeployProgram(log.args) 
+          args: parseArgsDeploy(log.args) 
         }) 
       } 
         throw new Error('Incorrect data at deploy program logs: some fields are missing or incorrect');
