@@ -1,11 +1,83 @@
 // NB! BEFORE going to production, ABIs need to be hard coded. This setup is for dev only.  
 
 import { Abi } from "viem"
+import factoryPrograms from "../../../../foundry/out/FactoryPrograms.sol/FactoryPrograms.json"
 import loyaltyProgram from "../../../../foundry/out/LoyaltyProgram.sol/LoyaltyProgram.json"
 import loyaltyGift from "../../../../foundry/out/LoyaltyGift.sol/LoyaltyGift.json"
 
+export const factoryProgramsAbi: Abi = JSON.parse(JSON.stringify(factoryPrograms.abi)) 
 export const loyaltyProgramAbi: Abi = JSON.parse(JSON.stringify(loyaltyProgram.abi)) // why?! why, why, why? It is NOT possible to directly import it. 
 export const loyaltyGiftAbi: Abi  = JSON.parse(JSON.stringify(loyaltyGift.abi)) 
+
+// export const factoryProgramsAbi: Abi = [
+//   {
+//     "type": "constructor",
+//     "inputs": [
+//       {
+//         "name": "_anEntryPoint",
+//         "type": "address",
+//         "internalType": "address"
+//       },
+//       {
+//         "name": "_factoryCards",
+//         "type": "address",
+//         "internalType": "address"
+//       }
+//     ],
+//     "stateMutability": "nonpayable"
+//   },
+//   {
+//     "type": "function",
+//     "name": "deployLoyaltyProgram",
+//     "inputs": [
+//       { "name": "_name", "type": "string", "internalType": "string" },
+//       { "name": "_colourScheme", "type": "string", "internalType": "string" },
+//       { "name": "_cardImageUri", "type": "string", "internalType": "string" }
+//     ],
+//     "outputs": [
+//       {
+//         "name": "loyaltyProgram",
+//         "type": "address",
+//         "internalType": "contract LoyaltyProgram"
+//       }
+//     ],
+//     "stateMutability": "nonpayable"
+//   },
+//   {
+//     "type": "function",
+//     "name": "s_entryPoint",
+//     "inputs": [],
+//     "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+//     "stateMutability": "view"
+//   },
+//   {
+//     "type": "function",
+//     "name": "s_factoryCards",
+//     "inputs": [],
+//     "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+//     "stateMutability": "view"
+//   },
+//   {
+//     "type": "event",
+//     "name": "FactoryProgramsDeployed",
+//     "inputs": [
+//       {
+//         "name": "entryPoint",
+//         "type": "address",
+//         "indexed": true,
+//         "internalType": "address"
+//       },
+//       {
+//         "name": "factoryCards",
+//         "type": "address",
+//         "indexed": true,
+//         "internalType": "address"
+//       }
+//     ],
+//     "anonymous": false
+//   }
+// ] as const
+
 
 // export const loyaltyProgramAbi = [
 //   {

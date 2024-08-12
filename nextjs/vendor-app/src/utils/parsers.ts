@@ -229,6 +229,21 @@ export const parseMetadata = (metadata: unknown): Metadata => {
        throw new Error('Incorrect data at program Metadata: some fields are missing or incorrect');
 };
 
+const parseArgsDeployProgram = (args: unknown): {programAddress: Hex} => {
+  if ( !args || typeof args !== 'object' ) {
+    throw new Error('Incorrect or missing data at args');
+  }
+
+  if (
+    'program' in args
+    ) { 
+    return ({
+      programAddress: parseEthAddress(args.program)
+    })
+  }
+  throw new Error(`Incorrect args format: ${args}`);
+}
+
 export const parseEventLogs = (logs: Log[]): Event[] => {
   if (!isArray(logs)) {
     throw new Error(`Incorrect transaction logs, not an array: ${logs}`);
@@ -260,5 +275,39 @@ export const parseEventLogs = (logs: Log[]): Event[] => {
 
   } catch {
     throw new Error('Incorrect data at transaction logs. Parser caught error');
+  }
+};
+
+export const parseDeployProgramLogs = (logs: Log[]): Event[] => {
+  if (!isArray(logs)) {
+    throw new Error(`Incorrect deploy program logs, not an array: ${logs}`);
+  }
+
+  try { 
+    const parsedLogs = logs.map((log: unknown) => {
+      if ( !log || typeof log !== 'object' ) {
+        throw new Error('Incorrect or missing data at event log');
+      }
+
+      if ( 
+        'address' in log && 
+        'logIndex' in log && 
+        'blockNumber' in log &&
+        'args' in log
+        ) {
+        return ({
+          address: parseEthAddress(log.address),
+          blockNumber: parseBigInt(log.blockNumber),
+          logIndex: parseNumber(log.logIndex),
+          args: parseArgsDeployProgram(log.args) 
+        }) 
+      } 
+        throw new Error('Incorrect data at deploy program logs: some fields are missing or incorrect');
+    })
+
+    return parsedLogs as Array<Event> 
+
+  } catch {
+    throw new Error('Incorrect data at deploy program logs. Parser caught error');
   }
 };

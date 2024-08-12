@@ -14,14 +14,14 @@ import { resetProgram, setProgram } from "@/redux/reducers/programReducer";
 
 export default function Home() {
   // FOR DEV ONLY // 
-  const programsForLocalStorage: Program[] = [{ 
-    address: "0x82b6311bDC316636Af8546891A380333a3CE0B8E", 
-    name: "Highstreet Hopes",
-    colourBase: "#3d5769",
-    colourAccent: "#c8cf0c", 
-    uriImage: "" 
-  }]
-  localStorage.setItem("clp_v_programs", JSON.stringify(programsForLocalStorage)); 
+  // const programsForLocalStorage: Program[] = [{ 
+  //   address: "0x82b6311bDC316636Af8546891A380333a3CE0B8E", 
+  //   name: "Highstreet Hopes",
+  //   colourBase: "#3d5769",
+  //   colourAccent: "#c8cf0c", 
+  //   uriImage: "" 
+  // }]
+  // localStorage.setItem("clp_v_programs", JSON.stringify(programsForLocalStorage)); 
   // FOR DEV ONLY // 
 
   const { open } = useWeb3Modal()

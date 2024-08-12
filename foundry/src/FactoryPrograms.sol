@@ -21,6 +21,7 @@ address immutable public s_factoryCards;
 
 /* Events */
 event FactoryProgramsDeployed(address indexed entryPoint, address  indexed factoryCards);
+event ProgramDeployed(address indexed program);
 
 /* Modifiers */
 
@@ -39,7 +40,8 @@ function deployLoyaltyProgram(
 ) public returns (LoyaltyProgram loyaltyProgram) {
     loyaltyProgram = new LoyaltyProgram(
       _name, _colourScheme, _cardImageUri, s_entryPoint, s_factoryCards
-    ); 
+    );
+    emit ProgramDeployed(address(loyaltyProgram));
   } 
 }
 

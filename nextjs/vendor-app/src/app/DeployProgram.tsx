@@ -1,6 +1,6 @@
 import EmblaCarousel from '../components/application/EmblaCarousel'
 import { EmblaOptionsType } from 'embla-carousel'
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import { NoteText, TitleText } from "../components/ui/StandardisedFonts"
 import { TabChoice } from "../components/ui/TabChoice"
 import { HexColorPicker } from "react-colorful"
@@ -8,10 +8,9 @@ import { InputBox } from "../components/ui/InputBox"
 import Image from "next/image";
 import { Button } from "../components/ui/Button"
 import { Hex, toHex, toBytes } from "viem"
-import { useAccount, useWalletClient, useDeployContract } from "wagmi"
-import { loyaltyProgramAbi } from "@/context/abi"
-import { loyaltyProgramBytecode } from "@/context/bytecode"
-import { parseEthAddress, parseHex } from "../utils/parsers"
+import { useAccount, useWriteContract, useWatchContractEvent } from "wagmi"
+import { factoryProgramsAbi, loyaltyGiftAbi } from "@/context/abi"
+import { parseEthAddress, parseDeployProgramLogs } from "../utils/parsers"
 import { fromHexColourToBytes } from '../utils/transformData'
 
 export const DeployProgram = () => {
@@ -20,27 +19,19 @@ export const DeployProgram = () => {
   const [ accent, setAccent ] = useState<string>("#a9b9e8") 
   const [ uri, setUri ] = useState<string>("www.somewhere.io") 
   const [ tab, setTab ] = useState<string>("Base") 
-  const { data: walletClient } = useWalletClient();
-  const { deployContract } = useDeployContract()
-  const { chain, address } = useAccount() 
-  const [transactionHash, setTransactionHash] = useState<Hex>(); 
+  const { writeContract } = useWriteContract()
 
   const OPTIONS: EmblaOptionsType = {}
 
-  const handleDeploy = async () => {
-    if (walletClient)
-    walletClient.deployContract({
-      abi: loyaltyProgramAbi,
-      args: [
-        name,
-        `${base};${accent}`, // = colour scheme
-        uri, 
-        '0x83A21828248Ef1DEcbfd6070148FeB7FA9a78cc1' // I had the incorrect address. Using create2 to deploy now on Anvil - should always be same address...  
-      ],
-      bytecode: loyaltyProgramBytecode,
-      })
-  }  
-  
+  useWatchContractEvent({
+    address: '0xD4eA33DF95698E5240C35c81e7a5FeA6164D842b',
+    abi: factoryProgramsAbi,
+    eventName: 'ProgramDeployed',
+    onLogs(logs) {
+      console.log('New logs!', logs) // parseDeployProgramLogs(logs)
+    },
+  })
+
   const nameProgram: React.JSX.Element = (
     <>
       <div>
@@ -75,7 +66,7 @@ export const DeployProgram = () => {
         /> 
       
       <NoteText 
-        message = "The colour scheme can be changed after deployment."
+        message = "The colour scheme can NOT be changed after deployment."
         size = {0}
         /> 
 
@@ -141,9 +132,6 @@ export const DeployProgram = () => {
   // "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"
 
   const SLIDES = [nameProgram, colourProgram, uriProgram]
-
-  const hexBase = fromHexColourToBytes(base)
-  const hexAccent = fromHexColourToBytes(accent)
   
   return (
     <>
@@ -152,20 +140,23 @@ export const DeployProgram = () => {
         </div>
         <div className={`w-full h-fit grid grid-cols-1 max-w-lg gap-4 px-2`}>
           <Button 
-            onClick = {() => handleDeploy() } 
-              
-              // deployContract({ // this is a new hook that does not seem to work properly yet. £todo: File bug report? 
-              // abi: loyaltyProgramAbi,
-              // args: [
-              //   name,
-              //   uri,
-              //   fromHexColourToBytes(base),  // NB! needs to be bytes! 
-              //   fromHexColourToBytes(accent), // NB! needs to be bytes! 
-              //   parseEthAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
-              // ],
-              // bytecode: loyaltyProgramBytecode,
-              // })
-            // }
+            onClick = {() =>  writeContract({ 
+              abi: factoryProgramsAbi,
+              address: '0xD4eA33DF95698E5240C35c81e7a5FeA6164D842b',
+              functionName: 'deployLoyaltyProgram',
+              args: [
+                name,
+                `${base};${accent}`,
+                uri,
+              ],
+           }, 
+           {
+            onSuccess: (data => console.log("Deploy contract success:", data)), 
+            onError:  (error => console.log("Deploy contract error:", error)), 
+           }
+          )
+        } 
+
             disabled = { name == undefined } 
             >
             Deploy

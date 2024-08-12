@@ -2,10 +2,10 @@
 Each of these items should take 2-3 hours.
 Currently stands at around 9 days to get PoC done. (about two weeks).  
 
-- [ ] Foundry: Refactor protocol.
-  - [ ] Create loyalty program factory. 
-  - [ ] Create Bespoke Abstract Account factory.
-  - [ ] Revise tests (as limited as possible) - check differences in gas consumption. 
+- [x] Foundry: Refactor protocol.
+  - [x] Create loyalty program factory. 
+  - [x] Create Bespoke Abstract Account factory.
+  - [x] Revise tests (as limited as possible) - check differences in gas consumption. 
 - [ ] Customer App: Implement Privy login. 
 - [ ] Customer App: Implement basic app. 
   - [ ] Copy as much as possible from vendor app.
