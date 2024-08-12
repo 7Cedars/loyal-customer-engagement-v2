@@ -23,6 +23,7 @@ createWeb3Modal({
   allWallets: 'ONLY_MOBILE'
 })
 
+// £todo: clean up providers. See the customer side for an approach to do so.  
 export default function Web3ModalProvider({
   children,
   initialState

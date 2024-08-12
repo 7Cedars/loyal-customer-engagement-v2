@@ -12,6 +12,8 @@ export const GivePoints = () => {
   const { data: signature, isPending, isError, isSuccess, signTypedData, reset } = useSignTypedData()
   const uniqueNumber  = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
 
+  console.log("signature: ", signature)
+
   // named list of all type definitions
   const types = {
     RequestPoints: [
@@ -60,7 +62,7 @@ export const GivePoints = () => {
     <section className="grow flex flex-col items-center justify-center">
         <div className="p-1">
           <QRCode 
-            value={`${process.env.NEXT_PUBLIC_C_URI};${prog.address};${amountPoints};${uniqueNumber.current};${signature}`}
+            value={`${process.env.NEXT_PUBLIC_C_URI}?prg=${prog.address}&pts=${amountPoints}&un=${uniqueNumber.current}&sig=${signature}`}
             style={{ 
               height: "350px", 
               width: "350px", 

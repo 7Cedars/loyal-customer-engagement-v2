@@ -29,6 +29,13 @@ export type QrData = undefined | {
   signature?: Hex; 
 }
 
+export type QrPoints = {
+  program: Hex; 
+  points: number; 
+  uniqueNumber: number; 
+  signature: Hex; 
+}
+
 // NB 0 = claim req
 // 1 = redeem req 
 export type Attribute = {  

@@ -7,8 +7,8 @@ import { ReduxProvider } from "../context/reduxProvider"
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Customer Loyalty Program',
-  description: 'Customer Loyalty Program build in Next and ethers, with backend in solidity.',
+  title: 'Customer Loyalty Program - vendor',
+  description: 'Customer Loyalty Program build with NextJS and wagmi, with backend in solidity.',
 }
 
 export default function RootLayout({
