@@ -26,7 +26,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
       <Link 
         href='/about' 
         aria-selected={path == `/about`}
-        className={"p-3 px-6"}
+        className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
         style={{color:accent}}
         >
         About
@@ -35,34 +35,34 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
       <Link 
         href='/home' 
         aria-selected={path == `/home`}
-        className={"p-3 px-6"} 
+        className={"p-3 px-6 opacity-50 aria-selected:opacity-100"} 
         style={{color:accent}}
         >
         Home 
       </Link>
 
       <Link 
-        href='/gifts' 
-        aria-selected={path == `/gifts`}
-        className={"p-3 px-6"}
+        href='/exchangePoints' 
+        aria-selected={path == `/exchangePoints`}
+        className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
         style={{color:accent}}
         >
-        Gifts
+        Exchange Points
       </Link>
 
       <Link 
-        href='/transactions' 
-        aria-selected={path == `/transactions`}
-        className={"p-3 px-6"}
+        href='/redeemGifts' 
+        aria-selected={path == `/redeemGifts`}
+        className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
         style={{color:accent}}
         >
-        Transaction 
+        Redeem Gifts
       </Link>
       
       <Link 
         href='/settings' 
         aria-selected={path == `/settings`}
-        className={"p-3 px-6"}
+        className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
         style={{color:accent}}
         >
         Settings 
@@ -71,7 +71,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
       <Link 
         href='/' 
         aria-selected={path == `/`}
-        className={"p-3 px-6"}
+        className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
         style={{color:accent}}
         >
         Exit 
@@ -92,7 +92,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
         <Link 
           href={"/home"}
           aria-selected={path == "/home"}
-          className={"p-3 px-6"}
+          className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
           > 
             <div className='col-span-1 grid text-xs justify-items-center'> 
                 <HomeIcon
@@ -104,34 +104,34 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
          </Link>
           <Link 
           href={"/gifts"} 
-          aria-selected={path == "/gifts" } 
-          className={"p-3 px-6"}
-          >
-            <div className={layoutIconBox}> 
-              <GiftIcon
-              className={layoutIcons}
-              style={{color:accent}}
-              />
-            Gifts           
-            </div>  
-         </Link>
-         <Link 
-          href={"/transactions"} 
-          aria-selected={path == "/transactions" } 
-          className={"p-3 px-6"}
+          aria-selected={path == "/exchangePoints" } 
+          className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
           >
             <div className={layoutIconBox}> 
               <ShoppingCartIcon
               className={layoutIcons}
               style={{color:accent}}
               />
-            Transactions           
+            Exchange           
+            </div>  
+         </Link>
+         <Link 
+          href={"/transactions"} 
+          aria-selected={path == "/redeemGifts" } 
+          className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
+          >
+            <div className={layoutIconBox}> 
+              <GiftIcon
+              className={layoutIcons}
+              style={{color:accent}}
+              />
+            Redeem           
             </div>  
          </Link>
          <Link 
           href={"/settings"} 
           aria-selected={path == "/settings" } 
-          className={"p-3 px-6"}
+          className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
           >
             <div className={layoutIconBox}> 
               <Cog6ToothIcon

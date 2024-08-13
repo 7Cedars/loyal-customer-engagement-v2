@@ -10,7 +10,7 @@ import {MessageHashUtils} from "lib/openzeppelin-contracts/contracts/utils/crypt
 import {Initializable} from "lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "lib/openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-import {console2} from "forge-std/Script.sol";
+import {console2} from "lib/forge-std/src/Script.sol";
 
 // eth-infinitism imports // 
 import "lib/account-abstraction/contracts/core/Helpers.sol";
@@ -74,10 +74,10 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
 
         // within onTransferReceived: decode the calldata:
         // £Question: Why am I getting all 0 data back?!  
-        (sig, target, sender) = abi.decode(
-            func,
-            (bytes4, address, address)
-        );
+        // (sig, target, sender, data) = abi.decode(
+        //     func,
+        //     (bytes4, address, address, bytes)
+        // );
 
         // bytes memory sender = calldata func; //[0 : 4]
         // if (sender != bytes(0x0)) {
@@ -192,7 +192,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
     function _payPrefund(uint256 missingAccountFunds) internal override {
         if (missingAccountFunds != 0) {
             // notice: msg.sender == the entrypoint. It is the entryPoint that is calling this function. 
-            ILoyaltyProgram(s_loyaltyProgram).payCardPrefund(missingAccountFunds, msg.sender); 
+            ILoyaltyProgram(s_loyaltyProgram).payCardPrefund(missingAccountFunds, msg.sender, address(this)); 
             // (success);
             //ignore failure (its EntryPoint's job to verify, not account.)
         }

@@ -4,9 +4,9 @@
 
 pragma solidity 0.8.26;
 
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import {IERC721Receiver} from  "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import {IERC165} from "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
+import {IERC721Receiver} from  "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
 
 /// @dev the ERC-165 identifier for this interface is ... 
 interface ILoyaltyProgram is IERC165, IERC721Receiver, IERC721 {
@@ -27,5 +27,5 @@ interface ILoyaltyProgram is IERC165, IERC721Receiver, IERC721 {
 
     function unblockCard(address _card) external;
 
-    function payCardPrefund (uint256 missingAccountFunds, address originalSender) external;
+    function payCardPrefund (uint256 missingAccountFunds, address originalSender, address loyaltyCard) external;
 }

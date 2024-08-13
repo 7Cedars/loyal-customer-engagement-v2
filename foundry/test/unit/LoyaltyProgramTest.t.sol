@@ -5,8 +5,8 @@ pragma solidity 0.8.26;
 import {Test, console2} from "lib/forge-std/src/Test.sol";
 
 // openZeppelin imports 
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ECDSA} from "lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ERC1967Proxy} from "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Create2} from "lib/openzeppelin-contracts/contracts/utils/Create2.sol";
 
@@ -216,7 +216,6 @@ contract LoyaltyProgramTest is Test {
         );
       uint256 points = 50000; 
        
-        
       // loyalty program owner creates voucher for 5000 points. 
       RequestPoints memory message = RequestPoints({
           program: address(loyaltyProgram),
@@ -239,7 +238,7 @@ contract LoyaltyProgramTest is Test {
       }); 
 
       // give customer a card with points
-      vm.prank(customer); 
+      vm.prank(customer); // NB!  
       loyaltyProgram.requestPointsAndCard(
         requestPointsVoucher.program, 
         requestPointsVoucher.points, 
@@ -256,6 +255,8 @@ contract LoyaltyProgramTest is Test {
       
       // customer exchanges points for gift. 
       vm.prank(customer); 
+
+      // this crashes. 
       LoyaltyCard(payable(loyaltyCard)).execute(
         address(loyaltyProgram), 0, abi.encodeCall(
           LoyaltyProgram.exchangePointsForGift, (address(fridayFifteen), customer)
@@ -277,6 +278,9 @@ contract LoyaltyProgramTest is Test {
       DeployFactoryPrograms deployer = new DeployFactoryPrograms();
       (factoryPrograms, helperConfig) = deployer.run();
       config = helperConfig.getConfig();
+      factoryCards = FactoryCards(config.factoryCards);  
+
+      console2.log(address(factoryCards)); 
 
       loyaltyProgram = factoryPrograms.deployLoyaltyProgram(
         name, 

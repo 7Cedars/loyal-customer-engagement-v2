@@ -5,15 +5,18 @@ pragma solidity 0.8.26;
 import {Test, console2} from "lib/forge-std/src/Test.sol";
 
 // openZeppelin imports 
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ECDSA} from "lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ERC1967Proxy} from "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Create2} from "lib/openzeppelin-contracts/contracts/utils/Create2.sol";
 
 // eth-infinitism imports // 
 import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import {EntryPoint} from "lib/account-abstraction/contracts/core/EntryPoint.sol";
+import {PackedUserOperation} from "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 
 // local imports // 
+import {SendPackedUserOp} from "../../script/SendPackedUserOp.s.sol";
 import {LoyaltyProgram} from "../../src/LoyaltyProgram.sol";
 import {FactoryPrograms} from "../../src/FactoryPrograms.sol";
 import {LoyaltyCard} from  "../../src/LoyaltyCard.sol";
@@ -51,6 +54,8 @@ contract LoyaltyCardTest is Test {
   FridayFifteen fridayFifteen; 
   HelperConfig.NetworkConfig config; 
   FactoryCards factoryCards; 
+  EntryPoint entryPoint; 
+  SendPackedUserOp sendPackedUserOp;
   address ownerProgram; 
   bytes32 internal DOMAIN_SEPARATOR; 
 
@@ -103,7 +108,9 @@ contract LoyaltyCardTest is Test {
   address customerAddress = vm.addr(customerKey);
   uint256 customerKey2 = vm.envUint("DEFAULT_ANVIL_KEY_2");
   address customerAddress2 = vm.addr(customerKey2);
+  address randomUser = vm.addr(123);
   uint256 uniqueNumber = 3; 
+  uint256 points = 5000; 
 
   LoyaltyCard public cardImplementation;
   uint256 private constant LOYALTY_PROGRAM_VERSION = 2; 
@@ -167,8 +174,6 @@ contract LoyaltyCardTest is Test {
               verifyingContract: address(loyaltyProgram)
           })
       );
-    uint256 points = 5000; 
-      
       
     // loyalty program owner creates voucher for 5000 points. 
     RequestPoints memory message = RequestPoints({
@@ -277,12 +282,16 @@ contract LoyaltyCardTest is Test {
     DeployFactoryPrograms deployer = new DeployFactoryPrograms();
     (factoryPrograms, helperConfig) = deployer.run();
     config = helperConfig.getConfig();
+    entryPoint = EntryPoint(payable(config.entryPoint)); 
+    factoryCards = FactoryCards(config.factoryCards); 
+    sendPackedUserOp = new SendPackedUserOp();
 
     loyaltyProgram = factoryPrograms.deployLoyaltyProgram(
       name, 
       colourScheme, 
       cardImageUri
     );
+    vm.deal(address(loyaltyProgram), 1 ether); 
     
     DeployFridayFifteen deployerFridayFifteen = new DeployFridayFifteen(); 
     fridayFifteen = deployerFridayFifteen.run();
@@ -291,6 +300,39 @@ contract LoyaltyCardTest is Test {
     vm.prank(ownerProgram); 
     loyaltyProgram.transferOwnership(vendorAddress);
   }
+
+  ///////////////////////////////////////////////
+  ///                   Tests                 ///
+  ///////////////////////////////////////////////
+
+  function testEntryPointCanExecuteRequestPoints() public giveCustomerCardPointsAndGift(customerAddress) {
+    address customerCardAddress = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
+    LoyaltyCard customerCard = LoyaltyCard(payable(customerCardAddress)); 
+    uint256 gift = 0; 
+
+    // arrange
+    address dest = address(loyaltyProgram);
+    uint256 value = 0;
+    bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, gift, customerAddress);
+    bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
+    PackedUserOperation memory packedUserOp = sendPackedUserOp.generateSignedUserOperation(
+      executeCallData, helperConfig.getConfig(), address(customerCard)
+      );
+    // bytes32 userOperationHash = IEntryPoint(myHelperConfig.getConfig().entryPoint).getUserOpHash(packedUserOp);
+    uint256 missingAccountFunds = 1e18; 
+
+    vm.deal(address(customerCard), 1e18);
+    PackedUserOperation[] memory ops = new PackedUserOperation[](1); 
+    ops[0] = packedUserOp; 
+
+    //act 
+    vm.prank(randomUser); 
+    IEntryPoint(helperConfig.getConfig().entryPoint).handleOps(ops, payable(randomUser)); 
+
+    //assert -- build later
+    // assertEq(usdc.balanceOf(address(customerCard)), AMOUNT);
+  }
+
 
   function testRetrieveAddressFromCalldata() public giveCustomerCardAndPoints(customerAddress) {
     // DeployLoyaltyProgram deployer = new DeployLoyaltyProgram();

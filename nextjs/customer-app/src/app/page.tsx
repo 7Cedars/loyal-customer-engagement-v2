@@ -129,10 +129,7 @@ export default function Home() {
                   The qrCode is invalid. Please try again with another Qrcode.
                 </Button>
               : 
-              null
-              }
-              </div>
-              { user ? 
+                user ? 
                 <Button onClick={logout}> 
                   {` Connected to: ${
                     user.email ? user.email.address
@@ -142,15 +139,15 @@ export default function Home() {
                     user.wallet?.address 
                   }`
                 }
-                  {/* {user.linkedAccounts} */}
                 </Button> 
-              :
+              : 
                 <Button onClick={login}> 
                   Connect
-                </Button>
+                </Button> 
               }
           </div> 
         </div>
+      </div>
     </div>
   </main> 
   )

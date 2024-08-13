@@ -95,8 +95,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     RedeemGift private _redeemGift;  
     
     bytes32 private immutable DOMAIN_SEPARATOR;
-    IEntryPoint private immutable _entryPoint; 
-    FactoryCards private immutable _cardFactory; 
+    IEntryPoint public immutable s_entryPoint; 
+    FactoryCards public immutable s_cardFactory; 
 
     uint256 private constant MAX_INCREASE_NONCE = 100;
     uint256 private constant LOYALTY_PROGRAM_VERSION = 2;
@@ -120,7 +120,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     //                        Modifiers                             // 
     //////////////////////////////////////////////////////////////////
     modifier onlyCardHolder(address caller) {
-        address addr = _cardFactory.getAddress(caller, payable(address(this)), SALT);
+        address addr = s_cardFactory.getAddress(caller, payable(address(this)), SALT);
         uint256 codeSize = addr.code.length;
         if (codeSize == 0) {
         revert LoyaltyProgram__OnlyCardHolder();
@@ -159,8 +159,8 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         _mint(address(this), type(uint256).max);
 
         s_imageUri = _cardImageUri;
-        _entryPoint = IEntryPoint(_anEntryPoint); 
-        _cardFactory = FactoryCards(_aCardsFactory); 
+        s_entryPoint = IEntryPoint(_anEntryPoint); 
+        s_cardFactory = FactoryCards(_aCardsFactory); 
 
         DOMAIN_SEPARATOR = hashDomain(
             EIP712Domain({
@@ -182,11 +182,11 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     // this should transfer directly to deposit! / NO! It should go to the balance of this account! 
     // only the deposits of the _loyalty cards_ need to be filled up! 
     fallback() external payable {
-        emit Log("fallback", gasleft());
+        emit Log("fallback loyalty program", gasleft());
     }
 
     receive() external payable {
-        emit Log("receive", gasleft());
+        emit Log("receive loyalty program", gasleft());
     }
 
     //////////////////////////////////////////////////////////////////
@@ -224,7 +224,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         }
 
         // if msg.sender is not a registered loyalty card, create a new card and set owner of card to msg.sender. 
-        LoyaltyCard card = _cardFactory.getLoyaltyCard(_ownerCard, payable(address(this)), SALT);
+        LoyaltyCard card = s_cardFactory.getLoyaltyCard(_ownerCard, payable(address(this)), SALT);
 
         // 1) set executed to true & execute transfer
         s_executed[programSignature] = true;
@@ -246,7 +246,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
             revert LoyaltyProgram__GiftNotExchangeable(); 
         }
 
-        address cardAddress = _cardFactory.getAddress(_owner, payable(address(this)), SALT);
+        address cardAddress = s_cardFactory.getAddress(_owner, payable(address(this)), SALT);
 
         // if requerements not met, this function reverts with the reason why. 
         // also checks for balance on card. 
@@ -309,7 +309,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         }
 
         // check if request comes from registered loyalty card
-        address cardAddress = _cardFactory.getAddress(_ownerCard, payable(address(this)), SALT);
+        address cardAddress = s_cardFactory.getAddress(_ownerCard, payable(address(this)), SALT);
         uint256 codeSize = cardAddress.code.length;
         if (codeSize == 0) {
             revert LoyaltyProgram__NotRegisteredCard();
@@ -373,7 +373,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
         £todo: natspec
      */
     function setCardBlocked(address _owner, bool blocked) external onlyOwner {
-        address cardAddress = _cardFactory.getAddress(_owner, payable(address(this)), SALT); 
+        address cardAddress = s_cardFactory.getAddress(_owner, payable(address(this)), SALT); 
         _blockedCards[cardAddress] = blocked; 
 
         emit LoyaltyCardBlocked(_owner, blocked); 
@@ -405,13 +405,13 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
      // only 'pre-approved' transactions are allowed. 
      // £todo rename ownerCard prop 
      */
-    function payCardPrefund (uint256 missingAccountFunds, address originalSender, address ownerCard) external onlyCardHolder(ownerCard) noBlockedCard returns (bool success) {
+    function payCardPrefund (uint256 missingAccountFunds, address originalSender, address loyaltyCard) external noBlockedCard returns (bool success) {
         // check if the call origninated from the entrypoint. 
-        if (originalSender != address(_entryPoint)) { 
+        if (originalSender != address(s_entryPoint)) { 
             revert LoyaltyProgram__OnlyEntryPoint(); 
         }
         // £todo improve error handling.
-        _addDepositCard(msg.sender, missingAccountFunds); 
+        _addDepositCard(loyaltyCard, missingAccountFunds); 
         return true; 
     }
 
@@ -435,7 +435,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
      * deposit more funds for this account in the entryPoint
      */
     function _addDepositCard(address _card, uint256 _value) internal {
-        entryPoint().depositTo{value: _value}(_card);
+        s_entryPoint.depositTo{value: _value}(_card);
     }
 
     function _update(address from, address to, uint256 value) internal override (ERC20) {
@@ -455,7 +455,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
      * £todo add natspec
      */
     function entryPoint() public view returns (IEntryPoint) {
-        return _entryPoint;
+        return s_entryPoint;
     }
 
 

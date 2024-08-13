@@ -13,6 +13,7 @@ contract HelperConfig is Script {
   struct NetworkConfig {
     address entryPoint;
     address factoryCards; 
+    address account;
     // I can add more configs as needed later on.  
   }
   
@@ -24,9 +25,9 @@ contract HelperConfig is Script {
   uint256 constant OPS_SEPOLIA_CHAIN_ID = 11155420; 
   uint256 constant ARB_SEPOLIA_CHAIN_ID = 421614; 
   uint256 constant BASE_SEPOLIA_CHAIN_ID = 84532; 
-  bytes32 SALT = bytes32(hex'7ceda5'); 
-
+  address  BURNER_WALLET = vm.envAddress("BURNER_WALLET");
   address constant ANVIL_DEFAULT_ACCOUNT = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266; 
+  bytes32 SALT = bytes32(hex'7ceda5'); 
 
   NetworkConfig public localNetworkConfig; 
   mapping(uint256 chainId => NetworkConfig) public networkConfig;
@@ -49,31 +50,35 @@ contract HelperConfig is Script {
     }
   }
 
-  function getEthSepoliaConfig() public pure returns(NetworkConfig memory){ 
+  function getEthSepoliaConfig() public view returns(NetworkConfig memory){ 
     return NetworkConfig({
       entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
-      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 // to be filled out after first deployment. 
+      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment. 
+      account: BURNER_WALLET
     });
   }
 
-  function getOpsSepoliaConfig() public pure returns(NetworkConfig memory){ 
+  function getOpsSepoliaConfig() public view returns(NetworkConfig memory){ 
     return NetworkConfig({
       entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
-      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 // to be filled out after first deployment. 
+      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment. 
+      account: BURNER_WALLET
     });
   }
 
-  function getArbSepoliaConfig() public pure returns(NetworkConfig memory){ 
+  function getArbSepoliaConfig() public view returns(NetworkConfig memory){ 
     return NetworkConfig({
       entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
-      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 // to be filled out after first deployment. 
+      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment. 
+      account: BURNER_WALLET
     });
   }
 
-  function getBaseSepoliaConfig() public pure returns(NetworkConfig memory){ 
+  function getBaseSepoliaConfig() public view returns(NetworkConfig memory){ 
     return NetworkConfig({
       entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
-      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 // to be filled out after first deployment. 
+      factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment. 
+      account: BURNER_WALLET
     });
   }
 
@@ -98,7 +103,8 @@ contract HelperConfig is Script {
 
     localNetworkConfig =  NetworkConfig({
         entryPoint: address(entryPoint), 
-        factoryCards: address(factoryCards)
+        factoryCards: address(factoryCards), 
+        account: ANVIL_DEFAULT_ACCOUNT
         }); 
     return localNetworkConfig;
   }

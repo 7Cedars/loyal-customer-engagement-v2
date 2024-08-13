@@ -13,14 +13,16 @@ import { QrScanner } from "./QrScanner";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {qrPoints} = useAppSelector(state => state.qrPoints)
   const [mode, setMode]  = useState<string | undefined>()
   const [transferMode, setTransferMode] = useState<boolean>(false)
   const {data: balanceData, refetch, fetchStatus} = useBalance({ address: prog.address })
   const dispatch = useDispatch() 
 
-  console.log("prog.address:", prog.address)
-  console.log("balanceData:", balanceData)
-  console.log("prog.balance:", prog.balance)
+  if (qrPoints.points != 0) console.log("DATA CAME THROUGH")
+  // step 1: check for qrData in redux 
+  // step 2: writeContract: redeemPoints. 
+  // step 3: check event. if success: show info box. 
 
   // updating balance of program. 
   useEffect(() => {
