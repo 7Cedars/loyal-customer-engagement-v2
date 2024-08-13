@@ -9,41 +9,32 @@ import { parseHex, parseNumber, parseString } from "@/utils/parsers";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useSetActiveWallet } from "@privy-io/wagmi";
 import Image from "next/image";
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Hex, hexToBytes, stringToHex } from "viem";
 import { useAccount, useDisconnect, usePublicClient, useReadContracts, useWriteContract } from 'wagmi'
-// to do: 
-// 1: read URL. CHECK
-// 2: write data to redux store CHECK  
-// 3: read loyalty program contract CHECK 
-// 4: build info box
-// 5: build privy login. 
-
 
 export default function Home() {
   const params = useSearchParams(); 
   const dispatch = useDispatch(); 
-  const publicClient = usePublicClient()
   const [prog, setProg] = useState<Program>(); 
+  const router = useRouter()
 
-    // Privy hooks
-    const {ready, user, authenticated, login, connectWallet, logout, linkWallet} = usePrivy();
-    const {wallets, ready: walletsReady} = useWallets();
-    const {address, isConnected, isConnecting, isDisconnected} = useAccount();
-    const {disconnect} = useDisconnect();
-    const {setActiveWallet} = useSetActiveWallet();
-
-    console.log("user: ", user)
-    // console.log(wallets[0].address)
-    
+  // Privy hooks
+  // see docs: https://github.com/privy-io/wagmi-demo/blob/main/app/page.tsx 
+  const {ready, user, authenticated, login, connectWallet, logout, linkWallet} = usePrivy();
+  const {wallets, ready: walletsReady} = useWallets();
 
   const qrData = useRef<QrPoints>({
-    program: parseHex(params.get('prg')),
-    points: parseNumber(Number(params.get('pts'))),
-    uniqueNumber: parseNumber(Number(params.get('un'))),
-    signature: parseHex(params.get('sig'))
+    program: params.get('prg') ? 
+      parseHex(params.get('prg')) : undefined,
+    points: params.get('pts') ? 
+      parseNumber(Number(params.get('pts'))) : undefined,
+    uniqueNumber: params.get('un') ? 
+      parseNumber(Number(params.get('un'))) : undefined,
+    signature: params.get('sig') ? 
+      parseHex(params.get('sig')) : undefined
   })
 
   const programContract = {
@@ -90,8 +81,10 @@ export default function Home() {
       }
       setProg(qrProgram)
       dispatch(setProgram(qrProgram))
+
+      if (user) router.push('/home')
     } 
-  }, [qrData, dispatch, isFetched, programData])
+  }, [qrData, dispatch, isFetched, programData, user, router])
 
   console.log({
     params: params, 
@@ -121,17 +114,17 @@ export default function Home() {
             </div>
             <div className="w-full grid grid-cols-1"> 
             { 
-              prog && programData && !programData[0].result && qrData.current ? 
+              prog && programData && !programData[0].result && qrData.current && !user ? 
                 <Button onClick={login}>
-                  This voucher is worth {qrData.current.points} points. Log in to claim your points.
+                  This voucher is worth {qrData.current.points} points. Connect to claim your points.
                 </Button>
               : 
-                prog && programData && programData[0].result && qrData.current ? 
+                prog && programData && programData[0].result && qrData.current && !user ? 
                 <Button onClick={login}>
                   This voucher has expired. Log in to see your loyalty card. 
                 </Button>
               : 
-                qrData.current ? 
+                qrData.current.program != undefined ? 
                 <Button disabled>
                   The qrCode is invalid. Please try again with another Qrcode.
                 </Button>
@@ -139,7 +132,23 @@ export default function Home() {
               null
               }
               </div>
-              {/* CONTINUE HERE: build log out button. see https://github.com/privy-io/wagmi-demo/blob/main/app/page.tsx  */}
+              { user ? 
+                <Button onClick={logout}> 
+                  {` Connected to: ${
+                    user.email ? user.email.address
+                    : 
+                    user.phone ? user.phone.number
+                    :
+                    user.wallet?.address 
+                  }`
+                }
+                  {/* {user.linkedAccounts} */}
+                </Button> 
+              :
+                <Button onClick={login}> 
+                  Connect
+                </Button>
+              }
           </div> 
         </div>
     </div>

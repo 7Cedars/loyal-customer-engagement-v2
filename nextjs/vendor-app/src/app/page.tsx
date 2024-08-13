@@ -3,6 +3,7 @@
 import { Button } from "../components/ui/Button";
 import { useAccount } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Program } from "../types";
 import Image from "next/image";
 import { useAppSelector } from "@/redux/hooks";
@@ -11,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation'
 import { useDispatch } from "react-redux";
 import { resetProgram, setProgram } from "@/redux/reducers/programReducer";
+import { Hex } from "viem";
 
 export default function Home() {
   // FOR DEV ONLY // 
@@ -47,6 +49,12 @@ export default function Home() {
       uriImage: program.uriImage
     }))
     router.push('/home')
+  }
+
+  const handleRemoveProgram = (address: Hex | undefined) => {
+    const filteredPrograms = savedPrograms.filter((program) => program.address != address)
+    setSavedPrograms(filteredPrograms)
+    localStorage.setItem("clp_v_programs", JSON.stringify(filteredPrograms)); 
   }
 
   return (
@@ -92,18 +100,33 @@ export default function Home() {
           >
            { 
            savedPrograms.map(program => 
-              <button 
+            <>
+              <div 
                 key = {program.address}
-                className={`w-full h-full grid grid-cols-1 disabled:opacity-50 text-md text-center border content-center rounded-lg p-2 mt-0 h-12`} 
+                className={`relative w-full h-full flex flex-row disabled:opacity-50 text-md text-center border content-center rounded-lg p-2 mt-0 h-12`} 
                 style = {{
                   color: program.colourAccent, 
                   borderColor: program.colourAccent, 
                   backgroundColor: program.colourBase
                 }}
-                onClick={() => handleSelectionProgram(program)}
                 >
-                {program.name}
-              </button>
+                <button 
+                  className="grow" 
+                  onClick={() => handleSelectionProgram(program)}>
+                  {program.name}
+                </button>
+                <div 
+                  className="grid grid-cols-1 items-center absolute inset-y-0 right-0 hover:opacity-100 opacity-0">
+                  <button onClick={() => handleRemoveProgram(program.address)}>
+                    <XMarkIcon
+                      className={"h-6 w-6 mx-2"}
+                      style={{color: program.colourAccent}}
+                    />
+                  </button>
+                </div>
+              </div>
+                
+            </>
             )
           }
           <Button 

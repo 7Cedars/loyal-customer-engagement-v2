@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Providers from "./providers" 
+import Providers from "../context/providers" 
 
 export const metadata: Metadata = {
   title: 'Customer Loyalty Program - customer',

@@ -23,17 +23,26 @@ export const GivePoints = () => {
     ],
   } as const
 
-  // // The message that will be hashed and signed
-  const message = {
-    program: prog.address,
-    points:  BigInt(amountPoints),
-    uniqueNumber: uniqueNumber.current,
-  } as const
+  const handleSigning = () => {
+    uniqueNumber.current = BigInt(Math.random() * 10 ** 18) 
 
-  useEffect(() => { // every time a message is signed, create a new unique random number & show Qr code. 
-    if (signature) uniqueNumber.current = BigInt(Math.random() * 10 ** 18) 
-    setMode('qr')
-  }, [signature])
+    if (prog.address) {
+      const message = {
+        program: prog.address,
+        points:  BigInt(amountPoints),
+        uniqueNumber: uniqueNumber.current,
+      } as const
+    
+      signTypedData({
+        types, 
+        primaryType: 'RequestPoints',
+        message
+      })} 
+    }
+
+  useEffect(() => {
+    if (isSuccess) setMode('qr')
+  }, [isSuccess])
 
   const selectPoints: React.JSX.Element = (
     <section className="grow flex flex-col items-center justify-center"> 
@@ -47,11 +56,7 @@ export const GivePoints = () => {
         <NumPad onChange={(amount) =>{setAmountPoints(amount)}}/>
       </div>
       <div className="w-full h-12 p-1">
-        <Button onClick={() =>  signTypedData({
-            types, 
-            primaryType: 'RequestPoints',
-            message
-          })} >
+        <Button onClick={() => handleSigning()} >
           Create QR
         </Button>
       </div>

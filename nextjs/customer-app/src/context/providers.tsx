@@ -1,9 +1,11 @@
 'use client';
 
 import { PrivyClientConfig, PrivyProvider } from '@privy-io/react-auth';
-import { ReduxProvider } from "../context/reduxProvider"
-import { wagmiConfig } from '../context/wagmiConfig'  
+// import { ReduxProvider } from "./reduxProvider"
+import { wagmiConfig } from './wagmiConfig'  
 import { WagmiProvider } from 'wagmi'
+import { store } from "../redux/store";
+import { Provider } from "react-redux";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const queryClient = new QueryClient()
@@ -24,14 +26,14 @@ export default function Providers({children}: {children: React.ReactNode}) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <ReduxProvider>
+        <Provider store={store}>
           <PrivyProvider
             appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
             config={privyConfig}
             >
             {children}
           </PrivyProvider>
-        </ReduxProvider>
+        </Provider>
       </QueryClientProvider>
     </WagmiProvider>
   );
