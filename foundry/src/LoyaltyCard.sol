@@ -61,56 +61,18 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
      * @param value the value to pass in this call
      * @param func the calldata to pass in this call
      */
-    function execute(address dest, uint256 value, bytes calldata func) external returns (bytes4 sig, address target, address sender) {
+    function execute(address dest, uint256 value, bytes calldata func) external {
         _requireFromEntryPointOrOwner();
-
-        /// testing
-
-         
-        // address recipientAddress; 
-        // uint256 lenRecipientAddress; 
-        // uint256 amount; 
-        // ret = bytes(func);
-
-        // within onTransferReceived: decode the calldata:
-        // £Question: Why am I getting all 0 data back?!  
-        // (sig, target, sender, data) = abi.decode(
-        //     func,
-        //     (bytes4, address, address, bytes)
-        // );
-
-        // bytes memory sender = calldata func; //[0 : 4]
-        // if (sender != bytes(0x0)) {
-        //     revert("not address zero!"); 
-        // }
-        // assembly {
-            // ret = bytes32(func[:32]);
-            // amount := calldataload(0xC4)   // **why get data from 0xC4？
-
-            // recipientAddress := mload(0x40)
-            // lenRecipientAddress := calldataload(0xe4)   // offset 0x20 beside amount is the length variable, I know that.
-            // mstore(0x40, add(0x20, add(recipientAddress, lenRecipientAddress)))  // load address to the free memory
-
- 
-            // sender := calldataload(sub(calldatasize(), 4))
-  
-            // ret := mload(0x40)
-        //     .slot(3) := calldataload(0x20)
-        // }
-
-        //
-
-        /// testing
-        
         _call(dest, value, func);
 
     }
 
-    function decode(bytes memory data) private pure returns(bytes4 selector, bytes memory target) {
+    function decode(bytes memory data) private pure returns(bytes4 selector, bytes memory target, bytes memory callData) {
         assembly {
         // load 32 bytes into `selector` from `data` skipping the first 32 bytes
         selector := mload(add(data, 32))
         target := mload(add(data, 64))
+        callData := mload(add(data, 96)) // this I added. don't know if it works. 
         }
     }
 
@@ -167,6 +129,28 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             if (s_owner != ECDSA.recover(hash, userOp.signature)) {
                 return SIG_VALIDATION_FAILED;
             } 
+            return _validateTarget(userOp);
+    }
+
+    function _validateTarget(
+        PackedUserOperation calldata userOp
+        ) internal virtual returns (uint256 validationData) {
+            // bytes memory data = bytes();  
+            (bytes4 selector, bytes memory target, bytes memory callData) = decode(userOp.callData); 
+            (bytes4 selector2, bytes memory target2, bytes memory callData2) = decode(callData); 
+            // checking target contract 
+            // if (
+            //     address(target) != s_loyaltyProgram 
+            // ) return SIG_VALIDATION_FAILED; 
+            // checking target selector 
+            if (
+                selector != LoyaltyCard.execute.selector && 
+                selector2 !=  ILoyaltyProgram.exchangePointsForGift.selector 
+                // selector != selector // ILoyaltyProgram.requestPointsAndCard.selector 
+            ) return SIG_VALIDATION_FAILED; 
+            // console2.logBytes(target); 
+            // console2.logBytes4(selector); 
+
             return SIG_VALIDATION_SUCCESS;
     }
 

@@ -308,20 +308,45 @@ contract LoyaltyCardTest is Test {
   function testEntryPointCanExecuteRequestPoints() public giveCustomerCardPointsAndGift(customerAddress) {
     address customerCardAddress = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
     LoyaltyCard customerCard = LoyaltyCard(payable(customerCardAddress)); 
-    uint256 gift = 0; 
+    uint256 gift = 0;
 
     // arrange
     address dest = address(loyaltyProgram);
     uint256 value = 0;
     bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, gift, customerAddress);
-    bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
-    PackedUserOperation memory packedUserOp = sendPackedUserOp.generateSignedUserOperation(
-      executeCallData, helperConfig.getConfig(), address(customerCard)
-      );
-    // bytes32 userOperationHash = IEntryPoint(myHelperConfig.getConfig().entryPoint).getUserOpHash(packedUserOp);
-    uint256 missingAccountFunds = 1e18; 
 
-    vm.deal(address(customerCard), 1e18);
+    console2.logBytes(functionData); 
+
+    bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
+
+    console2.logBytes(executeCallData);
+
+    (bytes memory datawithoutSelector,  ) = removeSelector(executeCallData); 
+
+    console2.logBytes(datawithoutSelector);
+
+    /// CONTINUE HERE: BELOW IS THE SOLUTION TO WRITING A FUNCTION TO VALIDATE TARGET. 
+
+    (address target, , bytes memory retrievedCallData) = abi.decode(datawithoutSelector, (address, uint256, bytes)); 
+//  abi.decode(data, (uint256, address, uint256[], MyStruct));
+    // console2.logBytes4(selector);
+    console2.logAddress(target); // NB! this is the address of the loyaltyProgram!!!!!!!!! 
+    console2.logBytes(retrievedCallData);
+
+    (bytes memory datawithoutSelector2,  bytes4 selector2) = removeSelector(retrievedCallData); 
+    
+    console2.logBytes4(selector2); // NB! this is the selector of the loyaltyProgram function!!!!!!!!! 
+
+    PackedUserOperation memory packedUserOp = sendPackedUserOp.generateSignedUserOperation(
+      executeCallData, helperConfig.getConfig(), address(customerCard) 
+      );
+
+    // 0xd6f89877 
+
+    // bytes32 userOperationHash = IEntryPoint(myHelperConfig.getConfig().entryPoint).getUserOpHash(packedUserOp);
+    // uint256 missingAccountFunds = 1e18; 
+
+    // vm.deal(address(customerCard), 1e18);
     PackedUserOperation[] memory ops = new PackedUserOperation[](1); 
     ops[0] = packedUserOp; 
 
@@ -332,6 +357,27 @@ contract LoyaltyCardTest is Test {
     //assert -- build later
     // assertEq(usdc.balanceOf(address(customerCard)), AMOUNT);
   }
+
+  // https://github.com/ethereum/solidity/issues/14996 - its from PatrickC :) 
+  function removeSelector(bytes memory myData) public pure returns(bytes memory, bytes4){
+        uint256 BYTES4_SIZE = 4; 
+        uint256 bytesSize = myData.length - BYTES4_SIZE;
+        bytes memory dataWithoutSelector = new bytes(bytesSize);
+        for (uint8 i = 0; i < bytesSize; i++) {
+            dataWithoutSelector[i] = myData[i + BYTES4_SIZE];
+        }
+        bytes4 selector = bytes4(myData);
+        return (dataWithoutSelector, selector);
+  }
+
+
+  /////////// quick helper function. ///////////
+  function decode(bytes memory data) private pure returns (bytes4 selector, address target, uint256 value, bytes memory callData) {
+      // `approvePaylaod[4:]` basically ignores the first 4 bytes of the payload
+      (selector,target, value, callData) = abi.decode(data, (bytes4,address,uint256,bytes));
+      return (selector,target, value, callData);
+    }
+    /////////// quick helper function. ///////////
 
 
   function testRetrieveAddressFromCalldata() public giveCustomerCardAndPoints(customerAddress) {
