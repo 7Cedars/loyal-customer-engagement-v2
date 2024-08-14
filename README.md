@@ -22,7 +22,7 @@ Currently stands at around 9 days to get PoC done. (about two weeks).
     - [x] Creating points voucher. 
     - [x] Redeeming gifts.  
 - [x] Foundry: fix account abstraction flow - it was not actually tested yet. 
-- [WIP] Foundry: fix selected execution of account abstraction
+- [x] Foundry: fix selected execution of account abstraction DONE! It works! Woohoo! 
   - [x] This is the hardest part still to be done. But should be possible. -- solved main issue. Just have to implement through function. 
 - [ ] Vendor app: Implement basic Cypress tests
 - [ ] Customer app: Implement basic Cypress tests

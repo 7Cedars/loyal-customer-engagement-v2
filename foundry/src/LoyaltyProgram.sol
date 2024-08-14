@@ -3,6 +3,7 @@ pragma solidity 0.8.26;
 
 // OpenZeppelin imports //  
 import {ERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {IERC165} from "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
 import {ERC165} from "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
 import {ECDSA} from "lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
@@ -24,7 +25,7 @@ import {IFactoryCards} from "./interfaces/IFactoryCards.sol"; // £todo check us
 import {ILoyaltyGift} from "./interfaces/ILoyaltyGift.sol";
 import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
-contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
+contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
     using ERC165Checker for address;
@@ -404,14 +405,15 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
      // this is only possible because the transactions of the loyalty cards are highly restricted. 
      // only 'pre-approved' transactions are allowed. 
      // £todo rename ownerCard prop 
+     // msg.sender = loyalty card
      */
-    function payCardPrefund (uint256 missingAccountFunds, address originalSender, address loyaltyCard) external noBlockedCard returns (bool success) {
+    function payCardPrefund (uint256 missingAccountFunds, address originalSender) external noBlockedCard returns (bool success) {
         // check if the call origninated from the entrypoint. 
         if (originalSender != address(s_entryPoint)) { 
             revert LoyaltyProgram__OnlyEntryPoint(); 
         }
         // £todo improve error handling.
-        _addDepositCard(loyaltyCard, missingAccountFunds); 
+        _addDepositCard(msg.sender, missingAccountFunds); 
         return true; 
     }
 
@@ -422,7 +424,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     /**
     * @notice only owner is allowed to transfer points.   
     */
-    function transfer(address to, uint256 value) public override onlyOwner returns (bool) {
+    function transfer(address to, uint256 value) public override (ERC20, IERC20) onlyOwner returns (bool) {
         (bool success) = super.transfer(to, value); 
         return success; 
     }
@@ -516,7 +518,7 @@ contract LoyaltyProgram is IERC721Receiver, ERC165, ERC20, Ownable {
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC165)
+        override(ERC165, IERC165)
         returns (bool)
     {
         return 

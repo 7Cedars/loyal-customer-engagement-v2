@@ -30,6 +30,8 @@ import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
  * - 
  */
 contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializable {
+    error LoyaltyCard__FailedOp(string reason); 
+    
     address public s_owner;
     address payable public s_loyaltyProgram; 
     bytes public ret; 
@@ -104,20 +106,16 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
     // Why not do this in regular way - without writing additional functions? Is this more gass efficient? 
     function _onlyOwner() internal view {
         //directly from EOA owner, or through the account itself (which gets redirected through execute())
-        require(msg.sender == s_owner || msg.sender == address(this), "only owner");
+        if(msg.sender != s_owner && msg.sender != address(this)) revert LoyaltyCard__FailedOp("LC01: only owner");
     }
 
     function _onlyLoyaltyProgram() internal view { 
-        require(msg.sender == s_loyaltyProgram, "only loyalty program");
-    }
-
-    function _requireDestIsLoyaltyProgram(address dest) internal view { 
-        require(dest == s_loyaltyProgram, "only calls to loyalty program.");
+        if(msg.sender != s_loyaltyProgram) revert LoyaltyCard__FailedOp("LC02: only loyalty program");
     }
 
     // Require the function call went through EntryPoint or owner
     function _requireFromEntryPointOrOwner() internal view {
-        require(msg.sender == address(entryPoint()) || msg.sender == s_owner, "account: not Owner or EntryPoint");
+        if(msg.sender != address(entryPoint()) && msg.sender != s_owner) revert LoyaltyCard__FailedOp("LC03: sender not owner or entryPoint");
     }
 
     /// implement template method of BaseAccount
@@ -129,29 +127,33 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             if (s_owner != ECDSA.recover(hash, userOp.signature)) {
                 return SIG_VALIDATION_FAILED;
             } 
-            return _validateTarget(userOp);
+            _validateTarget(userOp.callData);
+
+            return SIG_VALIDATION_SUCCESS;
     }
 
     function _validateTarget(
-        PackedUserOperation calldata userOp
+        bytes calldata data
         ) internal virtual returns (uint256 validationData) {
-            // bytes memory data = bytes();  
-            (bytes4 selector, bytes memory target, bytes memory callData) = decode(userOp.callData); 
-            (bytes4 selector2, bytes memory target2, bytes memory callData2) = decode(callData); 
-            // checking target contract 
-            // if (
-            //     address(target) != s_loyaltyProgram 
-            // ) return SIG_VALIDATION_FAILED; 
-            // checking target selector 
-            if (
-                selector != LoyaltyCard.execute.selector && 
-                selector2 !=  ILoyaltyProgram.exchangePointsForGift.selector 
-                // selector != selector // ILoyaltyProgram.requestPointsAndCard.selector 
-            ) return SIG_VALIDATION_FAILED; 
-            // console2.logBytes(target); 
-            // console2.logBytes4(selector); 
-
-            return SIG_VALIDATION_SUCCESS;
+            // derived from a feature request by none other than PatrickC: https://github.com/ethereum/solidity/issues/14996
+            // retrieve the target contract and calldata of the userOp innerCall. 
+            uint256 BYTES4_SIZE = 4; 
+            uint256 bytesSize = data.length - BYTES4_SIZE;
+            bytes memory dataWithoutSelector = new bytes(bytesSize);
+            for (uint8 i = 0; i < bytesSize; i++) {
+                dataWithoutSelector[i] = data[i + BYTES4_SIZE];
+            }
+            (address targetContract, , bytes memory innerCall) = abi.decode(dataWithoutSelector, (address, uint256, bytes)); 
+            if(targetContract != s_loyaltyProgram) { 
+                revert LoyaltyCard__FailedOp("LC04: invalid target contract");  
+            }
+            bytes4 targetSelector = bytes4(innerCall);
+            if(
+                targetSelector != ILoyaltyProgram.requestPointsAndCard.selector &&
+                targetSelector != ILoyaltyProgram.exchangePointsForGift.selector 
+                ) { 
+                revert LoyaltyCard__FailedOp("LC05: invalid target selector");  
+            }
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
@@ -176,7 +178,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
     function _payPrefund(uint256 missingAccountFunds) internal override {
         if (missingAccountFunds != 0) {
             // notice: msg.sender == the entrypoint. It is the entryPoint that is calling this function. 
-            ILoyaltyProgram(s_loyaltyProgram).payCardPrefund(missingAccountFunds, msg.sender, address(this)); 
+            ILoyaltyProgram(s_loyaltyProgram).payCardPrefund(missingAccountFunds, msg.sender); 
             // (success);
             //ignore failure (its EntryPoint's job to verify, not account.)
         }

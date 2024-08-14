@@ -25,6 +25,7 @@ import {FridayFifteen} from "../../src/sample-gifts/FridayFifteen.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {DeployFactoryPrograms} from "../../script/DeployFactoryPrograms.s.sol";
 import {DeployFridayFifteen} from "../../script/DeployLoyaltyGifts.s.sol";
+import {ILoyaltyProgram} from "../../src/interfaces/ILoyaltyProgram.sol";
 
 contract LoyaltyCardTest is Test {
   using ECDSA for bytes32;
@@ -314,45 +315,46 @@ contract LoyaltyCardTest is Test {
     address dest = address(loyaltyProgram);
     uint256 value = 0;
     bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, gift, customerAddress);
-
-    console2.logBytes(functionData); 
-
     bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
-
-    console2.logBytes(executeCallData);
-
-    (bytes memory datawithoutSelector,  ) = removeSelector(executeCallData); 
-
-    console2.logBytes(datawithoutSelector);
-
-    /// CONTINUE HERE: BELOW IS THE SOLUTION TO WRITING A FUNCTION TO VALIDATE TARGET. 
-
-    (address target, , bytes memory retrievedCallData) = abi.decode(datawithoutSelector, (address, uint256, bytes)); 
-//  abi.decode(data, (uint256, address, uint256[], MyStruct));
-    // console2.logBytes4(selector);
-    console2.logAddress(target); // NB! this is the address of the loyaltyProgram!!!!!!!!! 
-    console2.logBytes(retrievedCallData);
-
-    (bytes memory datawithoutSelector2,  bytes4 selector2) = removeSelector(retrievedCallData); 
-    
-    console2.logBytes4(selector2); // NB! this is the selector of the loyaltyProgram function!!!!!!!!! 
 
     PackedUserOperation memory packedUserOp = sendPackedUserOp.generateSignedUserOperation(
       executeCallData, helperConfig.getConfig(), address(customerCard) 
       );
 
-    // 0xd6f89877 
-
-    // bytes32 userOperationHash = IEntryPoint(myHelperConfig.getConfig().entryPoint).getUserOpHash(packedUserOp);
-    // uint256 missingAccountFunds = 1e18; 
-
-    // vm.deal(address(customerCard), 1e18);
     PackedUserOperation[] memory ops = new PackedUserOperation[](1); 
     ops[0] = packedUserOp; 
 
     //act 
     vm.prank(randomUser); 
     IEntryPoint(helperConfig.getConfig().entryPoint).handleOps(ops, payable(randomUser)); 
+
+    //assert -- build later
+    // assertEq(usdc.balanceOf(address(customerCard)), AMOUNT);
+  }
+
+  function testEntryPointRevertsExecuteWithDisallowedFunction() public giveCustomerCardPointsAndGift(customerAddress) {
+    address customerCardAddress = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
+    LoyaltyCard customerCard = LoyaltyCard(payable(customerCardAddress)); 
+    uint256 gift = 0;
+
+    // arrange
+    address dest = address(loyaltyProgram);
+    uint256 value = 0;
+    bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.setAllowCreationCards.selector, false);
+    bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
+
+    PackedUserOperation memory packedUserOp = sendPackedUserOp.generateSignedUserOperation(
+      executeCallData, helperConfig.getConfig(), address(customerCard) 
+      );
+
+    PackedUserOperation[] memory ops = new PackedUserOperation[](1); 
+    ops[0] = packedUserOp; 
+
+    //act 
+    address entryPoint = helperConfig.getConfig().entryPoint; 
+    vm.prank(randomUser); 
+    vm.expectRevert(); 
+    IEntryPoint(entryPoint).handleOps(ops, payable(randomUser)); 
 
     //assert -- build later
     // assertEq(usdc.balanceOf(address(customerCard)), AMOUNT);
