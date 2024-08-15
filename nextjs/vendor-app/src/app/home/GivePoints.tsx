@@ -38,7 +38,7 @@ export const GivePoints = () => {
         primaryType: 'RequestPoints',
         message
       })} 
-    }
+  }
 
   useEffect(() => {
     if (isSuccess) setMode('qr')

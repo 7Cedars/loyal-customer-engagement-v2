@@ -5,7 +5,7 @@ import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi";
 import { setProgram } from "@/redux/reducers/programReducer";
 import { setQrPoints } from "@/redux/reducers/qrPointsReducer";
 import { Program, QrPoints } from "@/types";
-import { parseHex, parseNumber, parseString } from "@/utils/parsers";
+import { parseBigInt, parseHex, parseNumber, parseString } from "@/utils/parsers";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useSetActiveWallet } from "@privy-io/wagmi";
 import Image from "next/image";
@@ -13,7 +13,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Hex, hexToBytes, stringToHex } from "viem";
-import { useAccount, useDisconnect, usePublicClient, useReadContracts, useWriteContract } from 'wagmi'
+import { useReadContracts } from 'wagmi'
 
 export default function Home() {
   const params = useSearchParams(); 
@@ -27,14 +27,10 @@ export default function Home() {
   const {wallets, ready: walletsReady} = useWallets();
 
   const qrData = useRef<QrPoints>({
-    program: params.get('prg') ? 
-      parseHex(params.get('prg')) : undefined,
-    points: params.get('pts') ? 
-      parseNumber(Number(params.get('pts'))) : undefined,
-    uniqueNumber: params.get('un') ? 
-      parseNumber(Number(params.get('un'))) : undefined,
-    signature: params.get('sig') ? 
-      parseHex(params.get('sig')) : undefined
+    program: parseHex(params.get('prg')),
+    points: parseBigInt(params.get('pts')),
+    uniqueNumber: parseBigInt(params.get('un')),
+    signature: parseHex(params.get('sig'))
   })
 
   const programContract = {
@@ -65,6 +61,15 @@ export default function Home() {
         ...programContract, 
         functionName: 's_imageUri'
       },
+      {
+      ...programContract, 
+        functionName: 's_cardFactory'
+      },
+      {
+        ...programContract, 
+        functionName: 's_entryPoint'
+      },
+
     ]
   })
 
@@ -77,7 +82,9 @@ export default function Home() {
         name: parseString(programData[2].result), 
         colourBase: parseString(programData[3].result).split(`;`)[0], 
         colourAccent: parseString(programData[3].result).split(`;`)[1], 
-        uriImage: parseString(programData[4].result)
+        uriImage: parseString(programData[4].result), 
+        cardsFactory: parseHex(programData[5].result),
+        entryPoint: parseHex(programData[6].result)
       }
       setProg(qrProgram)
       dispatch(setProgram(qrProgram))

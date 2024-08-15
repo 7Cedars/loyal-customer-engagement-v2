@@ -52,7 +52,7 @@ contract HelperConfig is Script {
 
   function getEthSepoliaConfig() public view returns(NetworkConfig memory){ 
     return NetworkConfig({
-      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
+      entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032, 
       factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment. 
       account: BURNER_WALLET
     });
@@ -60,7 +60,7 @@ contract HelperConfig is Script {
 
   function getOpsSepoliaConfig() public view returns(NetworkConfig memory){ 
     return NetworkConfig({
-      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
+      entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032, 
       factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment. 
       account: BURNER_WALLET
     });
@@ -68,7 +68,7 @@ contract HelperConfig is Script {
 
   function getArbSepoliaConfig() public view returns(NetworkConfig memory){ 
     return NetworkConfig({
-      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
+      entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032, 
       factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment. 
       account: BURNER_WALLET
     });
@@ -76,7 +76,7 @@ contract HelperConfig is Script {
 
   function getBaseSepoliaConfig() public view returns(NetworkConfig memory){ 
     return NetworkConfig({
-      entryPoint: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, 
+      entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032, 
       factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment. 
       account: BURNER_WALLET
     });
@@ -86,7 +86,6 @@ contract HelperConfig is Script {
     if (localNetworkConfig.entryPoint != address(0)) { 
       return localNetworkConfig; 
     }
-    
     // deploy mock entrypoint and factoryCards contracts.
     // (separated the broadcasts for clarity.)
     console2.log("Deploying Mock EntryPoint..."); 

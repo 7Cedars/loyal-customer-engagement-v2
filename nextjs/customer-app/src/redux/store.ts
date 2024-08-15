@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import programReducer from './reducers/programReducer'
 import qrPointsReducer from './reducers/qrPointsReducer'
+import abstractAccountReducer from './reducers/abstractAccountReducer'
 
 export const store = configureStore({
   reducer: {
     selectedProgram: programReducer,
-    qrPoints: qrPointsReducer
+    qrPoints: qrPointsReducer, 
+    abstractAA: abstractAccountReducer
   }
 })
 

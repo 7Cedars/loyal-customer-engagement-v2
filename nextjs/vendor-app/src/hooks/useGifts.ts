@@ -4,7 +4,7 @@ import { wagmiConfig } from '../../wagmi-config'
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loyaltyGiftAbi } from "@/context/abi";
 import { Hex, Log } from "viem"
-import { useAccount, usePublicClient } from 'wagmi'
+import { publicClient } from "@/context/clients";
 import { whiteListedGifts } from "@/context/whitelistedGifts";
 
 import { useAppSelector } from "@/redux/hooks";
@@ -12,7 +12,6 @@ import { useDispatch } from "react-redux";
 import { parseBigIntToNumber, parseBoolean, parseEthAddress, parseMetadata, parseString, parseUri } from "@/utils/parsers";
 
 export const useGifts = () => {
-  const publicClient = usePublicClient()
   const [ status, setStatus ] = useState<Status>("isIdle")
   const statusAtGetGiftsContractData = useRef<Status>("isIdle") 
   const statusAtMetadata = useRef<Status>("isIdle") 

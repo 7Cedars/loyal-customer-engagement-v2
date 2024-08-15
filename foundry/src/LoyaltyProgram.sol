@@ -21,7 +21,6 @@ import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPo
 import {LoyaltyCard} from "./LoyaltyCard.sol";
 import {LoyaltyGift} from "./LoyaltyGift.sol";
 import {FactoryCards} from "./FactoryCards.sol";
-import {IFactoryCards} from "./interfaces/IFactoryCards.sol"; // £todo check use later
 import {ILoyaltyGift} from "./interfaces/ILoyaltyGift.sol";
 import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
@@ -225,7 +224,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         }
 
         // if msg.sender is not a registered loyalty card, create a new card and set owner of card to msg.sender. 
-        LoyaltyCard card = s_cardFactory.getLoyaltyCard(_ownerCard, payable(address(this)), SALT);
+        LoyaltyCard card = s_cardFactory.createAccount(_ownerCard, payable(address(this)), SALT);
 
         // 1) set executed to true & execute transfer
         s_executed[programSignature] = true;

@@ -8,7 +8,7 @@ import { Status, Event } from "@/types";
 import { Log } from "viem";
 import { parseEthAddress, parseEventLogs } from "@/utils/parsers";
 import { loyaltyProgramAbi } from "@/context/abi";
-import { usePublicClient } from "wagmi";
+import { publicClient } from "@/context/clients";
 import { useEffect } from "react";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -18,7 +18,6 @@ type UseEventProps = {
 }
 
 export default function useEvents({fromBlock, toBlock}: UseEventProps) {
-  const publicClient = usePublicClient()
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
 
   const [ giftListed, setGiftListed ] = useState<Event[]>([]) 

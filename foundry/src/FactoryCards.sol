@@ -46,7 +46,7 @@ contract FactoryCards {
     //             abi.encodeCall(SimpleAccount.initialize, (owner))
     //         )));
     // }
-    function getLoyaltyCard(
+    function createAccount(
       address owner, 
       address payable loyaltyProgram, 
       uint256 salt
@@ -78,4 +78,8 @@ contract FactoryCards {
                 )
             )));
     }
+
+    // function getAddress(address owner) public view returns (address) {
+    //     return owner; 
+    // }
 }

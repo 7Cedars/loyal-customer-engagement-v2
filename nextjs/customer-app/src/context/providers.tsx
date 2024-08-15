@@ -1,6 +1,7 @@
 'use client';
 
 import { PrivyClientConfig, PrivyProvider } from '@privy-io/react-auth';
+import {base, baseGoerli, foundry, mainnet, sepolia, polygon, polygonMumbai} from 'viem/chains';
 // import { ReduxProvider } from "./reduxProvider"
 import { wagmiConfig } from './wagmiConfig'  
 import { WagmiProvider } from 'wagmi'
@@ -11,15 +12,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 const queryClient = new QueryClient()
 
 const privyConfig: PrivyClientConfig = {
+  defaultChain: foundry,
+  supportedChains: [foundry, mainnet, sepolia, base, baseGoerli, polygon, polygonMumbai], // add arbitrum, optimism + testnets. 
   embeddedWallets: {
     createOnLogin: 'users-without-wallets',
     requireUserPasswordOnCreate: true,
-    noPromptOnSignature: false,
+    noPromptOnSignature: true,
   },
-  loginMethods: ['wallet', 'email', 'sms'],
+  loginMethods: ['email', 'sms', 'wallet'],
   appearance: {
-    showWalletLoginFirst: true,
-  },
+      theme: 'light',
+      accentColor: '#676FFF',
+      logo: 'your-logo-url'
+  }
 };
 
 export default function Providers({children}: {children: React.ReactNode}) {
@@ -31,7 +36,9 @@ export default function Providers({children}: {children: React.ReactNode}) {
             appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
             config={privyConfig}
             >
-            {children}
+              {/* <SmartAccountProvider> */}
+                 {children}
+              {/* </SmartAccountProvider> */}
           </PrivyProvider>
         </Provider>
       </QueryClientProvider>

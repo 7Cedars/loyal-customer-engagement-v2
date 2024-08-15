@@ -113,10 +113,15 @@ export const parseNumber = (number: unknown): number => {
 };
 
 export const parseBigInt = (number: unknown): bigint => {
-  if (!isBigInt(number) || isNumber(number) ) {
-    throw new Error(`Incorrect number, not a bigInt or number: ${number}`);
-  }
+  // if (!isBigInt(number) || isNumber(number) || isString(number) ) {
+  //   throw new Error(`Incorrect number, not a bigInt or number: ${number}`);
+  // }
   // here can additional checks later. 
+
+  if (isString(number)) {
+    number = Number(number)
+    return number as bigint;
+  }
 
   return number as bigint;
 };

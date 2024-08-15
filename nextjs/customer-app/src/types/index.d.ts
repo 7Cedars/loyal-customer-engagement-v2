@@ -7,6 +7,8 @@ export type Program = {
   colourBase: string; 
   colourAccent: string; 
   uriImage?: string;
+  cardsFactory?: Hex;
+  entryPoint?: Hex;
   owner?: Hex; 
 }
 
@@ -24,16 +26,16 @@ export type QrData = undefined | {
   program: Hex; 
   owner: Hex; 
   gift: Hex; 
-  giftId: BigInt; 
-  uniqueNumber: BigInt; 
+  giftId: bigint; 
+  uniqueNumber: bigint; 
   signature?: Hex; 
 }
 
 export type QrPoints = {
-  program: Hex | undefined; 
-  points: number | undefined; 
-  uniqueNumber: number | undefined; 
-  signature: Hex | undefined; 
+  program: Hex; 
+  points: bigint; 
+  uniqueNumber: bigint; 
+  signature: Hex; 
 }
 
 // NB 0 = claim req

@@ -10,16 +10,97 @@ import { useEffect, useState } from "react";
 import { setBalanceProgram } from "@/redux/reducers/programReducer";
 import { useDispatch } from "react-redux";
 import { QrScanner } from "./QrScanner";
+// import { bundlerClient, publicClient } from "@/context/clients";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { privateKeyToAccount } from "viem/accounts";
+import {createWalletClient, custom, http} from 'viem';
+import { parseEthAddress } from "@/utils/parsers";
+import { foundry } from "viem/chains";
+import {createSmartAccountClient, walletClientToSmartAccountSigner} from "permissionless";
+import {signerToSimpleSmartAccount, SimpleSmartAccount, SmartAccount} from "permissionless/accounts";
+import { setAbstractAccount } from "@/redux/reducers/abstractAccountReducer";
+import { useSendTransaction } from 'wagmi'
+import { parseEther } from 'viem'
+import { usePackedUserOp } from "@/hooks/usePackedUserOp";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {qrPoints} = useAppSelector(state => state.qrPoints)
-  const [mode, setMode]  = useState<string | undefined>()
-  const [transferMode, setTransferMode] = useState<boolean>(false)
+  const [mode, setMode]  = useState()
+  const [transferMode, setTransferMode] = useState(false)
   const {data: balanceData, refetch, fetchStatus} = useBalance({ address: prog.address })
+  const {wallets, ready: walletsReady} = useWallets();
   const dispatch = useDispatch() 
+  const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
+  const resultReadContractFactory = usePackedUserOp(qrPoints)
 
-  if (qrPoints.points != 0) console.log("DATA CAME THROUGH")
+  console.log("embeddedWallet: ", embeddedWallet)
+
+
+  const doSomething = async () => {
+    if (embeddedWallet) {
+    const provider = await embeddedWallet.getEthereumProvider();
+    console.log("provider: ", provider)
+
+    const transactionRequest = {
+      to: prog.address,
+      value: 0,
+      data: '0x0'
+    };
+
+    const transactionHash = await provider.request({
+      method: 'eth_sendTransaction',
+      params: [transactionRequest],
+    });
+
+    console.log(transactionHash)
+    }
+  }  
+  // doSomething() 
+ 
+
+  // if (embeddedWallet) {
+  //   const getSmartAccountClient = async () => {
+  //     console.log("getSmartAccountClient called")
+  //     const eip1193provider = await embeddedWallet.getEthereumProvider();
+
+  //     const privyClient = createWalletClient({
+  //       account: parseEthAddress(embeddedWallet.address),
+  //       chain: foundry, // Replace this with the chain used by your application
+  //       transport: custom(eip1193provider)
+  //     })
+  
+  //     const customSigner = walletClientToSmartAccountSigner(privyClient);
+  //     console.log("customSigner: ", customSigner)
+      
+  //     const simpleSmartAccount = await signerToSimpleSmartAccount(publicClient, {
+  //       entryPoint: prog.entryPoint, 
+  //       signer: customSigner,
+  //       factoryAddress: prog.cardsFactory,
+  //     }) 
+
+  //     console.log("simpleSmartAccount: ", simpleSmartAccount)
+  
+  //     // Create the SmartAccountClient for requesting signatures and transactions (RPCs)
+  //     const smartAccountClient = createSmartAccountClient({
+  //       // £bug? typescript does not take the "simpleSmartAccount" object here. No time to properly fix, hence turned this page to jsx.   
+  //       account: simpleSmartAccount, // simpleSmartAccount is not compatible. 
+  //       entryPoint: prog.entryPoint, 
+  //       chain: foundry, 
+  //       bundlerTransport: http('http://localhost:4337')
+  //     });
+
+  //     console.log("smartAccountClient: ", smartAccountClient); 
+
+  //     const smartAccountAddress = await smartAccountClient.address
+  //     console.log("smartAccountAddress: ", smartAccountAddress)
+
+  //     // dispatch(setAbstractAccount(smartAccountClient))
+  //   }
+  //   getSmartAccountClient()
+  // }
+
+  if (qrPoints.points != 0n) console.log("DATA CAME THROUGH")
   // step 1: check for qrData in redux 
   // step 2: writeContract: redeemPoints. 
   // step 3: check event. if success: show info box. 
@@ -34,14 +115,14 @@ export default function Page() {
         dispatch(setBalanceProgram(Number(balanceData?.value) / 10 ** balanceData?.decimals))  
       }
   }, [balanceData, prog, dispatch])
-
+  
   return (
     <Layout> 
       <TitleText title = {prog.name ? prog.name : "Home"} size = {2} /> 
       <div className="grow flex flex-col justify-start items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
-          <Button onClick={() => {setTransferMode(true)}}>
-            {prog.balance == undefined ? `Fetching balance...`:`Balance: ${prog.balance} Eth` } 
+          <Button onClick={() => {  }}>
+            Here should be points on card
           </Button>
         </div>
         <section 
@@ -72,7 +153,7 @@ export default function Page() {
             className="z-10 h-12 flex flex-row justify-between items-center w-full border rounded-t-full"
             style = {{borderColor: prog.colourAccent, borderBottom: prog.colourBase}}
             >
-               <button onClick={() => mode == undefined? setMode("Give Points") : setMode(undefined)} > 
+               <button onClick={() => {}} > 
                   <div 
                   className="ms-8 h-8 w-8 rotate-180 aria-selected:rotate-0 transition:all ease-in-out duration-300 delay-300"
                   aria-selected={mode == undefined} 

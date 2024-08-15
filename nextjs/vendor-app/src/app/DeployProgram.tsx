@@ -24,6 +24,7 @@ export const DeployProgram = () => {
   const [ uri, setUri ] = useState<string>("www.somewhere.io") 
   const [ tab, setTab ] = useState<string>("Base") 
   const { writeContract } = useWriteContract()
+  const cardsFactory: Hex = parseEthAddress(process.env.NEXT_PUBLIC_CARDS_FACTORY) 
 
   const OPTIONS: EmblaOptionsType = {}
   const savedPrograms = useRef<Program[]>([]) ; 
@@ -88,7 +89,7 @@ export const DeployProgram = () => {
   }
 
   useWatchContractEvent({
-    address: '0xD4eA33DF95698E5240C35c81e7a5FeA6164D842b',
+    address: cardsFactory,
     abi: factoryProgramsAbi,
     batch: false, 
     eventName: 'ProgramDeployed',
@@ -216,13 +217,13 @@ export const DeployProgram = () => {
           :
           status == "isError" ? 
             <Button disabled = {true}> 
-              Error.  
+              Error
             </Button>
           :
             <Button 
               onClick = {() =>  writeContract({ 
                   abi: factoryProgramsAbi,
-                  address: '0xD4eA33DF95698E5240C35c81e7a5FeA6164D842b',
+                  address: cardsFactory,
                   functionName: 'deployLoyaltyProgram',
                   args: [
                     name,
