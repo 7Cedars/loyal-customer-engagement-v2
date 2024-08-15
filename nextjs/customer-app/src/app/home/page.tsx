@@ -6,14 +6,14 @@ import { TitleText } from "@/components/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
 import { useBalance } from 'wagmi'
 import { ChevronUpIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { setBalanceProgram } from "@/redux/reducers/programReducer";
 import { useDispatch } from "react-redux";
 import { QrScanner } from "./QrScanner";
 // import { bundlerClient, publicClient } from "@/context/clients";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { privateKeyToAccount } from "viem/accounts";
-import {createWalletClient, custom, http} from 'viem';
+import {createWalletClient, custom, encodeFunctionData, http} from 'viem';
 import { parseEthAddress } from "@/utils/parsers";
 import { foundry } from "viem/chains";
 import {createSmartAccountClient, walletClientToSmartAccountSigner} from "permissionless";
@@ -21,10 +21,13 @@ import {signerToSimpleSmartAccount, SimpleSmartAccount, SmartAccount} from "perm
 import { setAbstractAccount } from "@/redux/reducers/abstractAccountReducer";
 import { useSendTransaction } from 'wagmi'
 import { parseEther } from 'viem'
-import { usePackedUserOp } from "@/hooks/usePackedUserOp";
+import { useSendUserOp } from "@/hooks/useSendUserOp";
+import { bundlerClient } from '../../context/clients' 
+import { loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const randomNonce  = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
   const {qrPoints} = useAppSelector(state => state.qrPoints)
   const [mode, setMode]  = useState()
   const [transferMode, setTransferMode] = useState(false)
@@ -32,30 +35,32 @@ export default function Page() {
   const {wallets, ready: walletsReady} = useWallets();
   const dispatch = useDispatch() 
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const resultReadContractFactory = usePackedUserOp(qrPoints)
+  const sendUserOp = useSendUserOp(); 
 
   console.log("embeddedWallet: ", embeddedWallet)
 
+  // NB CONTINUE HERE: Use the sendUserOp. -- and see what happens :D 
 
-  const doSomething = async () => {
-    if (embeddedWallet) {
-    const provider = await embeddedWallet.getEthereumProvider();
-    console.log("provider: ", provider)
+  
+  // const doSomething = async () => {
+  //   if (embeddedWallet) {
+  //   const provider = await embeddedWallet.getEthereumProvider();
+  //   console.log("provider: ", provider)
 
-    const transactionRequest = {
-      to: prog.address,
-      value: 0,
-      data: '0x0'
-    };
+  //   const transactionRequest = {
+  //     to: prog.address,
+  //     value: 0,
+  //     data: '0x0'
+  //   };
 
-    const transactionHash = await provider.request({
-      method: 'eth_sendTransaction',
-      params: [transactionRequest],
-    });
+  //   const transactionHash = await provider.request({
+  //     method: 'eth_sendTransaction',
+  //     params: [transactionRequest],
+  //   });
 
-    console.log(transactionHash)
-    }
-  }  
+  //   console.log(transactionHash)
+  //   }
+  // }  
   // doSomething() 
  
 
