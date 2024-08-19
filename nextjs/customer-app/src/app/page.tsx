@@ -27,10 +27,10 @@ export default function Home() {
   const {wallets, ready: walletsReady} = useWallets();
 
   const qrData = useRef<QrPoints>({
-    program: parseHex(params.get('prg')),
-    points: parseBigInt(params.get('pts')),
-    uniqueNumber: parseBigInt(params.get('un')),
-    signature: parseHex(params.get('sig'))
+    program: params.get('prg') ? parseHex(params.get('prg'))  :'0x',
+    points: params.get('pts') ? parseBigInt(params.get('pts')) : 0n,
+    uniqueNumber: params.get('un') ? parseBigInt(params.get('un')) : 0n,
+    signature: params.get('sig') ? parseHex(params.get('sig')) : '0x'
   })
 
   const programContract = {

@@ -35,7 +35,7 @@ export default function Page() {
   const {wallets, ready: walletsReady} = useWallets();
   const dispatch = useDispatch() 
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const sendUserOp = useSendUserOp(); 
+  const {sendUserOp, status} = useSendUserOp(); 
 
   console.log("embeddedWallet: ", embeddedWallet)
 
@@ -126,7 +126,18 @@ export default function Page() {
       <TitleText title = {prog.name ? prog.name : "Home"} size = {2} /> 
       <div className="grow flex flex-col justify-start items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
-          <Button onClick={() => {  }}>
+        {/* The following is just for dev purposes...  */}
+          <Button onClick={() => {sendUserOp({
+            abi: loyaltyProgramAbi,
+            functionName: 'requestPointsAndCard', 
+            args: [
+              qrPoints.program, 
+              qrPoints.points, 
+              qrPoints.uniqueNumber, 
+              qrPoints.signature,
+              embeddedWallet?.address ? embeddedWallet.address : '0x' 
+            ]
+          })}}>
             Here should be points on card
           </Button>
         </div>

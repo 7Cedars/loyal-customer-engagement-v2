@@ -98,36 +98,38 @@ export default function Home() {
           className={`w-full grow aria-disabled:grow-0 h-fit aria-disabled:h-2 aria-disabled:opacity-0 opacity-100 transition:all ease-in-out duration-300 delay-700 grid grid-cols-1 max-w-lg gap-4 px-2`}
           aria-disabled={status != "connected"}
           >
-           { 
-           savedPrograms.map(program => 
-            <>
-              <div 
-                key = {program.address}
-                className={`relative w-full h-full flex flex-row disabled:opacity-50 text-md text-center border content-center rounded-lg p-2 mt-0 h-12`} 
-                style = {{
-                  color: program.colourAccent, 
-                  borderColor: program.colourAccent, 
-                  backgroundColor: program.colourBase
-                }}
-                >
-                <button 
-                  className="grow" 
-                  onClick={() => handleSelectionProgram(program)}>
-                  {program.name}
-                </button>
-                <div 
-                  className="grid grid-cols-1 items-center absolute inset-y-0 right-0 hover:opacity-100 opacity-0">
-                  <button onClick={() => handleRemoveProgram(program.address)}>
-                    <XMarkIcon
-                      className={"h-6 w-6 mx-2"}
-                      style={{color: program.colourAccent}}
-                    />
-                  </button>
-                </div>
-              </div>
-                
-            </>
-            )
+          { 
+            savedPrograms.length > 0 ? 
+              savedPrograms.map((program, i) => 
+                <>
+                  <div 
+                    key = {i} 
+                    className={`relative w-full h-full flex flex-row disabled:opacity-50 text-md text-center border content-center rounded-lg p-2 mt-0 h-12`} 
+                    style = {{
+                      color: program.colourAccent, 
+                      borderColor: program.colourAccent, 
+                      backgroundColor: program.colourBase
+                    }} 
+                    >
+                    <button 
+                      className="grow" 
+                      onClick={() => handleSelectionProgram(program)}>
+                      {program.name}
+                    </button>
+                    <div 
+                      className="grid grid-cols-1 items-center absolute inset-y-0 right-0 hover:opacity-100 opacity-0">
+                      <button onClick={() => handleRemoveProgram(program.address)}>
+                        <XMarkIcon
+                          className={"h-6 w-6 mx-2"}
+                          style={{color: program.colourAccent}}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </>
+                )
+                : 
+                null 
           }
           <Button 
             onClick = {() => {SetMode("deploy") }}

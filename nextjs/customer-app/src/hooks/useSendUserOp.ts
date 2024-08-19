@@ -2,13 +2,13 @@
 import { entryPointAbi, factoryCardsAbi, loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi"
 import { bundlerClient } from "@/context/clients"
 import { useAppSelector } from "@/redux/hooks"
-import { QrPoints } from "@/types"
+import { QrPoints, Status } from "@/types"
 import { parseBigInt, parseEthAddress, parseHex } from "@/utils/parsers"
 import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { useEffect, useRef, useState } from "react"
 import { Abi, encodeFunctionData, encodePacked, Hex, hexToBigInt, numberToBytes, numberToHex } from "viem"
 import { toPackedUserOperation } from "viem/account-abstraction"
-import { useReadContract, useSignTypedData } from "wagmi"
+import { useReadContract, useReadContracts, useSignTypedData } from "wagmi"
 import { SignTypedDataData } from "wagmi/query"
 
 // 
@@ -65,16 +65,28 @@ const types = {
 } as const
 
 export const useSendUserOp = () => { // here types can be added: "exchangePoints", etc 
-  const randomNonce  = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
+  const addressNonce  = useRef<bigint>(0n)
   const functionData = useRef<Hex>('0x0')
   const executeCallData = useRef<Hex>('0x0')
-  const [packedUserOp, setPackedUserOp] = useState<PackedUserOperation | undefined>()
+  const cardFactoryData = useRef<Hex>('0x0')
+  const [status, setStatus] = useState<Status>('isIdle'); 
+  const [packedUserOp, setPackedUserOp] = useState<PackedUserOperation>({
+    sender: '0x', 
+    nonce: 0n,
+    initCode: '0x',
+    callData: '0x',
+    accountGasLimits: '0x',
+    preVerificationGas: 0n, 
+    gasFees: '0x',
+    paymasterAndData: '0x',
+    signature: '0x'
+  })
   const maxFeePerGas: bigint = 99985502n
   const maxPriorityFeePerGas: bigint = 1221000n
-  const preVerificationGas: bigint = 66875n
-  const verificationGasLimit: bigint = 373705n
-  const callGasLimit: bigint = 170447n
-  
+  const preVerificationGas: bigint = 6687500n
+  const verificationGasLimit: bigint = 37370500n
+  const callGasLimit: bigint = 17044700n
+
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
@@ -83,26 +95,62 @@ export const useSendUserOp = () => { // here types can be added: "exchangePoints
     abi: factoryCardsAbi,
     address: prog.cardsFactory,
     functionName: 'getAddress',
-    args: [embeddedWallet?.address, prog.address, 24] // NB: SALT VALUE IS NOT CORRECT YET! 
+    args: [embeddedWallet?.address, prog.address, 42n] 
   }) 
-  const {data: userOpHash, status: statusUserOpHash} = useReadContract({
+
+  const entryPointContract = {
     abi: entryPointAbi,
     address: prog.entryPoint,
-    functionName: 'getUserOpHash',
-    args: [packedUserOp]
-  }) 
-  const message = {
-    digest: parseHex(userOpHash)
   } as const
-  const { data: signature, isPending, isError, isSuccess, signTypedData, reset } = useSignTypedData()
+
+  const {data, status: statusUserOpHash} = useReadContracts({
+    contracts: [
+        {
+          ...entryPointContract,
+          functionName: 'getNonce',
+          args: [
+            loyaltyCardAddress,
+            42n
+          ]
+        },
+        {
+          ...entryPointContract,
+          functionName: 'getUserOpHash',
+          args: [packedUserOp]
+        }
+      ]
+  })
+
+
+  
+  addressNonce.current = data ? data[0].result as bigint : 0n
+
+  const message = {
+    digest: data ? data[1].result as Hex : '0x'
+  } as const
+  const { data: signature, isPending, isError, isSuccess, signTypedData, reset, failureReason } = useSignTypedData()
+
+  console.log({
+    statusLoyaltyCardAddress: statusLoyaltyCardAddress, 
+    loyaltyCardAddress: loyaltyCardAddress, 
+    statusUserOpHash: statusUserOpHash,
+    userOpHash: data ? data[1].result as Hex : '0x', 
+    addressNonce: data ? data[0].result as Hex : '0x', 
+    signature: signature, 
+    isSuccess: isSuccess, 
+    isPending: isPending, 
+    isError: isError,
+    failureReason: failureReason
+  })
   
   // this function does all the data prep. 
   const getPackedUserOp = ({abi, functionName, args}: sendUserOpProps) => {
     functionData.current = encodeFunctionData({
-      abi: loyaltyProgramAbi,
-      functionName: 'requestPointsAndCard', 
+      abi: abi,
+      functionName: functionName, 
       args: args // see args of requestPointsAndCard
     })
+    console.log(functionData.current) 
 
     executeCallData.current = encodeFunctionData({
       abi: loyaltyCardAbi,
@@ -113,11 +161,24 @@ export const useSendUserOp = () => { // here types can be added: "exchangePoints
         embeddedWallet?.address
       ]
     })
+    console.log(executeCallData.current) 
+
+    cardFactoryData.current = encodeFunctionData({
+      abi: factoryCardsAbi,
+      functionName: 'createAccount', 
+      args: [
+        embeddedWallet?.address,
+        prog.address, 
+        42n // salt
+      ]
+    })
+    console.log(cardFactoryData.current) 
 
     const packedUserOpTemp = toPackedUserOperation({
       sender: parseEthAddress(loyaltyCardAddress), // needs to be loyaltyCard. 
-      nonce: randomNonce.current,
+      nonce: addressNonce.current, 
       factory: prog.cardsFactory,
+      factoryData: cardFactoryData.current, 
       callData: executeCallData.current,
       maxFeePerGas,
       maxPriorityFeePerGas,
@@ -132,6 +193,7 @@ export const useSendUserOp = () => { // here types can be added: "exchangePoints
   
   // This is the function that is called by the user. With it, the user actually _signs their message_. signing message actually triggers sending it.  
   const sendUserOp = ({abi, functionName, args}: sendUserOpProps) => {
+    console.log("sendUserOp called")
     getPackedUserOp({abi, functionName, args})
 
     if (statusUserOpHash == 'success') {
@@ -145,11 +207,13 @@ export const useSendUserOp = () => { // here types can be added: "exchangePoints
   // when message is _signed_ it is send to the bundler. 
   useEffect(() => {
     if (signature && isSuccess && embeddedWallet) {
+      console.log("bundlerClient checks passed, going to be called")
       bundlerClient.sendUserOperation({
         userOperation: {
-            sender: parseEthAddress(embeddedWallet.address), // needs to be loyaltyCard. 
-            nonce: randomNonce.current,
+            sender: parseEthAddress(loyaltyCardAddress), 
+            nonce: addressNonce.current,
             factory: prog.cardsFactory,
+            factoryData: cardFactoryData.current, 
             callData: executeCallData.current,
             maxFeePerGas,
             maxPriorityFeePerGas,
@@ -162,8 +226,7 @@ export const useSendUserOp = () => { // here types can be added: "exchangePoints
     }
   }, [signature, isSuccess, embeddedWallet, prog.cardsFactory, maxFeePerGas, maxPriorityFeePerGas, preVerificationGas, verificationGasLimit, callGasLimit])
 
-  return sendUserOp // note, for now no error handling, status updates, etc. That's for later.  
-
+  return {sendUserOp, status} // note, for now no error handling, status updates, etc. That's for later.  
 }
 
 

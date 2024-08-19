@@ -127,9 +127,9 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             if (s_owner != ECDSA.recover(hash, userOp.signature)) {
                 return SIG_VALIDATION_FAILED;
             } 
-            _validateTarget(userOp.callData);
+            return _validateTarget(userOp.callData);
 
-            return SIG_VALIDATION_SUCCESS;
+            // return SIG_VALIDATION_SUCCESS;
     }
 
     function _validateTarget(
@@ -145,15 +145,16 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             }
             (address targetContract, , bytes memory innerCall) = abi.decode(dataWithoutSelector, (address, uint256, bytes)); 
             if(targetContract != s_loyaltyProgram) { 
-                revert LoyaltyCard__FailedOp("LC04: invalid target contract");  
+                return SIG_VALIDATION_FAILED; 
             }
             bytes4 targetSelector = bytes4(innerCall);
             if(
                 targetSelector != ILoyaltyProgram.requestPointsAndCard.selector &&
                 targetSelector != ILoyaltyProgram.exchangePointsForGift.selector 
                 ) { 
-                revert LoyaltyCard__FailedOp("LC05: invalid target selector");  
+                return SIG_VALIDATION_FAILED; 
             }
+            return SIG_VALIDATION_SUCCESS;
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
