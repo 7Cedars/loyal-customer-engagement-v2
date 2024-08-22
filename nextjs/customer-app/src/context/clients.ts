@@ -1,17 +1,28 @@
-import { createBundlerClient, createSmartAccountClient, ENTRYPOINT_ADDRESS_V07, bundlerActions } from "permissionless";
+import { createBundlerClient, createSmartAccountClient, ENTRYPOINT_ADDRESS_V07, bundlerActions, walletClientToSmartAccountSigner } from "permissionless";
 import { signerToSimpleSmartAccount } from "permissionless/accounts";
+import { pimlicoBundlerActions } from "permissionless/actions/pimlico";
 // import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico";
 import { http, createPublicClient, createClient } from "viem";
 import { foundry } from "viem/chains";
- 
+import { useWalletClient } from "wagmi";
+
+
+
 export const publicClient = createPublicClient({
   transport: http("http://localhost:8545"), 
 });
  
 export const bundlerClient = createClient({ 
   chain: foundry,
-  transport: http("http://localhost:4337") // check 
-}).extend(bundlerActions(ENTRYPOINT_ADDRESS_V07)) // £bug in docs: https://v1.viem.sh/docs/third-party/account-abstraction.html -- does not have entryPoint added. 
+  transport: http("http://localhost:4337", 
+    { timeout: 30_000 }
+  ), // check 
+})
+  .extend(bundlerActions(ENTRYPOINT_ADDRESS_V07))
+  .extend(pimlicoBundlerActions(ENTRYPOINT_ADDRESS_V07)) // £bug in docs: https://v1.viem.sh/docs/third-party/account-abstraction.html -- does not have entryPoint added. 
+
+
+
 
 // export const paymasterClient = createPimlicoPaymasterClient({
 //   chain: foundry,

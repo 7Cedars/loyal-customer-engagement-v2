@@ -6,6 +6,8 @@ import {LoyaltyCard} from "../src/LoyaltyCard.sol";
 import {LoyaltyProgram} from "../src/LoyaltyProgram.sol"; 
 import {FactoryCards} from "../src/FactoryCards.sol"; 
 import {EntryPoint} from "lib/account-abstraction/contracts/core/EntryPoint.sol"; 
+import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol"; 
+
 
 contract HelperConfig is Script {
   error HelperConfig__InvalidChainId(); 
@@ -88,20 +90,20 @@ contract HelperConfig is Script {
     }
     // deploy mock entrypoint and factoryCards contracts.
     // (separated the broadcasts for clarity.)
-    console2.log("Deploying Mock EntryPoint..."); 
-    vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT); 
-    EntryPoint entryPoint = new EntryPoint{salt: SALT}();
-    vm.stopBroadcast(); 
-    console2.log(address(entryPoint)); 
+    // console2.log("Deploying Mock EntryPoint..."); 
+    // vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT); 
+    // EntryPoint entryPoint = new EntryPoint{salt: SALT}();
+    // vm.stopBroadcast(); 
+    // console2.log(address(entryPoint)); 
 
     console2.log("Deploying Mock FactoryCards..."); 
     vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT); 
-    FactoryCards factoryCards = new FactoryCards{salt: SALT}(entryPoint);  
+    FactoryCards factoryCards = new FactoryCards{salt: SALT}(IEntryPoint(0x0000000071727De22E5E9d8BAf0edAc6f37da032));  
     vm.stopBroadcast(); 
     console2.log(address(factoryCards)); 
 
     localNetworkConfig =  NetworkConfig({
-        entryPoint: address(entryPoint), 
+        entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032, // address(entryPoint), 
         factoryCards: address(factoryCards), 
         account: ANVIL_DEFAULT_ACCOUNT
         }); 

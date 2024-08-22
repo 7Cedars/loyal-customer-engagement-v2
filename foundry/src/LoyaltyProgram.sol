@@ -224,7 +224,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         }
 
         // if msg.sender is not a registered loyalty card, create a new card and set owner of card to msg.sender. 
-        LoyaltyCard card = s_cardFactory.createAccount(_ownerCard, payable(address(this)), SALT);
+        LoyaltyCard card = LoyaltyCard(payable(s_cardFactory.createAccount(_ownerCard, payable(address(this)), SALT)));
 
         // 1) set executed to true & execute transfer
         s_executed[programSignature] = true;

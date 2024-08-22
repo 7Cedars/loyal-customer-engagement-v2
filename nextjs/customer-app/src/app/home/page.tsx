@@ -27,7 +27,7 @@ import { loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-  const randomNonce  = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
+  const randomNonce  = useRef<bigint>(BigInt(Math.round(Math.random() * 10 ** 18)))
   const {qrPoints} = useAppSelector(state => state.qrPoints)
   const [mode, setMode]  = useState()
   const [transferMode, setTransferMode] = useState(false)

@@ -5,7 +5,7 @@ pragma solidity 0.8.26;
 import {Script} from "forge-std/Script.sol";
 import {PackedUserOperation} from "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
-import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import {EntryPoint} from "lib/account-abstraction/contracts/core/EntryPoint.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract SendPackedUserOp is Script {
@@ -25,7 +25,7 @@ contract SendPackedUserOp is Script {
     PackedUserOperation memory userOp = _generateuserOperation(callData, loyaltyCard, nonce);
 
     // getUserOphash
-    bytes32 userOpHash = IEntryPoint(config.entryPoint).getUserOpHash(userOp);
+    bytes32 userOpHash = EntryPoint(payable(config.entryPoint)).getUserOpHash(userOp);
     bytes32 digest = userOpHash.toEthSignedMessageHash();
 
     //sign it
