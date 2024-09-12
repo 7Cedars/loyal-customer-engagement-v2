@@ -256,7 +256,8 @@ contract LoyaltyCardTest is Test {
 
     // let loyalty project select and mint gift
     vm.startPrank(vendorAddress);
-    loyaltyProgram.setLoyaltyGift(address(fridayFifteen), true, true);
+    loyaltyProgram.setExchangeableGift(address(fridayFifteen), true);
+    loyaltyProgram.setRedeemableGift(address(fridayFifteen), true);
     loyaltyProgram.mintGifts(address(fridayFifteen), amountGifts);
     vm.stopPrank(); 
     

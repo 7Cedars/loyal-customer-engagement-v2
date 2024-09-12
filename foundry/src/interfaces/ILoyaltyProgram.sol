@@ -11,32 +11,34 @@ import {IERC721Receiver} from  "lib/openzeppelin-contracts/contracts/token/ERC72
 /// @dev the ERC-165 identifier for this interface is ... 
 interface ILoyaltyProgram is IERC165, IERC721Receiver, IERC20 {
     function requestPointsAndCard(
-        address _program,
-        uint256 _points, 
-        uint256 _uniqueNumber, 
+        address program,
+        uint256 points, 
+        uint256 uniqueNumber, 
         bytes memory programSignature, 
-        address _ownerCard
+        address ownerCard
     ) external; 
 
     function exchangePointsForGift(
-        address _gift,
-        address _owner
+        address gift,
+        address owner
     ) external; 
 
     function redeemGift(
-        address _program,
-        address _ownerCard, 
-        address _gift,
-        uint256 _giftId,
-        uint256 _uniqueNumber, 
+        address program,
+        address ownerCard, 
+        address gift,
+        uint256 giftId,
+        uint256 uniqueNumber, 
         bytes memory signature
     ) external; 
 
-    function mintGifts(address _gift, uint256 amount) external;  
+    function mintGifts(address gift, uint256 amount) external;  
 
-    function setLoyaltyGift(address _gift, bool exchangeable, bool redeemable) external;  
+    function setExchangeableGift(address gift, bool exchangeable) external; 
 
-    function setCardBlocked(address _owner, bool blocked) external;
+    function setRedeemableGift(address gift, bool redeemable) external;  
+
+    function setCardBlocked(address owner, bool blocked) external;
 
     function setAllowCreationCards(bool allowed) external;
 

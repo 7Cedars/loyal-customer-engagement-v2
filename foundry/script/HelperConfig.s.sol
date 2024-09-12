@@ -36,6 +36,7 @@ contract HelperConfig is Script {
 
   constructor() { 
     networkConfig[ETH_SEPOLIA_CHAIN_ID] = getEthSepoliaConfig(); 
+    // £todo Here still need to add other chains! 
   }
 
   function getConfig() public returns (NetworkConfig memory) { 

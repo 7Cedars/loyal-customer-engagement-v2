@@ -21,12 +21,12 @@ import {ILoyaltyGift} from "./interfaces/ILoyaltyGift.sol";
 import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
 /**
- * A simplified implementation of eth-infintism's SimpleAccount. 
+ * A bespoke implementation of eth-infintism's SimpleAccount. 
  * In comparison to SimpleAccount, this implementation:
  * - registers parent contract with each created abstract account.   
  * - cannot do batched operations. 
  * - only allows ERC721 receiver (not ERC-1155). 
- * - has an additional check that only allows interactions with one address (its loyaltyProgram). - this is still WIP. 
+ * - has an additional check that only allows interactions with one address (its loyaltyProgram). 
  * - 
  */
 contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializable {
@@ -66,7 +66,6 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
     function execute(address dest, uint256 value, bytes calldata func) external {
         _requireFromEntryPointOrOwner();
         _call(dest, value, func);
-
     }
 
     function decode(bytes memory data) private pure returns(bytes4 selector, bytes memory target, bytes memory callData) {

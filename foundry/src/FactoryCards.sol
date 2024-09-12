@@ -56,7 +56,7 @@ contract FactoryCards {
         if (codeSize > 0) {
             return LoyaltyCard(payable(addr));
         }
-        if (!LoyaltyProgram(loyaltyProgram).s_allowCreationCards()) {
+        if (!LoyaltyProgram(loyaltyProgram).allowCreationCards()) {
             revert FactoryCards__NotRegisteredCard(); 
         }
         newCard = LoyaltyCard(payable(new ERC1967Proxy{salt : bytes32(salt)}(
