@@ -112,6 +112,7 @@ contract LoyaltyCardTest is Test {
   address randomUser = vm.addr(123);
   uint256 uniqueNumber = 3; 
   uint256 points = 5000; 
+  address constant ANVIL_DEFAULT_ACCOUNT = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266; 
 
   LoyaltyCard public cardImplementation;
   uint256 private constant LOYALTY_PROGRAM_VERSION = 2; 
@@ -317,17 +318,19 @@ contract LoyaltyCardTest is Test {
     uint256 value = 0;
     bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, gift, customerAddress);
     bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
-
+    
+    vm.prank(customerAddress);  
     PackedUserOperation memory packedUserOp = sendPackedUserOp.generateSignedUserOperation(
       executeCallData, helperConfig.getConfig(), address(customerCard) 
       );
-
     PackedUserOperation[] memory ops = new PackedUserOperation[](1); 
     ops[0] = packedUserOp; 
 
     //act 
-    vm.prank(randomUser); 
+    console2.log("entryPoint address:", address(entryPoint)); 
+    vm.prank(address(entryPoint));  
     IEntryPoint(helperConfig.getConfig().entryPoint).handleOps(ops, payable(randomUser)); 
+    // vm.stopPrank(); 
 
     //assert -- build later
     // assertEq(usdc.balanceOf(address(customerCard)), AMOUNT);

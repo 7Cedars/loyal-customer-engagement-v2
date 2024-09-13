@@ -78,12 +78,12 @@ contract LoyaltyProgramTest is Test {
     RequestPointsVoucher requestPointsVoucher; 
 
     // RedeemGift message struct
-    struct RedeemGift {
-        address program; 
-        address owner;
+   struct GiftToRedeem {
+        address program;
+        address owner; // = owner loyalty card.
         address gift;
         uint256 giftId;
-        uint256 uniqueNumber;
+        uint256 uniqueNumber; // this can be any number - as long as it makes the request (and its signature) unique.
     }
 
     struct RedeemGiftRequest {
@@ -427,7 +427,7 @@ contract LoyaltyProgramTest is Test {
        
       
       // customer owner creates & signs request to redeem gift. 
-      RedeemGift memory message = RedeemGift({
+      GiftToRedeem memory message = GiftToRedeem({
           program: address(loyaltyProgram),
           owner: customerAddress, 
           gift: address(fridayFifteen), 
@@ -443,6 +443,7 @@ contract LoyaltyProgramTest is Test {
       bytes memory signature = abi.encodePacked(r, s, v);
       
       // this info is encoded in the QR code. 
+      
       requestRedeemGift = RedeemGiftRequest({
         program: address(loyaltyProgram),
         owner: customerAddress, 
@@ -452,6 +453,7 @@ contract LoyaltyProgramTest is Test {
         signature: signature
       }); 
 
+      vm.prank(vendorAddress);  
       loyaltyProgram.redeemGift(
         requestRedeemGift.program, 
         requestRedeemGift.owner,
@@ -503,17 +505,20 @@ contract LoyaltyProgramTest is Test {
         );
     }
 
+
     /**
-     * @notice helper function to create digest hash from RedeemGift struct.
+     * @notice helper function to create digest hash from giftToRedeem struct.
      */
-    function hashRedeemGift(RedeemGift memory message) private pure returns (bytes32) {
+    function hashRedeemGift(GiftToRedeem memory message) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256(bytes("RedeemGift(address program,address owner,address gift,uint256 giftId,uint256 uniqueNumber)")),
+                keccak256(
+                    bytes("redeemGift(address program,address owner,address gift,uint256 giftId,uint256 uniqueNumber)")
+                ),
                 message.program,
                 message.owner,
                 message.gift,
-                message.giftId, 
+                message.giftId,
                 message.uniqueNumber
             )
         );

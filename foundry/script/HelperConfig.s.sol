@@ -92,19 +92,19 @@ contract HelperConfig is Script {
     // deploy mock entrypoint and factoryCards contracts.
     // (separated the broadcasts for clarity.)
     // console2.log("Deploying Mock EntryPoint..."); 
-    // vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT); 
-    // EntryPoint entryPoint = new EntryPoint{salt: SALT}();
-    // vm.stopBroadcast(); 
+    vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT); 
+    EntryPoint entryPoint = new EntryPoint{salt: SALT}();
+    vm.stopBroadcast(); 
     // console2.log(address(entryPoint)); 
 
     console2.log("Deploying Mock FactoryCards..."); 
     vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT); 
-    FactoryCards factoryCards = new FactoryCards{salt: SALT}(IEntryPoint(0x0000000071727De22E5E9d8BAf0edAc6f37da032));  
+    FactoryCards factoryCards = new FactoryCards{salt: SALT}(IEntryPoint(address(entryPoint)));  
     vm.stopBroadcast(); 
     console2.log(address(factoryCards)); 
 
     localNetworkConfig =  NetworkConfig({
-        entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032, // address(entryPoint), 
+        entryPoint: address(entryPoint), //  0x0000000071727De22E5E9d8BAf0edAc6f37da032,  
         factoryCards: address(factoryCards), 
         account: ANVIL_DEFAULT_ACCOUNT
         }); 
