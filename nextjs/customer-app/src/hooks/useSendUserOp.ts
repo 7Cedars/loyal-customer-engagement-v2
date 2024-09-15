@@ -22,7 +22,7 @@ import { SignTypedDataData } from "wagmi/query"
  * NB! READ THE BELOW FIRST BEFORE EDITING! 
  * 
  * The problem I am facing is that the userOp object is different in permissionless than it is in the contract. 
- * - the contract has a initcode item. 
+ * - the contract has an initcode item. 
  * - permissionless has a factory and factoryData item. -- this ALSO reflects in their UserOperation<0.7> type! 
  * - if you send UserOperation<0.7> object to getHashUserOp function in entryPoint contract: you get _nothing_ back. 
  * - meanwhile, if you do not use UserOperation<0.7> object to send item to bundler, bundler will protest. 
@@ -97,8 +97,6 @@ type gasPriceProps = {
       maxPriorityFeePerGas: bigint;
   };
 }
-
-createSmartAccountClient
 
 export const useSendUserOp = () => { // here types can be added: "exchangePoints", etc 
   const addressNonce  = useRef<bigint>(0n)
@@ -235,8 +233,8 @@ export const useSendUserOp = () => { // here types can be added: "exchangePoints
     const packedUserOpTemp = toPackedUserOperation({
       sender: parseEthAddress(loyaltyCardAddress), 
       nonce: addressNonce.current, 
-      factory: prog.cardsFactory as Hex,
-      factoryData: cardFactoryData, 
+      factory: prog.cardsFactory as Hex, // can I leave these out? 
+      factoryData: cardFactoryData, // can I leave these out? 
       callData: executeCallData.current,
       maxFeePerGas: gasPrice.current.fast.maxFeePerGas,
       maxPriorityFeePerGas: gasPrice.current.fast.maxPriorityFeePerGas,
@@ -246,7 +244,8 @@ export const useSendUserOp = () => { // here types can be added: "exchangePoints
       signature: '0xa15569dd8f8324dbeabf8073fdec36d4b754f53ce5901e283c6de79af177dc94557fa3c9922cd7af2a96ca94402d35c39f266925ee6407aeb32b31d76978d4ba1c' as Hex,
     } as UserOperation<"v0.7">) 
     // NB! the packedUserOpTemp object has the initCode item, and lacks the factory & factoryData items. 
-
+    // NB! it seems that initcode is optional in PackedUserOperation.sol. 
+    // maybe it is possible to circumvent the problem like this? 
     console.log("packedUserOpTemp: ", packedUserOpTemp)
 
     // setPackedUserOp(packedUserOpTemp) NB: this 

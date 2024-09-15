@@ -4,16 +4,8 @@ pragma solidity 0.8.26;
 /* imports */ 
 import {LoyaltyProgram} from "./LoyaltyProgram.sol";
 
-/* errors */
-
 /* interfaces, libraries, contracts */
 contract FactoryPrograms {
-
-/* errors */
-
-/* interfaces, libraries, contracts */
-
-/* Type declarations */
 
 /* State variables */
 address immutable public s_entryPoint; 
@@ -24,7 +16,6 @@ event FactoryProgramsDeployed(address indexed entryPoint, address  indexed facto
 event ProgramDeployed(address indexed program);
 
 /* Modifiers */
-
 constructor( 
   address _anEntryPoint,
   address _factoryCards

@@ -13,7 +13,6 @@ contract HelperConfig is Script {
 
     struct NetworkConfig {
         address entryPoint;
-        address factoryCards;
         address account;
     }
     // I can add more configs as needed later on.
@@ -56,7 +55,6 @@ contract HelperConfig is Script {
     function getEthSepoliaConfig() public view returns (NetworkConfig memory) {
         return NetworkConfig({
             entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment.
             account: BURNER_WALLET
         });
     }
@@ -64,7 +62,6 @@ contract HelperConfig is Script {
     function getOptSepoliaConfig() public view returns (NetworkConfig memory) {
         return NetworkConfig({
             entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment.
             account: BURNER_WALLET
         });
     }
@@ -72,7 +69,6 @@ contract HelperConfig is Script {
     function getArbSepoliaConfig() public view returns (NetworkConfig memory) {
         return NetworkConfig({
             entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment.
             account: BURNER_WALLET
         });
     }
@@ -80,7 +76,6 @@ contract HelperConfig is Script {
     function getBaseSepoliaConfig() public view returns (NetworkConfig memory) {
         return NetworkConfig({
             entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            factoryCards: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789, // to be filled out after first deployment.
             account: BURNER_WALLET
         });
     }
@@ -97,15 +92,8 @@ contract HelperConfig is Script {
         vm.stopBroadcast();
         // console2.log(address(entryPoint));
 
-        console2.log("Deploying Mock FactoryCards...");
-        vm.startBroadcast(ANVIL_DEFAULT_ACCOUNT);
-        FactoryCards factoryCards = new FactoryCards{salt: SALT}(IEntryPoint(address(entryPoint)));
-        vm.stopBroadcast();
-        console2.log(address(factoryCards));
-
         localNetworkConfig = NetworkConfig({
             entryPoint: address(entryPoint), //  0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            factoryCards: address(factoryCards),
             account: ANVIL_DEFAULT_ACCOUNT
         });
         return localNetworkConfig;
