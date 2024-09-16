@@ -47,7 +47,7 @@ export default function Home() {
       },
       {
         ...programContract, 
-        functionName: 's_allowCreationCards'
+        functionName: 'allowCreationCards'
       },
       {
         ...programContract, 
@@ -59,15 +59,15 @@ export default function Home() {
       },
       {
         ...programContract, 
-        functionName: 's_imageUri'
+        functionName: 'imageUri'
       },
       {
       ...programContract, 
-        functionName: 's_cardFactory'
+        functionName: 'CARD_FACTORY'
       },
       {
         ...programContract, 
-        functionName: 's_entryPoint'
+        functionName: 'entryPoint'
       },
 
     ]
@@ -76,6 +76,8 @@ export default function Home() {
   useEffect(() => {
     if (qrData.current && isFetched && programData) {
       dispatch(setQrPoints(qrData.current)) 
+
+      console.log("programData: ", programData)
 
       const qrProgram: Program = { 
         address: qrData.current.program, 

@@ -16,7 +16,7 @@ import { useReadContract, useReadContracts, useSignTypedData, useWalletClient } 
 import { SignTypedDataData } from "wagmi/query"
 
 // 
-// 
+// See the docs at: https://docs.privy.io/guide/react/recipes/account-abstraction/pimlico 
 // 
 /**
  * NB! READ THE BELOW FIRST BEFORE EDITING! 

@@ -277,9 +277,9 @@ contract LoyaltyProgramTest is Test {
       string memory cardImageUri = "";
 
       DeployFactoryPrograms deployer = new DeployFactoryPrograms();
-      (factoryPrograms, helperConfig) = deployer.run();
+      (factoryPrograms, factoryCards, helperConfig) = deployer.run();
       config = helperConfig.getConfig();
-      factoryCards = FactoryCards(config.factoryCards);  
+      // factoryCards = FactoryCards(config.factoryCards);  
 
       console2.log(address(factoryCards)); 
 
@@ -319,7 +319,7 @@ contract LoyaltyProgramTest is Test {
             colourScheme, 
             cardImageUri,
             config.entryPoint, 
-            config.factoryCards
+            address(factoryCards)
         );
     }
 

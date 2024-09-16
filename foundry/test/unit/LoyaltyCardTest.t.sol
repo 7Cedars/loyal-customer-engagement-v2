@@ -283,10 +283,10 @@ contract LoyaltyCardTest is Test {
     string memory cardImageUri = "";
 
     DeployFactoryPrograms deployer = new DeployFactoryPrograms();
-    (factoryPrograms, helperConfig) = deployer.run();
+    (factoryPrograms, factoryCards, helperConfig) = deployer.run();
     config = helperConfig.getConfig();
     entryPoint = EntryPoint(payable(config.entryPoint)); 
-    factoryCards = FactoryCards(config.factoryCards); 
+    // factoryCards = FactoryCards(config.factoryCards); 
     sendPackedUserOp = new SendPackedUserOp();
 
     loyaltyProgram = factoryPrograms.deployLoyaltyProgram(

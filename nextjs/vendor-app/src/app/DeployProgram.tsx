@@ -25,6 +25,7 @@ export const DeployProgram = () => {
   const [ tab, setTab ] = useState<string>("Base") 
   const { writeContract } = useWriteContract()
   const cardsFactory: Hex = parseEthAddress(process.env.NEXT_PUBLIC_CARDS_FACTORY) 
+  const programsFactory: Hex = parseEthAddress(process.env.NEXT_PUBLIC_PROGRAMS_FACTORY) 
 
   const OPTIONS: EmblaOptionsType = {}
   const savedPrograms = useRef<Program[]>([]) ; 
@@ -55,7 +56,7 @@ export const DeployProgram = () => {
         },
         {
           ...deployedProgram, 
-          functionName: 's_imageUri', 
+          functionName: 'imageUri', 
         }
       ], 
     })
@@ -89,7 +90,7 @@ export const DeployProgram = () => {
   }
 
   useWatchContractEvent({
-    address: cardsFactory,
+    address: programsFactory,
     abi: factoryProgramsAbi,
     batch: false, 
     eventName: 'ProgramDeployed',
@@ -223,7 +224,7 @@ export const DeployProgram = () => {
             <Button 
               onClick = {() =>  writeContract({ 
                   abi: factoryProgramsAbi,
-                  address: cardsFactory,
+                  address: programsFactory,
                   functionName: 'deployLoyaltyProgram',
                   args: [
                     name,

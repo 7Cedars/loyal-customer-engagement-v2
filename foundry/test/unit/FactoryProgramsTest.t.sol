@@ -31,7 +31,7 @@ contract FactoryProgramTest is Test {
 
   function setUp() external {
     DeployFactoryPrograms deployer = new DeployFactoryPrograms();
-    (factoryPrograms, helperConfig) = deployer.run();
+    (factoryPrograms, , helperConfig) = deployer.run();
     config = helperConfig.getConfig();
   }
   

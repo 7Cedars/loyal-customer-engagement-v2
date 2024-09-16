@@ -9,10 +9,11 @@ export const GivePoints = () => {
   const [mode, setMode] = useState<'points' | 'qr'>('points')
   const [amountPoints, setAmountPoints] = useState<number>(0)
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-  const { data: signature, isPending, isError, isSuccess, signTypedData, reset } = useSignTypedData()
+  const { data: signature, isPending, isError, error, isSuccess, signTypedData, reset } = useSignTypedData()
   const uniqueNumber  = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
 
   console.log("signature: ", signature)
+  console.log("isError, error:", error)
 
   // named list of all type definitions
   const types = {

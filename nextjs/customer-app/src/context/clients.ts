@@ -7,14 +7,14 @@ import { foundry } from "viem/chains";
 import { useWalletClient } from "wagmi";
 
 
-
 export const publicClient = createPublicClient({
   transport: http("http://localhost:8545"), 
 });
  
 export const bundlerClient = createClient({ 
   chain: foundry,
-  transport: http("http://localhost:4337", 
+  transport: http(process.env.NEXT_PUBLIC_BUNDLER, 
+  // transport: http("http://localhost:4337", 
     { timeout: 30_000 }
   ), // check 
 })

@@ -21,7 +21,7 @@ contract SendPackedUserOp is Script {
     HelperConfig.NetworkConfig memory config,
     address loyaltyCard
     ) public view returns (PackedUserOperation memory) {
-    uint256 nonce = vm.getNonce(loyaltyCard) - 1;
+    uint256 nonce = vm.getNonce(loyaltyCard); // - 1;
     PackedUserOperation memory userOp = _generateuserOperation(callData, loyaltyCard, nonce);
 
     // getUserOphash
@@ -48,7 +48,7 @@ contract SendPackedUserOp is Script {
     ) internal pure returns (PackedUserOperation memory) {
       uint256 verificationGasLimit = 16777216;
       uint256 callGasLimit = verificationGasLimit;
-      uint256 maxPriorityFeePerGas = 256;
+      uint256 maxPriorityFeePerGas = 512;
       uint256 maxFeePerGas = maxPriorityFeePerGas;
 
       return PackedUserOperation({

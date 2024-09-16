@@ -18,7 +18,7 @@ const metadata = {
 export const wagmiConfig = createConfig({
   chains: [foundry, optimismSepolia], //  foundry,  arbitrumSepolia, sepolia,  baseSepolia, [ optimismSepolia ], polygonMumbai
   transports: {
-    [foundry.id]: http(), 
+    [foundry.id]: http("http://localhost:8545"), 
     // [sepolia.id]: http(`process.env.NEXT_PUBLIC_ALCHEMY_SEP_API_RPC`), 
     // [arbitrumSepolia.id]: http(`https://arb-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_ARB_SEP_API_KEY}`), 
     // [arbitrumSepolia.id]: http(), 
