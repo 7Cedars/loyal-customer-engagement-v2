@@ -29,18 +29,6 @@ type EncodeRequestPointsAndCardProps = {
   signature: Hex; 
 }
 
-type sendUserOpProps = { 
-  abi: Abi;
-  functionName: string;  
-  args: Array<bigint | string | Hex >; 
-}
-
-const types = {
-  userOpHash: [
-    { name: 'digest', type: 'bytes32' }
-  ],
-} as const
-
 type gasPriceProps = {
   slow: {
     maxFeePerGas: bigint;
@@ -56,22 +44,30 @@ type gasPriceProps = {
   };
 }
 
-export const useLoyaltyCard = () => { // here types can be added: "exchangePoints", etc 
-  const [packedUserOp, setPackedUserOp] = useState<UserOperation<"v0.7">>()
-  const preVerificationGas: bigint = 247487n
-  const verificationGasLimit: bigint = 526114n
-  const callGasLimit: bigint = 75900n
+type sendUserOpProps = { 
+  abi: Abi;
+  functionName: string;  
+  args: Array<bigint | string | Hex >; 
+}
 
+const types = {
+  userOpHash: [
+    { name: 'digest', type: 'bytes32' }
+  ],
+} as const
+
+export const useLoyaltyCard = () => { // here types can be added: "exchangePoints", etc 
   const [error, setError] = useState<string | null>(null); 
-  const [isFetching, setIsFetching] = useState<boolean>(false); 
+  const [isLoading, setIsLoading] = useState<boolean>(false); 
   const [loyaltyCard, setLoyaltyCard] = useState<ToSmartAccountReturnType>(); 
+  const [userOp, setUserOp] = useState<UserOperation<"v0.7">>(); 
 
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
 
   const fetchLoyaltyCard = useCallback(
-    async (owner: `0x${string}`, loyaltyProgram: `0x${string}`, salt: bigint) => {
+    async (loyaltyProgram: `0x${string}`, salt: bigint) => {
       if (!publicClient) {
         setError("No publicClient available");
         return;
@@ -85,7 +81,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         return;
       }
 
-      setIsFetching(true);
+      setIsLoading(true);
       setError(null);
 
       const account = await toSmartAccount({
@@ -106,7 +102,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
               address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
               abi: factoryCardsAbi,
               functionName: 'getAddress',
-              args: [owner, loyaltyProgram, salt]
+              args: [embeddedWallet.address, loyaltyProgram, salt]
             })
               
             const encodedCallData = encodeFunctionData({
@@ -132,7 +128,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
               address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
               abi: factoryCardsAbi,
               functionName: 'getAddress',
-              args: [owner, loyaltyProgram, salt]
+              args: [embeddedWallet.address, loyaltyProgram, salt]
             })
             return cardAddress as `0x${string}`
           } catch(error) {
@@ -156,7 +152,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
               address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
               abi: factoryCardsAbi,
               functionName: 'getAddress',
-              args: [owner, loyaltyProgram, salt]
+              args: [embeddedWallet.address, loyaltyProgram, salt]
             })
 
             const nonce = await publicClient.readContract({
@@ -253,7 +249,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         // Sign a User Operation to be broadcasted via the Bundler.
         async signUserOperation(userOperation): Promise<`0x${string}`> {
           try {
-            // const fetchedGasPrice: gasPriceProps = await bundlerClient.getUserOperationGasPrice() 
             const provider = await embeddedWallet.getEthereumProvider();
             const walletAddress = embeddedWallet.address
 
@@ -261,7 +256,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
               address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
               abi: factoryCardsAbi,
               functionName: 'getAddress',
-              args: [owner, loyaltyProgram, salt]
+              args: [embeddedWallet.address, loyaltyProgram, salt]
             })
 
             const nonce = await publicClient.readContract({
@@ -343,12 +338,97 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         // },
       })
 
-      setIsFetching(false)
+      setIsLoading(false)
       setLoyaltyCard(account)
 
     }, [])
 
-    return { fetchLoyaltyCard, loyaltyCard, isFetching, error };
+    const createUserOp = useCallback(
+      async (functionName: string, args: any[]) => {
+        const callGasLimit: bigint = 75900n
+        const preVerificationGas: bigint = 247487n
+        const verificationGasLimit: bigint = 526114n
+        const salt: bigint = 123456n 
+
+        if (!publicClient) {
+          setError("No publicClient available");
+          return;
+        }
+        if (!prog.entryPoint) {
+          setError("No entryPoint available");
+          return;
+        }
+        if (!embeddedWallet) {
+          setError("No embedded Wallet available");
+          return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+        
+        const fetchedGasPrice: gasPriceProps = await bundlerClient.getUserOperationGasPrice() 
+        
+        try {
+          const cardAddress = await publicClient.readContract({
+            address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
+            abi: factoryCardsAbi,
+            functionName: 'getAddress',
+            args: [embeddedWallet.address, prog.address, salt]
+          })
+
+          const nonce = await publicClient.readContract({
+            address: cardAddress as `0x${string}`,
+            abi: loyaltyCardAbi,
+            functionName: 'getNonce'
+          })
+
+          const callData = encodeFunctionData({
+            abi: loyaltyProgramAbi,
+            functionName: functionName, 
+            args: args
+          })
+
+          const userOperation: UserOperation<"v0.7"> = {
+            /** The data to pass to the `sender` during the main execution call. */
+            callData: callData,
+            /** The amount of gas to allocate the main execution call */
+            callGasLimit: callGasLimit, 
+            /** Account factory. Only for new accounts. */
+            factory: undefined,
+            /** Data for account factory. */
+            factoryData: undefined, 
+            /** Maximum fee per gas. */
+            maxFeePerGas: fetchedGasPrice.standard.maxFeePerGas,
+            /** Maximum priority fee per gas. */
+            maxPriorityFeePerGas: fetchedGasPrice.standard.maxPriorityFeePerGas,
+            /** Anti-replay parameter. */
+            nonce: nonce as bigint, 
+            /** Address of paymaster contract. */
+            paymaster: undefined, 
+            /** Data for paymaster. */
+            paymasterData: undefined, 
+            /** The amount of gas to allocate for the paymaster post-operation code. */
+            paymasterPostOpGasLimit: undefined, 
+            /** The amount of gas to allocate for the paymaster validation code. */
+            paymasterVerificationGasLimit: undefined, 
+            /** Extra gas to pay the bunder. */
+            preVerificationGas: preVerificationGas, 
+            /** The account making the operation. */
+            sender: cardAddress as `0x${string}`,
+            /** Data passed into the account to verify authorization. */
+            signature: '0x',
+            /** The amount of gas to allocate for the verification step. */
+            verificationGasLimit: verificationGasLimit
+          }
+
+          setUserOp(userOperation)
+
+        } catch (error) {
+          setError(`Error @createUserOp: ${error}`)
+        }
+    }, [])
+
+    return { fetchLoyaltyCard, loyaltyCard, isLoading, error, createUserOp, userOp};
   
   }
 

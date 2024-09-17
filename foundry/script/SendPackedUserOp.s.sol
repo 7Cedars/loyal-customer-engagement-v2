@@ -2,7 +2,7 @@
 // Following along with class @https://updraft.cyfrin.io/courses/advanced-foundry/account-abstraction
 pragma solidity 0.8.26; 
 
-import {Script} from "forge-std/Script.sol";
+import {Script, console2} from "forge-std/Script.sol";
 import {PackedUserOperation} from "lib/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
 import {EntryPoint} from "lib/account-abstraction/contracts/core/EntryPoint.sol";
@@ -21,10 +21,13 @@ contract SendPackedUserOp is Script {
     HelperConfig.NetworkConfig memory config,
     address loyaltyCard
     ) public view returns (PackedUserOperation memory) {
-    uint256 nonce = vm.getNonce(loyaltyCard); // - 1;
+    uint256 nonce = vm.getNonce(loyaltyCard) - 1;
     PackedUserOperation memory userOp = _generateuserOperation(callData, loyaltyCard, nonce);
 
     // getUserOphash
+    console2.log("getUSerOpHash ABOUT TO BE CALLED");
+    console2.log("config.entryPoint length:", address(config.entryPoint).code.length); 
+
     bytes32 userOpHash = EntryPoint(payable(config.entryPoint)).getUserOpHash(userOp);
     bytes32 digest = userOpHash.toEthSignedMessageHash();
 

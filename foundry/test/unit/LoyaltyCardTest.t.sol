@@ -9,6 +9,7 @@ import {ECDSA} from "lib/openzeppelin-contracts/contracts/utils/cryptography/ECD
 import {MessageHashUtils} from "lib/openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ERC1967Proxy} from "lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Create2} from "lib/openzeppelin-contracts/contracts/utils/Create2.sol";
+import {calldataKeccak, min} from "lib/account-abstraction/contracts/core/Helpers.sol";
 
 // eth-infinitism imports // 
 import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
@@ -328,8 +329,8 @@ contract LoyaltyCardTest is Test {
 
     //act 
     console2.log("entryPoint address:", address(entryPoint)); 
-    vm.prank(address(entryPoint));  
-    IEntryPoint(helperConfig.getConfig().entryPoint).handleOps(ops, payable(randomUser)); 
+    vm.prank(customerAddress);  
+    IEntryPoint(address(entryPoint)).handleOps(ops, payable(randomUser)); 
     // vm.stopPrank(); 
 
     //assert -- build later
@@ -485,7 +486,6 @@ contract LoyaltyCardTest is Test {
           )
       );
   }
-
 }
 
 // contract testExternalCallContract is Test {

@@ -21,7 +21,7 @@ import {signerToSimpleSmartAccount, SimpleSmartAccount, SmartAccount} from "perm
 import { setAbstractAccount } from "@/redux/reducers/abstractAccountReducer";
 import { useSendTransaction } from 'wagmi'
 import { parseEther } from 'viem'
-import { useSendUserOp } from "@/hooks/useSendUserOp";
+import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { bundlerClient } from '../../context/clients' 
 import { loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi";
 
@@ -35,13 +35,19 @@ export default function Page() {
   const {wallets, ready: walletsReady} = useWallets();
   const dispatch = useDispatch() 
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {sendUserOp, status} = useSendUserOp(); 
+  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, createUserOp, userOp} = useLoyaltyCard(); 
 
-  console.log("embeddedWallet: ", embeddedWallet)
+  console.log("loyaltyCard: ", loyaltyCard)
+  console.log("isLoading: ", isLoading)
+  console.log("error: ", error)
+
+  useEffect(() => {
+    if (prog.address) {
+      fetchLoyaltyCard(prog.address, 12356n)
+    }
+  }, [])
 
   // NB CONTINUE HERE: Use the sendUserOp. -- and see what happens :D 
-
-  
   // const doSomething = async () => {
   //   if (embeddedWallet) {
   //   const provider = await embeddedWallet.getEthereumProvider();
@@ -127,17 +133,15 @@ export default function Page() {
       <div className="grow flex flex-col justify-start items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
         {/* The following is just for dev purposes...  */}
-          <Button onClick={() => {sendUserOp({
-            abi: loyaltyProgramAbi,
-            functionName: 'requestPointsAndCard', 
-            args: [
+          <Button onClick={() => {createUserOp(
+            'requestPointsAndCard', 
+            [
               qrPoints.program, 
               qrPoints.points, 
               qrPoints.uniqueNumber, 
               qrPoints.signature,
               embeddedWallet?.address ? embeddedWallet.address : '0x' 
-            ]
-          })}}>
+            ])}}> 
             Here should be points on card
           </Button>
         </div>
