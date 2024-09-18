@@ -6,24 +6,28 @@ import { TitleText } from "@/components/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
 import { useBalance } from 'wagmi'
 import { ChevronUpIcon } from '@heroicons/react/24/outline';
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { setBalanceProgram } from "@/redux/reducers/programReducer";
 import { useDispatch } from "react-redux";
 import { QrScanner } from "./QrScanner";
 // import { bundlerClient, publicClient } from "@/context/clients";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { privateKeyToAccount } from "viem/accounts";
-import {createWalletClient, custom, encodeFunctionData, http} from 'viem';
+import {Client, createClient, createWalletClient, custom, encodeFunctionData, http, numberToHex} from 'viem';
 import { parseEthAddress } from "@/utils/parsers";
 import { foundry } from "viem/chains";
-import {createSmartAccountClient, walletClientToSmartAccountSigner} from "permissionless";
+import {bundlerActions, createSmartAccountClient, ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner} from "permissionless"; 
 import {signerToSimpleSmartAccount, SimpleSmartAccount, SmartAccount} from "permissionless/accounts";
 import { setAbstractAccount } from "@/redux/reducers/abstractAccountReducer";
 import { useSendTransaction } from 'wagmi'
 import { parseEther } from 'viem'
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
-import { bundlerClient } from '../../context/clients' 
+// import { bundlerClient } from '../../context/clients' 
+import { createBundlerClient, SmartAccountImplementation } from 'viem/account-abstraction'
 import { loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi";
+import { publicClient } from "@/context/clients";
+import { toLoyaltyCardAccount } from "@/utils/toLoyaltyCardAccount";
+import { getBlock, sendTransaction, simulateContract, writeContract } from 'viem/actions'
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -35,83 +39,41 @@ export default function Page() {
   const {wallets, ready: walletsReady} = useWallets();
   const dispatch = useDispatch() 
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, createUserOp, userOp} = useLoyaltyCard(); 
+  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, createUserOp, userOp, sendUserOp} = useLoyaltyCard(); 
 
-  console.log("loyaltyCard: ", loyaltyCard)
-  console.log("isLoading: ", isLoading)
-  console.log("error: ", error)
+  // const [signature, setSignature] = useState<`0x${string}`>(); 
+
+  // The following brought to much complexity into front end code. 
+  // const getLoyaltyCard = useCallback(
+  //   async ( ) => {
+  //     if (embeddedWallet) {
+  //       const account = await toLoyaltyCardAccount(
+  //         embeddedWallet, 
+  //         prog.address as `0x${string}`,
+  //         '0x0',
+  //       )
+  //       const client = createWalletClient({
+  //         account: account, 
+  //         chain: foundry,
+  //         transport: http("http://localhost:4337"),
+  //       }).extend(bundlerActions(ENTRYPOINT_ADDRESS_V07))
+
+  //       setLoyaltyCardAccount(account)
+  //       setLoyaltyCardClient(client) 
+  //     }
+  //   }, [embeddedWallet, prog.address]) 
+
 
   useEffect(() => {
     if (prog.address) {
-      fetchLoyaltyCard(prog.address, 12356n)
+      fetchLoyaltyCard(prog.address, '0x0')
     }
-  }, [])
+  }, [prog.address, fetchLoyaltyCard])
 
-  // NB CONTINUE HERE: Use the sendUserOp. -- and see what happens :D 
-  // const doSomething = async () => {
-  //   if (embeddedWallet) {
-  //   const provider = await embeddedWallet.getEthereumProvider();
-  //   console.log("provider: ", provider)
-
-  //   const transactionRequest = {
-  //     to: prog.address,
-  //     value: 0,
-  //     data: '0x0'
-  //   };
-
-  //   const transactionHash = await provider.request({
-  //     method: 'eth_sendTransaction',
-  //     params: [transactionRequest],
-  //   });
-
-  //   console.log(transactionHash)
-  //   }
-  // }  
-  // doSomething() 
- 
-
-  // if (embeddedWallet) {
-  //   const getSmartAccountClient = async () => {
-  //     console.log("getSmartAccountClient called")
-  //     const eip1193provider = await embeddedWallet.getEthereumProvider();
-
-  //     const privyClient = createWalletClient({
-  //       account: parseEthAddress(embeddedWallet.address),
-  //       chain: foundry, // Replace this with the chain used by your application
-  //       transport: custom(eip1193provider)
-  //     })
+  useEffect(() => { 
+    if (userOp && loyaltyCard){ sendUserOp(userOp, loyaltyCard) }
+  }, [userOp, sendUserOp, loyaltyCard])
   
-  //     const customSigner = walletClientToSmartAccountSigner(privyClient);
-  //     console.log("customSigner: ", customSigner)
-      
-  //     const simpleSmartAccount = await signerToSimpleSmartAccount(publicClient, {
-  //       entryPoint: prog.entryPoint, 
-  //       signer: customSigner,
-  //       factoryAddress: prog.cardsFactory,
-  //     }) 
-
-  //     console.log("simpleSmartAccount: ", simpleSmartAccount)
-  
-  //     // Create the SmartAccountClient for requesting signatures and transactions (RPCs)
-  //     const smartAccountClient = createSmartAccountClient({
-  //       // £bug? typescript does not take the "simpleSmartAccount" object here. No time to properly fix, hence turned this page to jsx.   
-  //       account: simpleSmartAccount, // simpleSmartAccount is not compatible. 
-  //       entryPoint: prog.entryPoint, 
-  //       chain: foundry, 
-  //       bundlerTransport: http('http://localhost:4337')
-  //     });
-
-  //     console.log("smartAccountClient: ", smartAccountClient); 
-
-  //     const smartAccountAddress = await smartAccountClient.address
-  //     console.log("smartAccountAddress: ", smartAccountAddress)
-
-  //     // dispatch(setAbstractAccount(smartAccountClient))
-  //   }
-  //   getSmartAccountClient()
-  // }
-
-  if (qrPoints.points != 0n) console.log("DATA CAME THROUGH")
   // step 1: check for qrData in redux 
   // step 2: writeContract: redeemPoints. 
   // step 3: check event. if success: show info box. 
@@ -134,14 +96,17 @@ export default function Page() {
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
         {/* The following is just for dev purposes...  */}
           <Button onClick={() => {createUserOp(
-            'requestPointsAndCard', 
-            [
-              qrPoints.program, 
-              qrPoints.points, 
-              qrPoints.uniqueNumber, 
-              qrPoints.signature,
-              embeddedWallet?.address ? embeddedWallet.address : '0x' 
-            ])}}> 
+          'requestPointsAndCard', 
+          [
+            qrPoints.program, 
+            qrPoints.points, 
+            qrPoints.uniqueNumber, 
+            qrPoints.signature,
+            embeddedWallet?.address ? embeddedWallet.address : '0x' 
+          ], 
+          `0x0`
+        )
+        }}> 
             Here should be points on card
           </Button>
         </div>
