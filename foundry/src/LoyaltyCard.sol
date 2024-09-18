@@ -126,35 +126,37 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             if (s_owner != ECDSA.recover(hash, userOp.signature)) {
                 return SIG_VALIDATION_FAILED;
             } 
-            return _validateTarget(userOp.callData);
+            // return _validateTarget(userOp.callData);
 
-            // return SIG_VALIDATION_SUCCESS;
-    }
-
-    function _validateTarget(
-        bytes calldata data
-        ) internal virtual returns (uint256 validationData) {
-            // derived from a feature request by none other than PatrickC: https://github.com/ethereum/solidity/issues/14996
-            // retrieve the target contract and calldata of the userOp innerCall. 
-            uint256 BYTES4_SIZE = 4; 
-            uint256 bytesSize = data.length - BYTES4_SIZE;
-            bytes memory dataWithoutSelector = new bytes(bytesSize);
-            for (uint8 i = 0; i < bytesSize; i++) {
-                dataWithoutSelector[i] = data[i + BYTES4_SIZE];
-            }
-            (address targetContract, , bytes memory innerCall) = abi.decode(dataWithoutSelector, (address, uint256, bytes)); 
-            if(targetContract != s_loyaltyProgram) { 
-                return SIG_VALIDATION_FAILED; 
-            }
-            bytes4 targetSelector = bytes4(innerCall);
-            if(
-                targetSelector != ILoyaltyProgram.requestPointsAndCard.selector &&
-                targetSelector != ILoyaltyProgram.exchangePointsForGift.selector 
-                ) { 
-                return SIG_VALIDATION_FAILED; 
-            }
             return SIG_VALIDATION_SUCCESS;
     }
+
+    // NB! I think this is the cause of the AA23 reverted - arithmetic overflow/underflow error! 
+    // 
+    // function _validateTarget(
+    //     bytes calldata data
+    //     ) internal virtual returns (uint256 validationData) {
+    //         // derived from a feature request by none other than PatrickC: https://github.com/ethereum/solidity/issues/14996
+    //         // retrieve the target contract and calldata of the userOp innerCall. 
+    //         uint256 BYTES4_SIZE = 4; 
+    //         uint256 bytesSize = data.length - BYTES4_SIZE;
+    //         bytes memory dataWithoutSelector = new bytes(bytesSize);
+    //         for (uint8 i = 0; i < bytesSize; i++) {
+    //             dataWithoutSelector[i] = data[i + BYTES4_SIZE];
+    //         }
+    //         (address targetContract, , bytes memory innerCall) = abi.decode(dataWithoutSelector, (address, uint256, bytes)); 
+    //         if(targetContract != s_loyaltyProgram) { 
+    //             return SIG_VALIDATION_FAILED; 
+    //         }
+    //         bytes4 targetSelector = bytes4(innerCall);
+    //         if(
+    //             targetSelector != ILoyaltyProgram.requestPointsAndCard.selector &&
+    //             targetSelector != ILoyaltyProgram.exchangePointsForGift.selector 
+    //             ) { 
+    //             return SIG_VALIDATION_FAILED; 
+    //         }
+    //         return SIG_VALIDATION_SUCCESS;
+    // }
 
     function _call(address target, uint256 value, bytes memory data) internal {
         (bool success, bytes memory result) = target.call{value: value}(data);

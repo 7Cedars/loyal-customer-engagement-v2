@@ -13,7 +13,7 @@ import { QrScanner } from "./QrScanner";
 // import { bundlerClient, publicClient } from "@/context/clients";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { privateKeyToAccount } from "viem/accounts";
-import {Client, createClient, createWalletClient, custom, encodeFunctionData, http, numberToHex} from 'viem';
+import {Client, createClient, createWalletClient, custom, encodeFunctionData, http, numberToBytes, numberToHex} from 'viem';
 import { parseEthAddress } from "@/utils/parsers";
 import { foundry } from "viem/chains";
 import {bundlerActions, createSmartAccountClient, ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner} from "permissionless"; 
@@ -39,41 +39,16 @@ export default function Page() {
   const {wallets, ready: walletsReady} = useWallets();
   const dispatch = useDispatch() 
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, createUserOp, userOp, sendUserOp} = useLoyaltyCard(); 
+  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
   // const [signature, setSignature] = useState<`0x${string}`>(); 
 
-  // The following brought to much complexity into front end code. 
-  // const getLoyaltyCard = useCallback(
-  //   async ( ) => {
-  //     if (embeddedWallet) {
-  //       const account = await toLoyaltyCardAccount(
-  //         embeddedWallet, 
-  //         prog.address as `0x${string}`,
-  //         '0x0',
-  //       )
-  //       const client = createWalletClient({
-  //         account: account, 
-  //         chain: foundry,
-  //         transport: http("http://localhost:4337"),
-  //       }).extend(bundlerActions(ENTRYPOINT_ADDRESS_V07))
-
-  //       setLoyaltyCardAccount(account)
-  //       setLoyaltyCardClient(client) 
-  //     }
-  //   }, [embeddedWallet, prog.address]) 
-
-
   useEffect(() => {
     if (prog.address) {
-      fetchLoyaltyCard(prog.address, '0x0')
+      fetchLoyaltyCard(prog.address, numberToHex(123456, {size: 32}))
     }
   }, [prog.address, fetchLoyaltyCard])
 
-  useEffect(() => { 
-    if (userOp && loyaltyCard){ sendUserOp(userOp, loyaltyCard) }
-  }, [userOp, sendUserOp, loyaltyCard])
-  
   // step 1: check for qrData in redux 
   // step 2: writeContract: redeemPoints. 
   // step 3: check event. if success: show info box. 
@@ -95,17 +70,20 @@ export default function Page() {
       <div className="grow flex flex-col justify-start items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
         {/* The following is just for dev purposes...  */}
-          <Button onClick={() => {createUserOp(
-          'requestPointsAndCard', 
-          [
-            qrPoints.program, 
-            qrPoints.points, 
-            qrPoints.uniqueNumber, 
-            qrPoints.signature,
-            embeddedWallet?.address ? embeddedWallet.address : '0x' 
-          ], 
-          `0x0`
-        )
+          <Button onClick={() => {
+            if (loyaltyCard) 
+              sendUserOp(
+                loyaltyCard, 
+                'requestPointsAndCard', 
+                [
+                  qrPoints.program, 
+                  qrPoints.points, 
+                  qrPoints.uniqueNumber, 
+                  qrPoints.signature,
+                  embeddedWallet?.address ? embeddedWallet.address : '0x' 
+                ], 
+                numberToHex(123456, {size: 32})
+              )
         }}> 
             Here should be points on card
           </Button>

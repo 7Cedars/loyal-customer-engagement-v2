@@ -9,12 +9,11 @@ import { createSmartAccountClient, ENTRYPOINT_ADDRESS_V07, getSenderAddress, par
 import { signerToSimpleSmartAccount } from "permissionless/accounts"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Abi, Account, encodeFunctionData, encodePacked, Hex, hexToBigInt, numberToBytes, numberToHex, http, createWalletClient, custom, EIP1193Provider, ByteArray, SignableMessage, concat, toBytes, Address, Client, Prettify, pad, parseAbi, hexToBytes } from "viem"
-import { EntryPointVersion, PackedUserOperation, SmartAccount, SmartAccountImplementation, toPackedUserOperation, ToSmartAccountReturnType } from "viem/account-abstraction"
+import { EntryPointVersion, getUserOperationHash, PackedUserOperation, SmartAccount, SmartAccountImplementation, toPackedUserOperation, ToSmartAccountReturnType } from "viem/account-abstraction"
 import { foundry } from "viem/chains"
 import { useReadContract, useReadContracts, useSignTypedData, useWalletClient } from "wagmi"
 import { SignTypedDataData } from "wagmi/query"
 import { toSmartAccount } from 'viem/account-abstraction'
-import { signMessage } from "viem/accounts"
 import { env } from "process"
 import { toLoyaltyCardAccount } from "@/utils/toLoyaltyCardAccount"
 
@@ -39,40 +38,6 @@ type gasPriceProps = {
   };
 }
 
-// type sendUserOpProps = { 
-//   abi: Abi;
-//   functionName: string;  
-//   args: Array<bigint | string | Hex >; 
-// }
-
-const types = {
-  userOpHash: [
-    { name: 'digest', type: 'bytes32' }
-  ],
-  EIP712Domain: [
-    {
-      name: 'name',
-      type: 'string',
-    },
-    {
-      name: 'version',
-      type: 'string',
-    },
-    {
-      name: 'chainId',
-      type: 'uint256',
-    },
-    {
-      name: 'salt',
-      type: 'string',
-    },
-    {
-      name: 'verifyingContract',
-      type: 'string',
-    },
-  ],
-} 
-
 export const useLoyaltyCard = () => { // here types can be added: "exchangePoints", etc 
   const [error, setError] = useState<string | null>(null); 
   const [isLoading, setIsLoading] = useState<boolean>(false); 
@@ -82,7 +47,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
   console.log("error: ", error)
 
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-  const {signTypedData} = usePrivy();
+  const {signMessage} = usePrivy();
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
 
@@ -144,28 +109,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
               functionName: 'execute',
               args: [calls[0].to, calls[0].value ?? 0n, calls[0].data ?? '0x'],
             })
-          
-          // try {
-          //   const cardAddress = await publicClient.readContract({
-          //     address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
-          //     abi: factoryCardsAbi,
-          //     functionName: 'getAddress',
-          //     args: [embeddedWallet.address, loyaltyProgram, salt]
-          //   })
-          //   console.log("cardAddress:", cardAddress)
-              
-          //   const encodedCallData = encodeFunctionData({
-          //       abi: loyaltyCardAbi,
-          //       functionName: 'execute', 
-          //       args: [
-          //         cardAddress,
-          //         0n, // cards never send any value. period. 
-          //         calls[0] // cards can only send one call at a time.  
-          //       ]
-          //     })
-          //     console.log("encodedCallData: ", encodedCallData)
-
-          //     return encodedCallData
             } catch(error) {
               setError(`Error @encodeCalls: ${error}`)
               return '0x'
@@ -265,105 +208,33 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         // Sign a User Operation to be broadcasted via the Bundler.
         // NB! in toSoldadySmartAccount example. This is a simple sign message! NOT typedData! 
         async signUserOperation(userOperation): Promise<`0x${string}`> {
-          console.log("SIGN USER OPERATION CALLED") 
-          let nonce;
           const cardAddress = await this.getAddress()
 
-          try {
-            nonce = await publicClient.readContract({
-              address: cardAddress as `0x${string}`,
-              abi: loyaltyCardAbi,
-              functionName: 'getNonce'
-            })
-          } catch {
-            nonce = 0n; // if no address is available, returns nonce = 0n. 
-          }
+          const userOpHash = getUserOperationHash({
+            chainId: 31337, // chainId,
+            entryPointAddress: entryPoint.address,
+            entryPointVersion: entryPoint.version,
+            userOperation: {
+              ...(userOperation as any),
+              sender: cardAddress,
+            },
+          })
+          console.log("viems userOpHash:", userOpHash)
 
           try {
-            // NB! converting the UserOperation object to a PackedUserOperation object. 
-            const packedUserOp: PackedUserOperation = { //
-              /** Concatenation of {@link UserOperation`verificationGasLimit`} (16 bytes) and {@link UserOperation`callGasLimit`} (16 bytes) */
-              accountGasLimits: concat([
-                numberToHex(userOperation.verificationGasLimit, {size: 16}), 
-                numberToHex(userOperation.callGasLimit, {size: 16}),
-                ]), 
-              /** The data to pass to the `sender` during the main execution call. */
-              callData: userOperation.callData, 
-              /** Concatenation of {@link UserOperation`factory`} and {@link UserOperation`factoryData`}. */
-              initCode: concat([
-                userOperation.factory ? userOperation.factory : '0x11', 
-                userOperation.factoryData ? userOperation.factoryData : '0x11'
-              ]),
-              /** Concatenation of {@link UserOperation`maxPriorityFee`} (16 bytes) and {@link UserOperation`maxFeePerGas`} (16 bytes) */
-              gasFees: concat([
-                numberToHex(userOperation.maxPriorityFeePerGas, {size: 16}), 
-                numberToHex(userOperation.maxFeePerGas, {size: 16}),
-                ]), 
-              /** Anti-replay parameter. */
-              nonce: nonce as bigint, 
-              /** Concatenation of paymaster fields (or empty). */
-              paymasterAndData: '0x', 
-              /** Extra gas to pay the bunder. */
-              preVerificationGas: userOperation.preVerificationGas,
-              /** The account making the operation. */
-              sender: userOperation.sender  as `0x${string}`,
-              /** Data passed into the account to verify authorization. */
-              signature: '0x'
-            }
-
-            const userOpHashData = await publicClient.readContract({
-              address: prog.entryPoint as `0x${string}`,
-              abi: entryPointAbi,
-              functionName: 'getUserOpHash',
-              args: [packedUserOp]
-            })
-
-            console.log("userOpHashData: ", userOpHashData)
-
             const uiConfig = {
               title: 'Sample title text',
               description: 'Sample description text',
               buttonText: 'Sample button text',
             };
-
-            const domain = {
-              name: 'Example userOp',
-              version: '1.0.0',
-              chainId: 31337,
-              salt: hexToBytes(salt),
-              verifyingContract: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
-            };
-
-            const typedData: SignTypedDataParams = { // I hope this is correct - let's see.. 
-              primaryType: 'userOpHash',
-              domain: domain, 
-              types: types, 
-              message: {digest: userOpHashData} as Record<string, unknown>
-            } 
- 
-            const signature = await signTypedData(typedData, uiConfig);
+            const signature = await signMessage(userOpHash, uiConfig);
 
             return signature as `0x${string}`
           } catch (error) {
             setError(`Error @signUserOperation: ${error}`)
-            return '0x'
+            return '0x11'
           }
         },
-       
-        // (Optional) Extend the Smart Account with custom properties.
-        // extend: {
-        //   abi: [/* ... */],
-        //   factory: {
-        //     abi: [/* ... */],
-        //     address: '0xda4b37208c41c4f6d1b101cac61e182fe1da0754',
-        //   },
-        // },
-        // (Optional) User Operation configuration.
-        // userOperation: {
-        //   async estimateGas(userOperation) {
-        //     // Estimate gas properties for a User Operation.
-        //   },
-        // },
       })
 
       setIsLoading(false)
@@ -389,7 +260,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
           setError("No embedded Wallet available");
           return;
         }
-
 
         setIsLoading(true);
         setError(null);
@@ -492,28 +362,19 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     }, [])
 
     const sendUserOp = useCallback(
-      async (userOperation: UserOperation<"v0.7">, loyaltyCard: ToSmartAccountReturnType ) => {
+      async (loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: `0x${string}`) => {
         console.log("sendUserOp called")
 
-        const signature = await loyaltyCard.signUserOperation(userOperation);
-        const userOpSigned = {...userOperation, signature: signature} 
-
-        const hash = await bundlerClient.sendUserOperation({userOperation: userOpSigned}) 
-        console.log("HASH: ", hash)
-        //   account: loyaltyCard,
-        //   calls: [{ to: prog.address , value: 0, factory: '0x0' }]
-
-        //   // userOperation: userOpSigned
-        // })
-        // if (userOp) {
-        //   const hash = await bundlerClient.sendUserOperation(userOp)
-        //   console.log("HASH: ", hash)
-        // }
-        // (functionName: string, args: any[])
-
-        
-        
-      
+        const userOperation = await createUserOp(functionName, args, salt);
+        if (userOperation) {
+          const signature = await loyaltyCard.signUserOperation(userOperation);
+          const userOpSigned = {...userOperation, signature: signature} 
+  
+          const hash = await bundlerClient.sendUserOperation({userOperation: userOpSigned}) 
+          console.log("HASH: ", hash)     
+        } else {
+          Error("sendUserOp: userOperation did not come through")
+        }
       }, [])
 
     return { fetchLoyaltyCard, loyaltyCard, isLoading, error, createUserOp, userOp, sendUserOp};
