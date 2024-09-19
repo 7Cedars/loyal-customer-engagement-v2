@@ -11,20 +11,15 @@ type TabChoiceProps = {
   onChange?: (choice: string) => void;
 };
 
-const appearance = [
-  "text-xs",
-  "text-md",
-  "text-lg"
-]
-
 export const TabChoice = ({
   optionOne = "choiceOne", 
-  optionTwo = "choiceTwo", 
+  optionTwo = "choiceTwo",
+  initialChoice = 0,  
   onChange,
 }: TabChoiceProps) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const choices: string[] = [optionOne, optionTwo]
-  const [choice, setChoice] = useState<string | undefined>()
+  const [choice, setChoice] = useState<string | undefined>(choices[initialChoice])
 
   const handleChange = ({target}: {target:string}) => {
     setChoice(target)

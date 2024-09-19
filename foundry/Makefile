@@ -68,7 +68,7 @@ testDeploy:
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFridayFifteen $(OPT_SEPOLIA_TEST_ARGS)
 
 deploy:
-#	@forge script script/DeployFactoryPrograms.s.sol:DeployFactoryPrograms $(OPT_SEPOLIA_DEPLOY_ARGS)
+	@forge script script/DeployFactoryPrograms.s.sol:DeployFactoryPrograms $(OPT_SEPOLIA_DEPLOY_ARGS)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCoffee $(OPT_SEPOLIA_DEPLOY_ARGS)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCupCake $(OPT_SEPOLIA_DEPLOY_ARGS)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFridayFifteen $(OPT_SEPOLIA_DEPLOY_ARGS)

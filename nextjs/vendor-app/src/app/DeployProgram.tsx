@@ -16,12 +16,18 @@ import { Program, Status } from '@/types'
 import { readContracts } from '@wagmi/core'
 import { wagmiConfig } from '../../wagmi-config'
 
+type ImageLoaderProps = {
+  src: string; 
+  width: number; 
+  quality: number; 
+}
+
 export const DeployProgram = () => {
   const [ name, setName ] = useState<string | undefined>() 
   const [ base, setBase ] = useState<string>("#2f4632") 
   const [ status, setStatus ] = useState<Status>("isIdle") 
   const [ accent, setAccent ] = useState<string>("#a9b9e8")
-  const [ uri, setUri ] = useState<string>("www.somewhere.io") 
+  const [ uri, setUri ] = useState<string | undefined>() 
   const [ tab, setTab ] = useState<string>("Base") 
   const { writeContract } = useWriteContract()
   const cardsFactory: Hex = parseEthAddress(process.env.NEXT_PUBLIC_CARDS_FACTORY) 
@@ -99,9 +105,22 @@ export const DeployProgram = () => {
     },
   })
 
-  useEffect(() => {
+  const parseImage = async (src: string) => {
+    
+    const res = await fetch(src);
+    const buff = await res.blob();
+    console.log("buff: ", buff)
+    const isImage = buff.type.startsWith('image/png')
 
-  }, [])
+    if (isImage) {
+      setUri(src)
+      console.log("image successfully set")
+    } else {
+      setUri("/logo.png") // "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC") 
+      console.log("image did not pass test")
+    }
+
+  }
 
   const nameProgram: React.JSX.Element = (
     <>
@@ -118,11 +137,14 @@ export const DeployProgram = () => {
           /> 
       </div>
 
-      <InputBox
-        nameId = "name"
-        placeholder={"Enter a name here."}
-        onChange = {(event: ChangeEvent<HTMLInputElement>) => setName(event.target.value)} // this needs a parser.... 
-      />
+      <div className='h-20'>
+        
+        <InputBox
+          nameId = "name"
+          placeholder={"Enter a name here."}
+          onChange = {(event: ChangeEvent<HTMLInputElement>) => setName(event.target.value)} // this needs a parser.... 
+        />
+      </div>
 
       <div />  
     </>
@@ -182,22 +204,36 @@ export const DeployProgram = () => {
           className="w-fit h-fit text-md text-center border-4 rounded-lg p-6"
           style = {{color: accent, borderColor: accent, backgroundColor: base }}  
           >
-          <Image
-              className="w-full"
-              width={100}
-              height={100}
-              style = {{ objectFit: "fill" }} 
-              src={"https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"}
-              alt="No valid image detected."
-            />
+           { uri ?  
+            <Image
+                className="w-full"
+                width={100}
+                height={100}
+                style = {{ objectFit: "fill" }} 
+                src={uri}
+                alt="No valid image detected."
+                onError={(e) => console.log(e)}
+              /> :
+
+              <div className={`text-center text-lg`} style = {{color: accent}}>
+                 No valid image at Url
+              </div>
+           }
         </div>
       </section>
+
+      <div className='h-fit flex-col'> 
+      <NoteText 
+          message = "Only png images allowed. Full url required, including 'https://'."
+          size = {0}
+          /> 
 
       <InputBox
         nameId = "uri"
         placeholder={"Enter a uri (https://...) to an image."}
-        onChange = {(event: ChangeEvent<HTMLInputElement>) => setUri(event.target.value)} // this needs a parser.... 
+        onChange = {(event: ChangeEvent<HTMLInputElement>) => parseImage(event.target.value)} // this needs a parser.... 
       />   
+      </div>
     </> 
   )
   // "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC"
@@ -206,7 +242,7 @@ export const DeployProgram = () => {
   
   return (
     <>
-        <div className={`w-full h-[50vh] flex flex-col content-center max-w-lg gap-4 p-2`}> 
+        <div className={`w-full h-fit flex flex-col content-center max-w-lg gap-4 p-2`}> 
           <EmblaCarousel slides={SLIDES} options={OPTIONS} />
         </div>
         <div className={`w-full h-fit grid grid-cols-1 max-w-lg gap-4 px-2`}>

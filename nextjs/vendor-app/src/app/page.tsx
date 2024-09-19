@@ -101,32 +101,32 @@ export default function Home() {
           { 
             savedPrograms.length > 0 ? 
               savedPrograms.map((program, i) => 
-                <>
+                
+                <div 
+                  key = {i} 
+                  className={`relative w-full h-full flex flex-row disabled:opacity-50 text-md text-center border content-center rounded-lg p-2 mt-0 h-12`} 
+                  style = {{
+                    color: program.colourAccent, 
+                    borderColor: program.colourAccent, 
+                    backgroundColor: program.colourBase
+                  }} 
+                  >
+                  <button 
+                    className="grow" 
+                    onClick={() => handleSelectionProgram(program)}>
+                    {program.name}
+                  </button>
                   <div 
-                    key = {i} 
-                    className={`relative w-full h-full flex flex-row disabled:opacity-50 text-md text-center border content-center rounded-lg p-2 mt-0 h-12`} 
-                    style = {{
-                      color: program.colourAccent, 
-                      borderColor: program.colourAccent, 
-                      backgroundColor: program.colourBase
-                    }} 
-                    >
-                    <button 
-                      className="grow" 
-                      onClick={() => handleSelectionProgram(program)}>
-                      {program.name}
+                    className="grid grid-cols-1 items-center absolute inset-y-0 right-0 hover:opacity-100 opacity-0">
+                    <button onClick={() => handleRemoveProgram(program.address)}>
+                      <XMarkIcon
+                        className={"h-6 w-6 mx-2"}
+                        style={{color: program.colourAccent}}
+                      />
                     </button>
-                    <div 
-                      className="grid grid-cols-1 items-center absolute inset-y-0 right-0 hover:opacity-100 opacity-0">
-                      <button onClick={() => handleRemoveProgram(program.address)}>
-                        <XMarkIcon
-                          className={"h-6 w-6 mx-2"}
-                          style={{color: program.colourAccent}}
-                        />
-                      </button>
-                    </div>
                   </div>
-                </>
+                </div>
+                
                 )
                 : 
                 null 

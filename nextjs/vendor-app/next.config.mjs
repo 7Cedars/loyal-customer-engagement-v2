@@ -11,14 +11,18 @@ const nextConfig = {
   // reactStrictMode: false,  // this is normally set to true 
   images: {
     remotePatterns: [
+      // {
+      //   protocol: 'https',
+      //   hostname: 'aqua-famous-sailfish-288.mypinata.cloud',
+      //   port: '',
+      //   pathname: '/ipfs/**',
+      // },
       {
         protocol: 'https',
-        hostname: 'aqua-famous-sailfish-288.mypinata.cloud',
-        port: '',
-        pathname: '/ipfs/**',
+        hostname: '*'
       },
     ],
-    dangerouslyAllowSVG: true,
+    dangerouslyAllowSVG: false,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
