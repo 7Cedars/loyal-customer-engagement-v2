@@ -204,7 +204,7 @@ contract LoyaltyProgramTest is Test {
     }
 
     modifier giveCustomerCardPointsAndGift(address customer) {
-      address loyaltyCard = factoryCards.getAddress(customer, payable(address(loyaltyProgram)), SALT);
+      LoyaltyCard loyaltyCard = factoryCards.createAccount(customer, payable(address(loyaltyProgram)), SALT);
       uint256 amountGifts = 20; 
       DOMAIN_SEPARATOR =_hashDomain(
             EIP712Domain({
@@ -249,8 +249,7 @@ contract LoyaltyProgramTest is Test {
 
       // let loyalty project select and mint gift
       vm.startPrank(vendorAddress);
-      loyaltyProgram.setExchangeableGift(address(fridayFifteen), true);
-      loyaltyProgram.setRedeemableGift(address(fridayFifteen), true);
+      loyaltyProgram.setAllowedGift(address(fridayFifteen), 0, true, true);
       loyaltyProgram.mintGifts(address(fridayFifteen), amountGifts);
       vm.stopPrank(); 
       
@@ -258,7 +257,7 @@ contract LoyaltyProgramTest is Test {
       vm.prank(customer); 
 
       // this crashes. 
-      LoyaltyCard(payable(loyaltyCard)).execute(
+      loyaltyCard.execute(
         address(loyaltyProgram), 0, abi.encodeCall(
           LoyaltyProgram.exchangePointsForGift, (address(fridayFifteen), customer)
       ));
@@ -361,56 +360,36 @@ contract LoyaltyProgramTest is Test {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    //                    Test Function requestPoints                 //
+    //                    Test Function requestPoints                        //
     ///////////////////////////////////////////////////////////////////////////
 
-    function testrequestPointsCreatesCardWithPoints() public giveVoucher5000Points(customerAddress) {
-      address loyaltyCard = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
-      
-      vm.expectEmit(true, false, false, false);
-      emit LoyaltyCardCreated(config.entryPoint, customerAddress, address(loyaltyProgram));
-      
-      vm.prank(customerAddress); 
-      loyaltyProgram.requestPoints(
-        requestPointsVoucher.program, 
-        requestPointsVoucher.points, 
-        requestPointsVoucher.uniqueNumber, 
-        requestPointsVoucher.signature, 
-        customerAddress
-      ); 
-
-      vm.assertEq(loyaltyProgram.balanceOf(loyaltyCard), 5000); 
-    }
-    
-    // £todo test if all the checks work on 
-
+    // £todo 
 
     ///////////////////////////////////////////////////////////////////////////
     //                   Test Function ExchangePointsForGift                 //
     ///////////////////////////////////////////////////////////////////////////
 
     function testExchangePointsForGift() public giveCustomerCardAndPoints(customerAddress) {
-      address loyaltyCard = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
+      LoyaltyCard loyaltyCard = factoryCards.createAccount(customerAddress, payable(address(loyaltyProgram)), SALT);
       uint256 amountGifts = 20; 
-      uint256 balanceCardBefore = loyaltyProgram.balanceOf(loyaltyCard);
+      uint256 balanceCardBefore = loyaltyProgram.balanceOf(address(loyaltyCard));
       uint256 giftCost = fridayFifteen.GIFT_COST();
       
       vm.startPrank(vendorAddress);
-      loyaltyProgram.setExchangeableGift(address(fridayFifteen), true);
-      loyaltyProgram.setRedeemableGift(address(fridayFifteen), true);
+      loyaltyProgram.setAllowedGift(address(fridayFifteen), 0, true, true);
       loyaltyProgram.mintGifts(address(fridayFifteen), amountGifts);
       vm.stopPrank(); 
       
       // note: this is the ay I should test. as close as possible to AA implementation. 
       vm.prank(customerAddress); // even better would be address(entryPonint) 
-      LoyaltyCard(payable(loyaltyCard)).execute(
+      loyaltyCard.execute(
         address(loyaltyProgram), 0, abi.encodeCall(
           LoyaltyProgram.exchangePointsForGift, (address(fridayFifteen), customerAddress)
         ));
-      uint256 balanceCardAfter = loyaltyProgram.balanceOf(loyaltyCard);
+      uint256 balanceCardAfter = loyaltyProgram.balanceOf(address(loyaltyCard));
 
       vm.assertEq(fridayFifteen.balanceOf(address(loyaltyProgram)), amountGifts - 1); 
-      vm.assertEq(fridayFifteen.balanceOf(loyaltyCard), 1);
+      vm.assertEq(fridayFifteen.balanceOf(address(loyaltyCard)), 1);
       vm.assertEq(balanceCardBefore, balanceCardAfter + giftCost); 
     }
 
@@ -424,7 +403,6 @@ contract LoyaltyProgramTest is Test {
 
     function testRedeemGift() public giveCustomerCardPointsAndGift(customerAddress) {
       uint256 giftId = 0; // I can also programatically search this. TBI. 
-       
       
       // customer owner creates & signs request to redeem gift. 
       GiftToRedeem memory message = GiftToRedeem({

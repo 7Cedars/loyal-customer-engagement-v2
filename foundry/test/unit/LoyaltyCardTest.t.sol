@@ -214,7 +214,7 @@ contract LoyaltyCardTest is Test {
   }
 
   modifier giveCustomerCardPointsAndGift(address customer) {
-    address loyaltyCard = factoryCards.getAddress(customer, payable(address(loyaltyProgram)), SALT);
+    LoyaltyCard loyaltyCard = factoryCards.createAccount(customerAddress, payable(address(loyaltyProgram)), SALT);
     uint256 amountGifts = 20; 
     DOMAIN_SEPARATOR =_hashDomain(
           EIP712Domain({
@@ -259,7 +259,7 @@ contract LoyaltyCardTest is Test {
     
     // customer exchanges points for gift. 
     vm.prank(customer); 
-    LoyaltyCard(payable(loyaltyCard)).execute(
+    loyaltyCard.execute(
       address(loyaltyProgram), 0, abi.encodeCall(
         LoyaltyProgram.exchangePointsForGift, (address(fridayFifteen), customer)
     ));
@@ -303,8 +303,7 @@ contract LoyaltyCardTest is Test {
 
     // let loyalty project select and mint gift
     vm.startPrank(vendorAddress);
-    loyaltyProgram.setExchangeableGift(address(fridayFifteen), true);
-    loyaltyProgram.setRedeemableGift(address(fridayFifteen), true);
+    loyaltyProgram.setAllowedGift(address(fridayFifteen), 0, true, true);
     loyaltyProgram.mintGifts(address(fridayFifteen), amountGifts);
     vm.stopPrank(); 
   }
@@ -314,15 +313,8 @@ contract LoyaltyCardTest is Test {
   ///////////////////////////////////////////////
 
   function testEntryPointCanExecuteExchangePoints() public giveCustomerCardPointsAndGift(customerAddress) {
-    address customerCardAddress = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
-    LoyaltyCard customerCard = LoyaltyCard(payable(customerCardAddress)); 
+    LoyaltyCard customerCard = factoryCards.createAccount(customerAddress, payable(address(loyaltyProgram)), SALT);
     uint256 amountGifts = 15; 
-    
-    vm.startPrank(vendorAddress);
-    loyaltyProgram.setExchangeableGift(address(freeCoffee), true);
-    loyaltyProgram.setRedeemableGift(address(freeCoffee), true);
-    loyaltyProgram.mintGifts(address(freeCoffee), amountGifts);
-    vm.stopPrank(); 
 
     // arrange
     address dest = address(loyaltyProgram);
@@ -330,9 +322,12 @@ contract LoyaltyCardTest is Test {
     bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, address(freeCoffee), customerAddress);
     bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
     
+    HelperConfig.NetworkConfig memory config = helperConfig.getConfig(); 
+    config.key = customerKey; 
+
     vm.prank(customerAddress);  
     PackedUserOperation memory packedUserOp = sendPackedUserOp.generateSignedUserOperation(
-      executeCallData, helperConfig.getConfig(), address(customerCard) 
+      executeCallData, config, address(customerCard) 
       );
     PackedUserOperation[] memory ops = new PackedUserOperation[](1); 
     ops[0] = packedUserOp; 
@@ -347,18 +342,20 @@ contract LoyaltyCardTest is Test {
     // assertEq(usdc.balanceOf(address(customerCard)), AMOUNT);
   }
 
-  function testEntryPointRevertsExecuteWithDisallowedFunction() public giveCustomerCardPointsAndGift(customerAddress) {
-    address customerCardAddress = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
-    LoyaltyCard customerCard = LoyaltyCard(payable(customerCardAddress)); 
+  function testEntryPointRevertsExecuteWithDisallowedAddress() public giveCustomerCardPointsAndGift(customerAddress) {
+    LoyaltyCard customerCard = factoryCards.createAccount(customerAddress, payable(address(loyaltyProgram)), SALT);
 
     // arrange
-    address dest = address(loyaltyProgram);
+    address dest = address(fridayFifteen); // Note, not loyaltyprogram.  
     uint256 value = 0;
     bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.setAllowCreationCards.selector, false);
     bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
 
+    HelperConfig.NetworkConfig memory config = helperConfig.getConfig(); 
+    config.key = customerKey; 
+
     PackedUserOperation memory packedUserOp = sendPackedUserOp.generateSignedUserOperation(
-      executeCallData, helperConfig.getConfig(), address(customerCard) 
+      executeCallData, config, address(customerCard) 
       );
 
     PackedUserOperation[] memory ops = new PackedUserOperation[](1); 

@@ -34,9 +34,7 @@ interface ILoyaltyProgram is IERC165, IERC721Receiver, IERC20 {
 
     function mintGifts(address gift, uint256 amount) external;  
 
-    function setExchangeableGift(address gift, bool exchangeable) external; 
-
-    function setRedeemableGift(address gift, bool redeemable) external;  
+    function setAllowedGift(address gift, uint256 index, bool exchangeable, bool redeemable) external; 
 
     function setCardBlocked(address owner, bool blocked) external;
 

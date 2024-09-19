@@ -46,6 +46,8 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     error LoyaltyProgram__CardDoesNotOwnGift();
     error LoyaltyProgram__GiftExchangeFailed();
     error LoyaltyProgram__OnlyEntryPoint();
+    error LoyaltyProgram__GiftAddressAndArrayDoNotAlign(); 
+    error LoyaltyProgram__GiftAlreadyAllowed(); 
 
     //////////////////////////////////////////////////////////////////
     //                   Type declarations                          //
@@ -85,8 +87,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     //                    State variables                           //
     //////////////////////////////////////////////////////////////////
     mapping(address => AllowedGift) public allowedGifts;
-    address[] public exchangableGifts;
-    address[] public redeemableGifts;
+    address[] public allowedGiftsArray; // needed for quick retrieval gifts linked to program. 
 
     mapping(bytes => bool) public s_executed; // combines RequestPoints and giftToRedeem hashes.
     mapping(address => bool) private _blockedCards;
@@ -110,8 +111,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     //////////////////////////////////////////////////////////////////
     event Log(string func, uint256 gas);
     event LoyaltyProgramDeployed(address indexed owner, address indexed program, uint256 indexed version);
-    event ExchangeableGiftSet(address indexed loyaltyGift, bool indexed exchangeable);
-    event RedeemableGiftSet(address indexed loyaltyGift, bool indexed redeemable);
+    event AllowedGiftSet(address indexed loyaltyGift, bool indexed exchangeable, bool indexed redeemable);
     event LoyaltyPointsExchangeForGift(address indexed owner, address indexed gift, uint256 indexed giftId);
     event LoyaltyGiftRedeemed(address indexed owner, address indexed gift, uint256 indexed giftId);
     event LoyaltyCardBlocked(address indexed owner, bool indexed blocked);
@@ -348,40 +348,40 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
 
     /**
      * £todo: natspec
+     Note: this function is not called very often. But the array of gifts _is_ called very often 
+     So the inefficiency (and complexity) of using an array in addition to the mapping is accepted.  
+     Note: if deleting or updating a gift, index of non-zero is needed. 
+     Note: index of 0 implies that it is a newly allowed gift. 
      */
-    function setExchangeableGift(address gift, bool exchangeable) external onlyOwner {
+    function setAllowedGift(address gift, uint256 index, bool exchangeable, bool redeemable) external onlyOwner {
+        // checks 
         if (!ERC165Checker.supportsInterface(gift, type(ILoyaltyGift).interfaceId)) {
             revert LoyaltyProgram__IncorrectInterface(gift);
         }
-        if (exchangeable == false) {
-            // £todo remove item from exchangableGifts.
+        if (index != 0 && allowedGiftsArray[index] != gift) {
+            revert LoyaltyProgram__GiftAddressAndArrayDoNotAlign();
         }
-        if (exchangeable == true) {
-            // £todo add item from exchangableGifts.
+        if (
+            index == 0 && 
+            allowedGifts[gift].redeemable == true || 
+            allowedGifts[gift].exchangeable == true 
+            ) {
+            revert LoyaltyProgram__GiftAlreadyAllowed();
         }
 
+        // different actions re allowedGiftsArray according to index and logged gifts. 
+        if (index == 0) {
+            allowedGiftsArray.push(gift); 
+        }
+        if (index != 0 && exchangeable == false && redeemable == false) {
+            allowedGiftsArray[index] = allowedGiftsArray[allowedGiftsArray.length - 1];
+            allowedGiftsArray.pop();
+        }
+        // updating the allowedGifts mapping.
         allowedGifts[gift].exchangeable = exchangeable;
-
-        emit ExchangeableGiftSet(gift, exchangeable);
-    }
-
-    /**
-     * £todo: natspec
-     */
-    function setRedeemableGift(address gift, bool redeemable) external onlyOwner {
-        if (!ERC165Checker.supportsInterface(gift, type(ILoyaltyGift).interfaceId)) {
-            revert LoyaltyProgram__IncorrectInterface(gift);
-        }
-        if (redeemable == false) {
-            // £todo remove item from exchangableGifts.
-        }
-        if (redeemable == true) {
-            // £todo add item from exchangableGifts.
-        }
-
         allowedGifts[gift].redeemable = redeemable;
 
-        emit RedeemableGiftSet(gift, redeemable);
+        emit AllowedGiftSet(gift, exchangeable, redeemable);
     }
 
     /**
