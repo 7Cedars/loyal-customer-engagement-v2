@@ -36,7 +36,7 @@ contract SendPackedUserOp is Script {
     bytes32 r; 
     bytes32 s;
     if (block.chainid == 31337) {
-      (v, r, s) = vm.sign(vm.envUint("DEFAULT_ANVIL_KEY_1"), digest); // NB! it is the customerCard that signs here! 
+      (v, r, s) = vm.sign(config.key, digest); // NB! it is the customerCard that signs here! 
     } else {
       (v, r, s) = vm.sign(config.account, digest);
     }

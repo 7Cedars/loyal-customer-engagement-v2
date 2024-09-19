@@ -23,9 +23,10 @@ import {FactoryPrograms} from "../../src/FactoryPrograms.sol";
 import {LoyaltyCard} from  "../../src/LoyaltyCard.sol";
 import {FactoryCards} from  "../../src/FactoryCards.sol";
 import {FridayFifteen} from "../../src/sample-gifts/FridayFifteen.sol";
+import {FreeCoffee} from "../../src/sample-gifts/FreeCoffee.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {DeployFactoryPrograms} from "../../script/DeployFactoryPrograms.s.sol";
-import {DeployFridayFifteen} from "../../script/DeployLoyaltyGifts.s.sol";
+import {DeployFridayFifteen, DeployFreeCoffee} from "../../script/DeployLoyaltyGifts.s.sol";
 import {ILoyaltyProgram} from "../../src/interfaces/ILoyaltyProgram.sol";
 
 contract LoyaltyCardTest is Test {
@@ -54,6 +55,7 @@ contract LoyaltyCardTest is Test {
   LoyaltyProgram loyaltyProgram; 
   HelperConfig helperConfig;
   FridayFifteen fridayFifteen; 
+  FreeCoffee freeCoffee; 
   HelperConfig.NetworkConfig config; 
   FactoryCards factoryCards; 
   EntryPoint entryPoint; 
@@ -299,6 +301,8 @@ contract LoyaltyCardTest is Test {
     
     DeployFridayFifteen deployerFridayFifteen = new DeployFridayFifteen(); 
     fridayFifteen = deployerFridayFifteen.run();
+    DeployFreeCoffee deployerFreeCoffee = new DeployFreeCoffee(); 
+    freeCoffee = deployerFreeCoffee.run();
     
     ownerProgram = loyaltyProgram.owner();
     vm.prank(ownerProgram); 
@@ -313,11 +317,18 @@ contract LoyaltyCardTest is Test {
     address customerCardAddress = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
     LoyaltyCard customerCard = LoyaltyCard(payable(customerCardAddress)); 
     uint256 gift = 0;
+    uint256 amountGifts = 15; 
+    
+    vm.startPrank(vendorAddress);
+    loyaltyProgram.setExchangeableGift(address(freeCoffee), true);
+    loyaltyProgram.setRedeemableGift(address(freeCoffee), true);
+    loyaltyProgram.mintGifts(address(freeCoffee), amountGifts);
+    vm.stopPrank(); 
 
     // arrange
     address dest = address(loyaltyProgram);
     uint256 value = 0;
-    bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, gift, customerAddress);
+    bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, address(freeCoffee), customerAddress);
     bytes memory executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
     
     vm.prank(customerAddress);  
@@ -326,6 +337,8 @@ contract LoyaltyCardTest is Test {
       );
     PackedUserOperation[] memory ops = new PackedUserOperation[](1); 
     ops[0] = packedUserOp; 
+
+  
 
     //act 
     console2.log("entryPoint address:", address(entryPoint)); 

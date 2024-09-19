@@ -1,21 +1,13 @@
 "use client"
-import { entryPointAbi, factoryCardsAbi, factoryProgramsAbi, loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi"
+import { entryPointAbi, factoryCardsAbi, loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi"
 import { bundlerClient, publicClient, client } from "@/context/clients"
 import { useAppSelector } from "@/redux/hooks"
-import { QrPoints, Status } from "@/types"
-import { parseBigInt, parseEthAddress, parseHex } from "@/utils/parsers"
-import { SignTypedDataParams, usePrivy, useWallets } from "@privy-io/react-auth"
-import { createSmartAccountClient, ENTRYPOINT_ADDRESS_V07, getSenderAddress, parseAccount, signUserOperationHashWithECDSA, UserOperation, walletClientToSmartAccountSigner } from "permissionless"
-import { signerToSimpleSmartAccount } from "permissionless/accounts"
-import { useCallback, useEffect, useRef, useState } from "react"
-import { Abi, Account, encodeFunctionData, encodePacked, Hex, hexToBigInt, numberToBytes, numberToHex, http, createWalletClient, custom, EIP1193Provider, ByteArray, SignableMessage, concat, toBytes, Address, Client, Prettify, pad, parseAbi, hexToBytes } from "viem"
-import { EntryPointVersion, getUserOperationHash, PackedUserOperation, SmartAccount, SmartAccountImplementation, toPackedUserOperation, ToSmartAccountReturnType } from "viem/account-abstraction"
-import { foundry } from "viem/chains"
-import { useReadContract, useReadContracts, useSignTypedData, useWalletClient } from "wagmi"
-import { SignTypedDataData } from "wagmi/query"
+import { usePrivy, useWallets } from "@privy-io/react-auth"
+import { ENTRYPOINT_ADDRESS_V07, parseAccount, UserOperation,  } from "permissionless"
+import { useCallback, useState } from "react"
+import { encodeFunctionData, pad } from "viem"
+import { getUserOperationHash, ToSmartAccountReturnType } from "viem/account-abstraction"
 import { toSmartAccount } from 'viem/account-abstraction'
-import { env } from "process"
-import { toLoyaltyCardAccount } from "@/utils/toLoyaltyCardAccount"
 
 // 
 // See the docs at: https://docs.privy.io/guide/react/recipes/account-abstraction/pimlico 
@@ -369,7 +361,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         if (userOperation) {
           const signature = await loyaltyCard.signUserOperation(userOperation);
           const userOpSigned = {...userOperation, signature: signature} 
-  
           const hash = await bundlerClient.sendUserOperation({userOperation: userOpSigned}) 
           console.log("HASH: ", hash)     
         } else {

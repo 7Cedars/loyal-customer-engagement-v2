@@ -14,6 +14,7 @@ contract HelperConfig is Script {
     struct NetworkConfig {
         address entryPoint;
         address account;
+        uint256 key; 
     }
     // I can add more configs as needed later on.
 
@@ -55,28 +56,32 @@ contract HelperConfig is Script {
     function getEthSepoliaConfig() public view returns (NetworkConfig memory) {
         return NetworkConfig({
             entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            account: BURNER_WALLET
+            account: BURNER_WALLET, 
+            key: 0
         });
     }
 
     function getOptSepoliaConfig() public view returns (NetworkConfig memory) {
         return NetworkConfig({
             entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            account: BURNER_WALLET
+            account: BURNER_WALLET, 
+            key: 0
         });
     }
 
     function getArbSepoliaConfig() public view returns (NetworkConfig memory) {
         return NetworkConfig({
             entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            account: BURNER_WALLET
+            account: BURNER_WALLET, 
+            key: 0
         });
     }
 
     function getBaseSepoliaConfig() public view returns (NetworkConfig memory) {
         return NetworkConfig({
             entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            account: BURNER_WALLET
+            account: BURNER_WALLET, 
+            key: 0
         });
     }
 
@@ -93,8 +98,9 @@ contract HelperConfig is Script {
         // console2.log(address(entryPoint));
 
         localNetworkConfig = NetworkConfig({
-            entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032, // address(entryPoint), //  0x0000000071727De22E5E9d8BAf0edAc6f37da032,
-            account: ANVIL_DEFAULT_ACCOUNT
+            entryPoint: address(entryPoint),  // address(entryPoint), //  0x0000000071727De22E5E9d8BAf0edAc6f37da032,
+            account: ANVIL_DEFAULT_ACCOUNT,
+            key: 0
         });
         return localNetworkConfig;
     }
