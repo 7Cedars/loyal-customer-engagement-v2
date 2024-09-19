@@ -11,7 +11,7 @@ import {FridayFifteen} from "../src/sample-gifts/FridayFifteen.sol";
 
 
 contract DeployFreeCoffee is Script {
-    bytes32 SALT = bytes32(hex'7ceda5'); 
+    bytes32 SALT = bytes32(hex'7ceda521'); 
 
     function run() external returns (FreeCoffee) {
         vm.startBroadcast();
@@ -22,7 +22,7 @@ contract DeployFreeCoffee is Script {
 }
 
 contract DeployFreeCupCake is Script {
-    bytes32 SALT = bytes32(hex'7ceda5'); 
+    bytes32 SALT = bytes32(hex'7ceda521'); 
 
     function run() external returns (FreeCupCake) {
         vm.startBroadcast();
@@ -33,7 +33,7 @@ contract DeployFreeCupCake is Script {
 }
 
 contract DeployFridayFifteen is Script {
-    bytes32 SALT = bytes32(hex'7ceda5'); 
+    bytes32 SALT = bytes32(hex'7ceda521'); 
 
     function run() external returns (FridayFifteen) {
         vm.startBroadcast();
