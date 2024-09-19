@@ -59,8 +59,8 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         address verifyingContract;
     }
 
-    // RequestPoints message struct
-    struct RequestPoints {
+    // pointsToRequest message struct
+    struct PointsToRequest {
         address program;
         uint256 points;
         uint256 uniqueNumber; // this can be any number - as long as it makes the request (and its signature) unique.
@@ -94,7 +94,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     string public imageUri;
     bool public allowCreationCards = true;
 
-    RequestPoints private requestPoints;
+    PointsToRequest private pointsToRequest;
     GiftToRedeem private giftToRedeem;
 
     bytes32 private immutable DOMAIN_SEPARATOR;
@@ -123,16 +123,6 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     //////////////////////////////////////////////////////////////////
     //                        Modifiers                             //
     //////////////////////////////////////////////////////////////////
-    modifier onlyCardHolder(address caller) {
-        address addr = FactoryCards(CARD_FACTORY).getAddress(caller, payable(address(this)), SALT);
-        uint256 codeSize = addr.code.length;
-        if (codeSize == 0) {
-            revert LoyaltyProgram__OnlyCardHolder();
-        }
-
-        _;
-    }
-
     modifier noBlockedCard() {
         if (_blockedCards[msg.sender]) {
             revert LoyaltyProgram__BlockedLoyaltyCard();
@@ -200,8 +190,9 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
      * £todo: natspec
      *
      *     £ NB: this function is called by loyaltyCard that calls this function.
+     * Note: points are ALWAYS transferred to a loyalty card!  
      */
-    function requestPointsAndCard(
+    function requestPoints(
         address program,
         uint256 points,
         uint256 uniqueNumber,
@@ -209,12 +200,12 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         address ownerCard
     ) external {
         // filling up RequestGift struct with provided data.
-        requestPoints.program = program;
-        requestPoints.points = points;
-        requestPoints.uniqueNumber = uniqueNumber;
+        pointsToRequest.program = program;
+        pointsToRequest.points = points;
+        pointsToRequest.uniqueNumber = uniqueNumber;
 
         // creating digest & using it to recover loyalty program  address.
-        bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashRequestPoints(requestPoints));
+        bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(pointsToRequest));
         address signer = digest.recover(programSignature);
 
         // Checks.
@@ -227,14 +218,12 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
             revert LoyaltyProgram__AlreadyExecuted();
         }
 
-        // if msg.sender is not a registered loyalty card, create a new card and set owner of card to msg.sender.
-        LoyaltyCard card = LoyaltyCard(payable(
-            FactoryCards(CARD_FACTORY).createAccount(ownerCard, payable(address(this)), SALT)
-            ));
+        // if get address of loyalty card (note that with on the first transfer, the entryPoint initialises a card).
+        address cardAddress = FactoryCards(CARD_FACTORY).getAddress(ownerCard, payable(address(this)), SALT); 
 
-        // 1) set executed to true & execute transfer
+        // set executed to true & execute transfer
         s_executed[programSignature] = true;
-        _update(payable(address(this)), address(card), points); // emits a transfer event
+        _update(payable(address(this)), cardAddress, points); // emits a transfer event
     }
 
     /**
@@ -242,14 +231,19 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
      *
      *     £ NB: it is the loyaltyCard that calls this function.
      */
-    function exchangePointsForGift(address gift, address owner) external onlyCardHolder(owner) {
+    function exchangePointsForGift(address gift, address caller) external {
         // CHECK
+        // check if caller owns loyalty card
+        address cardAddress = FactoryCards(CARD_FACTORY).getAddress(caller, payable(address(this)), SALT);
+        uint256 codeSize = cardAddress.code.length;
+        if (codeSize == 0) {
+            revert LoyaltyProgram__OnlyCardHolder();
+        }
+
         // check if gift eexchangeable.
         if (!allowedGifts[gift].exchangeable) {
             revert LoyaltyProgram__GiftNotExchangeable();
         }
-
-        address cardAddress = FactoryCards(CARD_FACTORY).getAddress(owner, payable(address(this)), SALT);
 
         // if requerements not met, this function reverts with the reason why.
         // also checks for balance on card.
@@ -267,7 +261,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         ILoyaltyGift(gift).safeTransferFrom(address(this), cardAddress, giftId);
 
         // emit.
-        emit LoyaltyPointsExchangeForGift(owner, gift, giftId);
+        emit LoyaltyPointsExchangeForGift(caller, gift, giftId);
     }
 
     /**
@@ -440,17 +434,6 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     }
 
     //////////////////////////////////////////////////////////////////
-    //                           Public                             //
-    /////////////////////////////////////////////////////////////////
-    /**
-     * @notice only owner is allowed to transfer points.
-     */
-    function transfer(address to, uint256 value) public override(ERC20, IERC20) onlyOwner returns (bool) {
-        (bool success) = super.transfer(to, value);
-        return success;
-    }
-
-    //////////////////////////////////////////////////////////////////
     //                          Internal                           //
     //////////////////////////////////////////////////////////////////
 
@@ -461,9 +444,9 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         IEntryPoint(ENTRY_POINT).depositTo{value: _value}(_card);
     }
 
-    function _update(address from, address to, uint256 value) internal override(ERC20) {
-        super._update(from, to, value);
-    }
+    // function _update(address from, address to, uint256 value) internal override(ERC20) {
+    //     super._update(from, to, value);
+    // }
 
     //////////////////////////////////////////////////////////////////
     //                          Private                             //
@@ -510,12 +493,12 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     }
 
     /**
-     * @notice helper function to create digest hash from RequestPoints struct.
+     * @notice helper function to create digest hash from pointsToRequest struct.
      */
-    function hashRequestPoints(RequestPoints memory message) private pure returns (bytes32) {
+    function hashPointsToRequest(PointsToRequest memory message) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256(bytes("RequestPoints(address program,uint256 points,uint256 uniqueNumber)")),
+                keccak256(bytes("PointsToRequest(address program,uint256 points,uint256 uniqueNumber)")),
                 message.program,
                 message.points,
                 message.uniqueNumber

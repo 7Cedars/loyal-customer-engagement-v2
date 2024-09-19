@@ -149,7 +149,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             // the following is not necessary and consumes gas: functions are role restricted in the target contract. 
             // bytes4 targetSelector = bytes4(innerCall);
             // if(
-            //     targetSelector != ILoyaltyProgram.requestPointsAndCard.selector &&
+            //     targetSelector != ILoyaltyProgram.requestPoints.selector &&
             //     targetSelector != ILoyaltyProgram.exchangePointsForGift.selector 
             //     ) { 
             //     return SIG_VALIDATION_FAILED; 

@@ -10,7 +10,7 @@ import {IERC721Receiver} from  "lib/openzeppelin-contracts/contracts/token/ERC72
 
 /// @dev the ERC-165 identifier for this interface is ... 
 interface ILoyaltyProgram is IERC165, IERC721Receiver, IERC20 {
-    function requestPointsAndCard(
+    function requestPoints(
         address program,
         uint256 points, 
         uint256 uniqueNumber, 

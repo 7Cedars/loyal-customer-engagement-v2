@@ -263,7 +263,7 @@ export const loyaltyGiftAbi: Abi  = JSON.parse(JSON.stringify(loyaltyGift.abi))
 //   },
 //   {
 //     "type": "function",
-//     "name": "requestPointsAndCard",
+//     "name": "requestPoints",
 //     "inputs": [
 //       { "name": "_program", "type": "address", "internalType": "address" },
 //       { "name": "_points", "type": "uint256", "internalType": "uint256" },

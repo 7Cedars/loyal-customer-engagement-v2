@@ -74,7 +74,7 @@ export default function Page() {
             if (loyaltyCard) 
               sendUserOp(
                 loyaltyCard, 
-                'requestPointsAndCard', 
+                'requestPoints', 
                 [
                   qrPoints.program, 
                   qrPoints.points, 

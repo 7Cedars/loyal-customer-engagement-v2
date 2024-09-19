@@ -203,7 +203,7 @@ contract LoyaltyCardFuzzTest is Test {
     bytes memory signature = abi.encodePacked(r, s, v);
 
     bytes memory functionData = abi.encodeWithSelector(
-      LoyaltyProgram.requestPointsAndCard.selector, 
+      LoyaltyProgram.requestPoints.selector, 
       address(loyaltyProgram), 
       points, 
       uniqueNumber, 

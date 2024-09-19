@@ -72,7 +72,7 @@ contract LoyaltyCardTest is Test {
   }
 
   // RequestPoints message struct
-  struct RequestPoints {
+  struct PointsToRequest {
       address program;
       uint256 points;
       uint256 uniqueNumber;
@@ -147,14 +147,14 @@ contract LoyaltyCardTest is Test {
       
       
     // loyalty program owner creates voucher for 5000 points. 
-    RequestPoints memory message = RequestPoints({
+    PointsToRequest memory message = PointsToRequest({
         program: address(loyaltyProgram),
         points: points,
         uniqueNumber: uniqueNumber
     });
 
     // vender signs the voucher
-    bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashRequestPoints(message));
+    bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(message));
     console2.logBytes32(digest);
 
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
@@ -181,14 +181,14 @@ contract LoyaltyCardTest is Test {
       );
       
     // loyalty program owner creates voucher for 5000 points. 
-    RequestPoints memory message = RequestPoints({
+    PointsToRequest memory message = PointsToRequest({
         program: address(loyaltyProgram),
         points: points, 
         uniqueNumber: uniqueNumber
     });
 
     // vender signs the voucher
-    bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashRequestPoints(message));
+    bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(message));
     console2.logBytes32(digest);
 
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
@@ -202,7 +202,7 @@ contract LoyaltyCardTest is Test {
     }); 
 
     vm.prank(customer); 
-    loyaltyProgram.requestPointsAndCard(
+    loyaltyProgram.requestPoints(
       requestPointsVoucher.program, 
       requestPointsVoucher.points, 
       requestPointsVoucher.uniqueNumber, 
@@ -226,16 +226,15 @@ contract LoyaltyCardTest is Test {
       );
     uint256 points = 50000; 
       
-      
     // loyalty program owner creates voucher for 5000 points. 
-    RequestPoints memory message = RequestPoints({
+    PointsToRequest memory message = PointsToRequest({
         program: address(loyaltyProgram),
         points: points, 
         uniqueNumber: uniqueNumber
     });
 
     // vender signs the voucher
-    bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashRequestPoints(message));
+    bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(message));
     console2.logBytes32(digest);
 
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
@@ -250,20 +249,13 @@ contract LoyaltyCardTest is Test {
 
     // give customer a card with points
     vm.prank(customer); 
-    loyaltyProgram.requestPointsAndCard(
+    loyaltyProgram.requestPoints(
       requestPointsVoucher.program, 
       requestPointsVoucher.points, 
       requestPointsVoucher.uniqueNumber, 
       requestPointsVoucher.signature, 
       customer
     ); 
-
-    // let loyalty project select and mint gift
-    vm.startPrank(vendorAddress);
-    loyaltyProgram.setExchangeableGift(address(fridayFifteen), true);
-    loyaltyProgram.setRedeemableGift(address(fridayFifteen), true);
-    loyaltyProgram.mintGifts(address(fridayFifteen), amountGifts);
-    vm.stopPrank(); 
     
     // customer exchanges points for gift. 
     vm.prank(customer); 
@@ -284,6 +276,7 @@ contract LoyaltyCardTest is Test {
     string memory name = "Highstreet Hopes";
     string memory colourScheme = '#3d5769;#c8cf0c'; 
     string memory cardImageUri = "";
+    uint256 amountGifts = 20; 
 
     DeployFactoryPrograms deployer = new DeployFactoryPrograms();
     (factoryPrograms, factoryCards, helperConfig) = deployer.run();
@@ -307,16 +300,22 @@ contract LoyaltyCardTest is Test {
     ownerProgram = loyaltyProgram.owner();
     vm.prank(ownerProgram); 
     loyaltyProgram.transferOwnership(vendorAddress);
+
+    // let loyalty project select and mint gift
+    vm.startPrank(vendorAddress);
+    loyaltyProgram.setExchangeableGift(address(fridayFifteen), true);
+    loyaltyProgram.setRedeemableGift(address(fridayFifteen), true);
+    loyaltyProgram.mintGifts(address(fridayFifteen), amountGifts);
+    vm.stopPrank(); 
   }
 
   ///////////////////////////////////////////////
   ///                   Tests                 ///
   ///////////////////////////////////////////////
 
-  function testEntryPointCanExecuteRequestPoints() public giveCustomerCardPointsAndGift(customerAddress) {
+  function testEntryPointCanExecuteExchangePoints() public giveCustomerCardPointsAndGift(customerAddress) {
     address customerCardAddress = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
     LoyaltyCard customerCard = LoyaltyCard(payable(customerCardAddress)); 
-    uint256 gift = 0;
     uint256 amountGifts = 15; 
     
     vm.startPrank(vendorAddress);
@@ -338,8 +337,6 @@ contract LoyaltyCardTest is Test {
     PackedUserOperation[] memory ops = new PackedUserOperation[](1); 
     ops[0] = packedUserOp; 
 
-  
-
     //act 
     console2.log("entryPoint address:", address(entryPoint)); 
     vm.prank(customerAddress);  
@@ -353,7 +350,6 @@ contract LoyaltyCardTest is Test {
   function testEntryPointRevertsExecuteWithDisallowedFunction() public giveCustomerCardPointsAndGift(customerAddress) {
     address customerCardAddress = factoryCards.getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
     LoyaltyCard customerCard = LoyaltyCard(payable(customerCardAddress)); 
-    uint256 gift = 0;
 
     // arrange
     address dest = address(loyaltyProgram);
@@ -473,16 +469,16 @@ contract LoyaltyCardTest is Test {
   /**
     * @notice helper function to create digest hash from RequestPoints struct.
     */
-  function hashRequestPoints(RequestPoints memory message) private pure returns (bytes32) {
-      return keccak256(
-          abi.encode(
-              keccak256(bytes("RequestPoints(address program,uint256 points,uint256 uniqueNumber)")),
-              message.program,
-              message.points, 
-              message.uniqueNumber
-          )
-      );
-  }
+    function hashPointsToRequest(PointsToRequest memory message) private pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256(bytes("PointsToRequest(address program,uint256 points,uint256 uniqueNumber)")),
+                message.program,
+                message.points,
+                message.uniqueNumber
+            )
+        );
+    }
 
   /**
     * @notice helper function to create digest hash from RedeemGift struct.
