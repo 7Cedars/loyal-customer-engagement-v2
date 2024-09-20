@@ -28,6 +28,8 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
     uint256 private _nextTokenId;
     string public i_uri;
 
+    event LoyaltyGiftDeployed(address indexed giftAddress); 
+
     //////////////////////////////////////////////////////////////////
     /**
         £todo natspec 
@@ -41,8 +43,10 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
 
     constructor(string memory _name, string memory _symbol, string memory _uri)
         ERC721(_name, _symbol)
-        Ownable(msg.sender) {
-            i_uri = _uri; 
+        Ownable(msg.sender) 
+        {
+            i_uri = _uri;
+            emit LoyaltyGiftDeployed(address(this));   
         }
 
     fallback() external {

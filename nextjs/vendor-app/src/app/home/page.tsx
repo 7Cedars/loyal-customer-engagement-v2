@@ -7,18 +7,23 @@ import { TabChoice } from "@/components/ui/TabChoice";
 import { useAppSelector } from "@/redux/hooks";
 import { useBalance } from 'wagmi'
 import { ChevronUpIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TransferFunds } from "./TransferFunds";
 import { setBalanceProgram } from "@/redux/reducers/programReducer";
 import { useDispatch } from "react-redux";
 import { GivePoints } from "./GivePoints";
 import { RedeemGifts } from "./RedeemGift";
+import { parseImageUri } from "@/utils/parsers";
+import Image from "next/image";
+import { useScreenDimensions } from "@/hooks/useScreenDimensions";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const [mode, setMode]  = useState<string | undefined>()
   const [transferMode, setTransferMode] = useState<boolean>(false)
+  const [uri, setUri] = useState<string>("")
   const {data: balanceData, refetch, fetchStatus} = useBalance({ address: prog.address })
+  const dimensions = useScreenDimensions()
   const dispatch = useDispatch() 
 
   console.log("prog.address:", prog.address)
@@ -36,17 +41,30 @@ export default function Page() {
       }
   }, [balanceData, prog, dispatch])
 
+  const checkImageUri = useCallback( 
+    async (uri:string) => {
+      const parsedURI = await parseImageUri(uri)
+      setUri(parsedURI)
+    }, []
+  )
+
+  // checking image uri. 
+  useEffect(() => {
+    if (prog && prog.uriImage) 
+      checkImageUri(prog.uriImage)
+  }, [prog])
+
   return (
     <Layout> 
       <TitleText title = {prog.name ? prog.name : "Home"} size = {2} /> 
-      <div className="grow flex flex-col justify-start items-center">
+      <div className="grow flex flex-col justify-center items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
           <Button onClick={() => {setTransferMode(true)}}>
             {prog.balance == undefined ? `Fetching balance...`:`Balance: ${prog.balance} Eth` } 
           </Button>
         </div>
         <section 
-          className="h-full w-full flex flex-col justify-start items-center mb-16 md:mb-0">
+          className="h-full w-full flex flex-col justify-center items-center mb-16 md:mb-0">
           
           <div 
             className="grow-0 opacity-0 aria-selected:grow aria-selected:opacity-100 transition:all ease-in-out duration-300 delay-300 h-2"
@@ -62,6 +80,22 @@ export default function Page() {
                     </Button>
                   </div> 
                 </div>
+                :
+                uri.length > 0 ? 
+                <> 
+                  <div className="w-full flex justify-center">
+                  <Image
+                      className="w-1/2"
+                      // fill
+                      width={dimensions.width}
+                      height={dimensions.height}
+                      style = {{ objectFit: "fill" }} 
+                      src={uri}
+                      alt="No valid image detected."
+                      onError={(e) => console.log(e)}
+                    /> 
+                  </div>
+                </>
                 :
                 <>
                   <div

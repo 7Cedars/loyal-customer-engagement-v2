@@ -8,11 +8,12 @@ import { TabChoice } from "@/components/ui/TabChoice";
 import { useEffect, useState } from "react";
 import { Gift } from "@/types";
 import { useGifts } from "@/hooks/useGifts";
+import { Button } from "@/components/ui/Button";
 
 export default function Page() {
   const [mode, setMode] = useState<string>()
   const [savedGifts, setSavedGifts] = useState<Gift[]>([])
-  const {status, gifts} = useGifts()
+  const {status, gifts, fetchGifts} = useGifts()
   
   console.log({
     status: status, 
@@ -34,7 +35,11 @@ export default function Page() {
       </div>
       
       <section className="flex flex-col divide-y justify-start p-2 overflow-auto">
-        {gifts?.map(gift => 
+
+        <Button onClick={() => {fetchGifts(0, 995)}}>
+          Press here to test
+        </Button>
+        {/* {gifts?.map(gift => 
           <GiftInfo 
             key = {gift.address} 
             address = {gift.address} 
@@ -46,7 +51,7 @@ export default function Page() {
             metadata = {gift.metadata}
           />
           )
-        }
+        } */}
       </section>
     </Layout>
   )

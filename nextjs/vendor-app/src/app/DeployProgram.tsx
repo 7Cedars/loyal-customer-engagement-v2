@@ -7,9 +7,9 @@ import { HexColorPicker } from "react-colorful"
 import { InputBox } from "../components/ui/InputBox"
 import Image from "next/image";
 import { Button } from "../components/ui/Button"
-import { Hex, toHex, toBytes, WriteContractErrorType, TransactionExecutionError, Log } from "viem"
-import { useAccount, useWriteContract, useWatchContractEvent } from "wagmi"
-import { factoryProgramsAbi, loyaltyGiftAbi, loyaltyProgramAbi } from "@/context/abi"
+import { Hex, Log } from "viem"
+import { useWriteContract, useWatchContractEvent } from "wagmi"
+import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi"
 import { parseEthAddress, parseDeployLogs, parseString } from "../utils/parsers"
 import { fromHexColourToBytes } from '../utils/transformData'
 import { Program, Status } from '@/types'
@@ -105,8 +105,7 @@ export const DeployProgram = () => {
     },
   })
 
-  const parseImage = async (src: string) => {
-    
+  const parseImage = async (src: string) => { // I have this now also in parsers. replace at a later stage.     
     const res = await fetch(src);
     const buff = await res.blob();
     console.log("buff: ", buff)

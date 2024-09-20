@@ -307,7 +307,21 @@ export const parseDeployLogs = (logs: Log[]): Event[] => {
 
     return parsedLogs as Array<Event> 
 
-  } catch {
-    throw new Error('Incorrect data at deploy program logs. Parser caught error');
+    } catch {
+      throw new Error('Incorrect data at deploy program logs. Parser caught error');
+    }
+  };
+
+  export const parseImageUri = async (src: string): Promise<string> => {
+    
+    const res = await fetch(src);
+    const buff = await res.blob();
+    console.log("buff: ", buff)
+    const isPng = buff.type.startsWith('image/png')
+
+    if (isPng) {
+      return src
+    } else {
+      return ""
+    }
   }
-};

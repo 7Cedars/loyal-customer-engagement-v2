@@ -10,6 +10,12 @@ export type Program = {
   owner?: Hex; 
 }
 
+export type GiftsInBlocks = {
+  startBlock: number; 
+  endBlock: number;
+  Gifts: Gift[]; 
+};
+
 export type Gift = {
   address: Hex;
   name: string; 
