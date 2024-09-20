@@ -13,11 +13,12 @@ import { Button } from "@/components/ui/Button";
 export default function Page() {
   const [mode, setMode] = useState<string>()
   const [savedGifts, setSavedGifts] = useState<Gift[]>([])
-  const {status, gifts, fetchGifts} = useGifts()
+  const {status, allGifts, fetchedGifts, fetchGifts} = useGifts()
   
   console.log({
     status: status, 
-    gifts: gifts
+    allGifts: allGifts,
+    fetchedGifts: fetchedGifts
   })
 
   return (
@@ -36,7 +37,7 @@ export default function Page() {
       
       <section className="flex flex-col divide-y justify-start p-2 overflow-auto">
 
-        <Button onClick={() => {fetchGifts(0, 995)}}>
+        <Button onClick={() => {fetchGifts(2201, 2300)}}>
           Press here to test
         </Button>
         {/* {gifts?.map(gift => 

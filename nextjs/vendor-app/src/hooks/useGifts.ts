@@ -1,76 +1,35 @@
 import { Gift, GiftsInBlocks, Status } from "@/types";
 import { readContracts } from '@wagmi/core'
 import { wagmiConfig } from '../../wagmi-config'
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { loyaltyGiftAbi } from "@/context/abi";
-import { Hex, Log, decodeEventLog } from "viem"
+import { Log, decodeEventLog } from "viem"
 import { publicClient } from "@/context/clients";
-import { whiteListedGifts } from "@/context/whitelistedGifts";
-
-import { useAppSelector } from "@/redux/hooks";
-import { useDispatch } from "react-redux";
 import { parseBigIntToNumber, parseBoolean, parseEthAddress, parseMetadata, parseString, parseUri } from "@/utils/parsers";
 
-// refactoring... 
-// this needs to save checked blocks + gifts found to local storage. 
-// 
+type GiftDeployedEvent = {
+  args: {
+    giftAddress: `0x${string}`
+  }
+  eventName: "LoyaltyGiftDeployed"
+}
 
 export const useGifts = () => {
   const [status, setStatus] = useState<Status>("isIdle")
   const [error, setError] = useState<any | null>(null)
-  const [data, setData] = useState<Gift[] | undefined>() 
-  const [gifts, setGifts] = useState<GiftsInBlocks[] | undefined>() 
-
-  // initiates the loading of gifts at refresh. 
-  useEffect(()=>{
-    let localStore = localStorage.getItem("clp_v_gifts")
-    const saved: GiftsInBlocks[] = localStore ? JSON.parse(localStore) : []
-    setGifts(saved)
-    setStatus("isSuccess")
-  }, [])
-
-  const fetchGifts = useCallback(
-    async (startBlock: number, endBlock: number) => {
-      
-      // check if blocks have already been queried. 
-      const alreadyChecked = gifts?.find(gift => {
-        gift.startBlock <= endBlock && startBlock <= gift.endBlock 
-      })
-      if (alreadyChecked) {
-        Error("requested blocks already queried") 
-      }
-      
-      const logs: Log[] = await publicClient.getContractEvents({
-        abi: loyaltyGiftAbi, 
-        eventName: 'LoyaltyGiftDeployed',  
-        fromBlock: BigInt(startBlock),
-        toBlock: BigInt(endBlock) 
-      }) 
-
-      const events = logs.map((log: Log) => {
-        decodeEventLog({
-          abi: loyaltyGiftAbi,
-          eventName: 'LoyaltyGiftDeployed', 
-          topics: log.topics, 
-          data: log.data
-        })
-      })
-
-      console.log("events: ", events)
-
-    }, [gifts]
-  ) 
+  const [fetchedGifts, setFetchedGifts] = useState<GiftsInBlocks | undefined>() // latest fetched gifts
+  const [allGifts, setAllGifts] = useState<GiftsInBlocks[]>() // all gifts ever fetched. nested array, sorted by block value. 
 
   const getGiftsContractData = useCallback( 
-    async () => {
+    async (requestedGifts: `0x${string}`[]) => {
       setStatus("isLoading") 
 
-      let giftAddress: Hex
+      let giftAddress: `0x${string}`
       let giftContractData: Gift[] = []
 
       if (publicClient) { 
         try {
-          for await (giftAddress of whiteListedGifts) {
+          for await (giftAddress of requestedGifts) {
 
             const giftContract = {
               address: giftAddress,
@@ -119,7 +78,8 @@ export const useGifts = () => {
                   additionalReq: parseBoolean(temp[4].result)
                 })
           } 
-          setData(giftContractData)
+          setStatus("isSuccess") 
+          return giftContractData
         } catch (error) {
           setStatus("isError") 
           setError(error)
@@ -128,15 +88,15 @@ export const useGifts = () => {
     setStatus("isSuccess")
   }, [ ])
 
-  const getGiftsMetaData = async () => {
+  const getGiftsMetaData = async (gifts: Gift[]) => {
     setStatus("isLoading")
 
     let gift: Gift
     let loyaltyGiftsMetadata: Gift[] = []
 
-    if (data && publicClient) {
+    if (publicClient) {
       try {
-        for await (gift of data) {
+        for await (gift of gifts) {
           if (gift.uri) {
             const fetchedMetadata: unknown = await(
               await fetch(gift.uri)
@@ -147,7 +107,7 @@ export const useGifts = () => {
           }
         } 
         setStatus("isSuccess")
-        setData(loyaltyGiftsMetadata)
+        return loyaltyGiftsMetadata
       } catch (error) {
         setStatus("isError")
         setError(error)
@@ -155,5 +115,71 @@ export const useGifts = () => {
     }
   }
 
-  return {fetchGifts, status, error, gifts}
+  const fetchGifts = useCallback(
+    async (startBlock: number, endBlock: number) => {
+      setStatus("isLoading")
+
+      // loading gifts saved in localStorage. 
+      let localStore = localStorage.getItem("clp_v_gifts")
+      const saved: GiftsInBlocks[] = localStore ? JSON.parse(localStore) : []
+
+      console.log("saved: ", saved)
+
+      // check if blocks have already been queried. 
+      const alreadyChecked = saved.find(gift => {
+        return gift.startBlock <= endBlock && startBlock <= gift.endBlock 
+      })
+      console.log("alreadyChecked: ", alreadyChecked )
+      if (alreadyChecked) {
+        setStatus("isError")
+        setError("requested blocks already queried") 
+        return;  
+      }
+      
+      // if checks pass: 
+      // fetch events
+      const logs: Log[] = await publicClient.getContractEvents({
+        abi: loyaltyGiftAbi, 
+        eventName: 'LoyaltyGiftDeployed',  
+        fromBlock: BigInt(startBlock),
+        toBlock: BigInt(endBlock) 
+      }) 
+      // decode the events
+      const events = logs.map((log: Log) => {
+        return decodeEventLog({
+          abi: loyaltyGiftAbi,
+          topics: log.topics 
+        })
+      })
+      console.log("logs: ", logs )
+      console.log("events: ", events )
+
+      // retrieve addresses and call subsequent data fetching functions. 
+      const giftEvents = events as unknown as GiftDeployedEvent[]
+      const requestedGifts = giftEvents.map(event => event.args.giftAddress)
+      const giftContractData = await getGiftsContractData(requestedGifts)
+
+      const giftContractwithMetadata = giftContractData ? await getGiftsMetaData(giftContractData) : []
+      const giftsInBlocks: GiftsInBlocks = {
+        startBlock, 
+        endBlock, 
+        gifts: giftContractwithMetadata as Gift[]
+      }
+      const gifts = [...saved, giftsInBlocks] 
+
+      // sort queries by block number.  
+      gifts.sort((a, b) => {
+        return a.startBlock > b.startBlock ? -1 : 1 // the latest block, with the largest block number, should end up first in line. 
+      })
+
+      // store all items. 
+      setFetchedGifts(giftsInBlocks)
+      setAllGifts(gifts)
+      localStorage.setItem("clp_v_gifts", JSON.stringify(gifts));
+      setStatus("isSuccess")
+
+    }, [getGiftsContractData]
+  ) 
+
+  return {fetchGifts, fetchedGifts, allGifts, status, error}
 }

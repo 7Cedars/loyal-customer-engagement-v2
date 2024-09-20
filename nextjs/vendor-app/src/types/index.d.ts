@@ -13,7 +13,7 @@ export type Program = {
 export type GiftsInBlocks = {
   startBlock: number; 
   endBlock: number;
-  Gifts: Gift[]; 
+  gifts: Gift[]; 
 };
 
 export type Gift = {
