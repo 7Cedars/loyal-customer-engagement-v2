@@ -3,216 +3,23 @@
 /**
 */ 
 
-import { useRef, useState } from "react";
-import { Status, Event } from "@/types";
-import { Log } from "viem";
+import { useCallback, useRef, useState } from "react";
+import { Status, Event, EventsInBlocks } from "@/types";
+import { decodeEventLog, Log } from "viem";
 import { parseEthAddress, parseEventLogs } from "@/utils/parsers";
 import { loyaltyProgramAbi } from "@/context/abi";
 import { publicClient } from "@/context/clients";
 import { useEffect } from "react";
 import { useAppSelector } from "@/redux/hooks";
 
-type UseEventProps = {
-  fromBlock: bigint; 
-  toBlock: bigint; 
-}
-
-export default function useEvents({fromBlock, toBlock}: UseEventProps) {
+export default function useEvents() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-
-  const [ giftListed, setGiftListed ] = useState<Event[]>([]) 
-  const [ pointsExchanged, setPointsExchanged ] = useState<Event[]>([])  
-  const [ giftRedeemed, setGiftRedeemed ] = useState<Event[]>([]) 
-  const [ cardBlocked, setCardBlocked ] = useState<Event[]>([]) 
-  const [ creationCardsAllowed, setCreationCardsAllowed ] = useState<Event[]>([]) 
-  const [ giftsMinted, setGiftsMinted ] = useState<Event[]>([])  
-  const [ colourSchemeChanged, setColourSchemeChanged ] = useState<Event[]>([]) 
-  const [ imageUriChanged, setImageUriChanged ] = useState<Event[]>([]) 
-
-  const [ events, setEvents ] = useState<Event[]>([]) 
-  const statusGiftListed = useRef<Status>("isIdle")
-  const statusPointsExchanged = useRef<Status>("isIdle")  
-  const statusGiftRedeemed = useRef<Status>("isIdle")
-  const statusCardBlocked = useRef<Status>("isIdle")
-  const statusCreationCardsAllowed = useRef<Status>("isIdle") 
-  const statusGiftsMinted = useRef<Status>("isIdle")
-  const statusColourSchemeChanged = useRef<Status>("isIdle") 
-  const statusImageUriChanged = useRef<Status>("isIdle")
-  const statusBlockData = useRef<Status>("isIdle")
+  const [fetchedEvents, setFetchedEvents] = useState<EventsInBlocks>()
+  const [allEvents, setAllEvents] = useState<EventsInBlocks[]>()
   const [status, setStatus] = useState<Status>("isIdle") 
-
-  // This one is done. I have to do the same for the seven (!) others.. 
-  const getGiftListed = async () => {
-    statusGiftListed.current = "isLoading"
-    if (publicClient)
-    try {
-      const eventLogs: Log[] = await publicClient.getContractEvents( { 
-        abi: loyaltyProgramAbi, 
-        address: parseEthAddress(prog.address), 
-        eventName: 'LoyaltyGiftListed',
-        fromBlock: fromBlock, 
-        toBlock: toBlock 
-      });
-      console.log("eventLogs: ", eventLogs)
-      const events =  parseEventLogs(eventLogs)
-      setGiftListed([...events])
-      statusGiftListed.current = "isSuccess" 
-    } catch (error) {
-      statusGiftListed.current = "isError"
-      console.log(error)
-    }
-  }
-
-  const getPointsExchanged = async () => {
-    statusPointsExchanged.current = "isLoading"
-    if (publicClient)
-    try {
-      const eventLogs: Log[] = await publicClient.getContractEvents( { 
-        abi: loyaltyProgramAbi, 
-        address: parseEthAddress(prog.address), 
-        eventName: 'LoyaltyPointsExchangeForGift',
-        fromBlock: fromBlock, 
-        toBlock: toBlock 
-      });
-      console.log("eventLogs: ", eventLogs)
-      const events =  parseEventLogs(eventLogs)
-      setPointsExchanged([...events])
-      statusPointsExchanged.current = "isSuccess" 
-    } catch (error) {
-      statusPointsExchanged.current = "isError"
-      console.log(error)
-    }
-  }
-
-  const getGiftRedeemed = async () => {
-    statusGiftRedeemed.current = "isLoading"
-    if (publicClient)
-    try {
-      const eventLogs: Log[] = await publicClient.getContractEvents( { 
-        abi: loyaltyProgramAbi, 
-        address: parseEthAddress(prog.address), 
-        eventName: 'LoyaltyGiftRedeemed',
-        fromBlock: fromBlock, 
-        toBlock: toBlock 
-      });
-      console.log("eventLogs: ", eventLogs)
-      const events =  parseEventLogs(eventLogs)
-      setGiftRedeemed([...events])
-      statusGiftRedeemed.current = "isSuccess" 
-    } catch (error) {
-      statusGiftRedeemed.current = "isError"
-      console.log(error)
-    }
-  }
-
-  const getCardBlocked = async () => {
-    statusCardBlocked.current = "isLoading"
-    if (publicClient)
-    try {
-      const eventLogs: Log[] = await publicClient.getContractEvents( { 
-        abi: loyaltyProgramAbi, 
-        address: parseEthAddress(prog.address), 
-        eventName: 'LoyaltyCardBlocked',
-        fromBlock: fromBlock, 
-        toBlock: toBlock 
-      });
-      console.log("eventLogs: ", eventLogs)
-      const events =  parseEventLogs(eventLogs)
-      setCardBlocked([...events])
-      statusCardBlocked.current = "isSuccess" 
-    } catch (error) {
-      statusCardBlocked.current = "isError"
-      console.log(error)
-    }
-  }
-
-  const getCreationCardsAllowed = async () => {
-    statusCreationCardsAllowed.current = "isLoading"
-    if (publicClient)
-    try {
-      const eventLogs: Log[] = await publicClient.getContractEvents( { 
-        abi: loyaltyProgramAbi, 
-        address: parseEthAddress(prog.address), 
-        eventName: 'CreationCardsAllowed',
-        fromBlock: fromBlock, 
-        toBlock: toBlock 
-      });
-      console.log("eventLogs: ", eventLogs)
-      const events =  parseEventLogs(eventLogs)
-      setCreationCardsAllowed([...events])
-      statusCreationCardsAllowed.current = "isSuccess" 
-    } catch (error) {
-      statusCreationCardsAllowed.current = "isError"
-      console.log(error)
-    }
-  }
-
-  const getGiftsMinted = async () => {
-    statusGiftsMinted.current = "isLoading"
-    if (publicClient)
-    try {
-      const eventLogs: Log[] = await publicClient.getContractEvents( { 
-        abi: loyaltyProgramAbi, 
-        address: parseEthAddress(prog.address), 
-        eventName: 'GiftsMinted',
-        fromBlock: fromBlock, 
-        toBlock: toBlock 
-      });
-      console.log("eventLogs: ", eventLogs)
-      const events =  parseEventLogs(eventLogs)
-      setGiftsMinted([...events])
-      statusGiftsMinted.current = "isSuccess" 
-    } catch (error) {
-      statusGiftsMinted.current = "isError"
-      console.log(error)
-    }
-  }
-
-  const getColourSchemeChanged = async () => {
-    statusColourSchemeChanged.current = "isLoading"
-    if (publicClient)
-    try {
-      const eventLogs: Log[] = await publicClient.getContractEvents( { 
-        abi: loyaltyProgramAbi, 
-        address: parseEthAddress(prog.address), 
-        eventName: 'ColourSchemeChanged',
-        fromBlock: fromBlock, 
-        toBlock: toBlock 
-      });
-      console.log("eventLogs: ", eventLogs)
-      const events =  parseEventLogs(eventLogs)
-      setColourSchemeChanged([...events])
-      statusColourSchemeChanged.current = "isSuccess" 
-    } catch (error) {
-      statusColourSchemeChanged.current = "isError"
-      console.log(error)
-    }
-  }
-
-  const getImageUriChanged = async () => {
-    statusImageUriChanged.current = "isLoading"
-    if (publicClient)
-    try {
-      const eventLogs: Log[] = await publicClient.getContractEvents( { 
-        abi: loyaltyProgramAbi, 
-        address: parseEthAddress(prog.address), 
-        eventName: 'ImageUriChanged',
-        fromBlock: fromBlock, 
-        toBlock: toBlock 
-      });
-      console.log("eventLogs: ", eventLogs)
-      const events =  parseEventLogs(eventLogs)
-      setImageUriChanged([...events])
-      statusImageUriChanged.current = "isSuccess" 
-    } catch (error) {
-      statusImageUriChanged.current = "isError"
-      console.log(error)
-    }
-  }
+  const [error, setError] = useState<any>(); 
   
-  const getBlockData = async () => {
-    statusBlockData.current = "isLoading"
-
+  const getBlockData = async (events: Event[]) => {
     let event: Event
     let eventsUpdated: Event[] = []
 
@@ -224,141 +31,82 @@ export default function useEvents({fromBlock, toBlock}: UseEventProps) {
         })
         eventsUpdated.push({...event, blockData: data})
       }
-      setEvents(eventsUpdated) 
-      statusBlockData.current = "isSuccess" 
+      return eventsUpdated
       } catch (error) {
-        statusBlockData.current = "isError" 
-        console.log(error)
+        setStatus("isError") 
+        setError(error)
       }
     }
   }
 
-  useEffect(() => {
-    // fetching all events within time period. 
-    getGiftListed()
-    getPointsExchanged()
-    getGiftRedeemed()
-    getCardBlocked()
-    getCreationCardsAllowed()
-    getGiftsMinted()
-    getColourSchemeChanged()
-    getImageUriChanged()
-  }, [ ])
+  const fetchEvents = useCallback(
+    async (startBlock: number, endBlock: number) => {
+      let localStore = localStorage.getItem("clp_v_events")
+      const saved: EventsInBlocks[] = localStore ? JSON.parse(localStore) : []
+      setAllEvents(saved)
 
-  useEffect(() => {
-    if (
-      statusGiftListed.current == "isSuccess" &&
-      statusPointsExchanged.current == "isSuccess" &&  
-      statusGiftRedeemed.current == "isSuccess" &&
-      statusCardBlocked.current == "isSuccess" &&
-      statusCreationCardsAllowed.current == "isSuccess" && 
-      statusGiftsMinted.current == "isSuccess" &&
-      statusColourSchemeChanged.current == "isSuccess" && 
-      statusImageUriChanged.current == "isSuccess"
-      ) {
-        const allEvents = [
-          ...giftListed, 
-          ...pointsExchanged, 
-          ...giftRedeemed, 
-          ...cardBlocked, 
-          ...creationCardsAllowed, 
-          ...giftsMinted, 
-          ...colourSchemeChanged,
-          ...imageUriChanged
-        ]
-        allEvents.sort((firstEvent, secondEvent) => 
-          Number(firstEvent.blockNumber) - Number(secondEvent.blockNumber)
-        );
-        setEvents(allEvents)
+      // check if blocks have already been queried. 
+      const alreadyChecked = saved.find(block => {
+        return block.startBlock <= endBlock && startBlock <= block.endBlock 
+      })
+
+      if (alreadyChecked) {
+        setStatus("isError")
+        setError("requested blocks already queried") 
+        return;  
       }
-  }, [
-    giftListed, 
-    pointsExchanged, 
-    giftRedeemed, 
-    cardBlocked, 
-    creationCardsAllowed, 
-    giftsMinted, 
-    colourSchemeChanged,
-    imageUriChanged
-  ])
+      
+      // if checks pass: 
+      // fetch events
+      const logs: Log[] = await publicClient.getContractEvents({
+        abi: loyaltyProgramAbi, 
+        address: prog.address,
+        fromBlock: BigInt(startBlock),
+        toBlock: BigInt(endBlock) 
+      }) 
+      // decode the events
+      const events: Event[] = logs.map((log: Log) => {
+        const event = decodeEventLog({
+          abi: loyaltyProgramAbi,
+          topics: log.topics, 
+          data: log.data
+        })
 
-  useEffect(() => {
-    if (
-      statusGiftListed.current == "isSuccess" &&
-      statusPointsExchanged.current == "isSuccess" &&  
-      statusGiftRedeemed.current == "isSuccess" &&
-      statusCardBlocked.current == "isSuccess" &&
-      statusCreationCardsAllowed.current == "isSuccess" && 
-      statusGiftsMinted.current == "isSuccess" &&
-      statusColourSchemeChanged.current == "isSuccess" && 
-      statusImageUriChanged.current == "isSuccess" && 
-      events.length > 0 
-    ) {
-      getBlockData() 
-    } 
+        return {
+          address: log.address, 
+          blockNumber: log.blockNumber, 
+          logIndex: log.logIndex, 
+          event: event.eventName, 
+          args: event.args
+        }
+      })
+      const eventsUpdated = await getBlockData(events)
 
-    if (
-      statusGiftListed.current == "isSuccess" &&
-      statusPointsExchanged.current == "isSuccess" &&  
-      statusGiftRedeemed.current == "isSuccess" &&
-      statusCardBlocked.current == "isSuccess" &&
-      statusCreationCardsAllowed.current == "isSuccess" && 
-      statusGiftsMinted.current == "isSuccess" &&
-      statusColourSchemeChanged.current == "isSuccess" && 
-      statusImageUriChanged.current == "isSuccess" && 
-      statusBlockData.current == "isIdle"  && 
-      events.length == 0 
-    ) {
-      statusBlockData.current = "isSuccess" 
-    } 
-  }, [ 
-    events
-  ])
+      const eventsInBlocks: EventsInBlocks = {
+        startBlock, 
+        endBlock, 
+        events: eventsUpdated ? eventsUpdated : []
+      }
+      const allEventsTemp = [...saved, eventsInBlocks] 
 
-   // updating status
-   useEffect(() => {
-    if (
-      statusGiftListed.current == "isError" ||
-      statusPointsExchanged.current == "isError" ||  
-      statusGiftRedeemed.current == "isError" ||
-      statusCardBlocked.current == "isError" ||
-      statusCreationCardsAllowed.current == "isError" || 
-      statusGiftsMinted.current == "isError" ||
-      statusColourSchemeChanged.current == "isError" || 
-      statusImageUriChanged.current == "isError" || 
-      statusBlockData.current == "isError"
-    ) {
-      setStatus("isError")
-    }
-    if (
-      statusGiftListed.current == "isLoading" ||
-      statusPointsExchanged.current == "isLoading" ||  
-      statusGiftRedeemed.current == "isLoading" ||
-      statusCardBlocked.current == "isLoading" ||
-      statusCreationCardsAllowed.current == "isLoading" || 
-      statusGiftsMinted.current == "isLoading" ||
-      statusColourSchemeChanged.current == "isLoading" || 
-      statusImageUriChanged.current == "isLoading" || 
-      statusBlockData.current == "isLoading"
-    ) {
-      setStatus("isLoading")
-    }
-    if (
-      statusGiftListed.current == "isSuccess" &&
-      statusPointsExchanged.current == "isSuccess" &&  
-      statusGiftRedeemed.current == "isSuccess" &&
-      statusCardBlocked.current == "isSuccess" &&
-      statusCreationCardsAllowed.current == "isSuccess" && 
-      statusGiftsMinted.current == "isSuccess" &&
-      statusColourSchemeChanged.current == "isSuccess" && 
-      statusImageUriChanged.current == "isSuccess" && 
-      statusBlockData.current == "isSuccess" 
-    ) {
+      // sort queries by block number.  
+      allEventsTemp.sort((a, b) => {
+        return a.startBlock > b.startBlock ? -1 : 1 // the latest block, with the largest block number, should end up first in line. 
+      })
+
+      // store all items. 
+      setFetchedEvents(eventsInBlocks)
+      setAllEvents(allEventsTemp)
+      // a hack to correctly encode bigints. See https://github.com/GoogleChromeLabs/jsbi/issues/30 
+      localStorage.setItem("clp_v_events", JSON.stringify( 
+        allEventsTemp, (key, value) => 
+          typeof value === 'bigint' // if bigint... 
+        ? value.toString() // ...transfer to string. 
+        : value // return everything else unchanged
+      ));
       setStatus("isSuccess")
-    }
-  }, [ 
-    events
-  ])
+    }, [prog.address]
+  ) 
 
-  return {status, events}
+  return {fetchEvents, fetchedEvents, allEvents, status, error}
 }

@@ -8,6 +8,7 @@ interface SelectedProgram {
 
 const initialState: SelectedProgram = {
   selectedProgram: {
+    address: '0x0', 
     colourBase: "#f1f5f9", 
     colourAccent: "#0f172a"
   }
@@ -26,6 +27,7 @@ export const programSlice = createSlice({
     resetProgram: (state, action: PayloadAction<boolean>) => {
       if (action.payload === true) {
         state.selectedProgram = {
+          address: '0x0', 
           colourBase: "#f1f5f9", 
           colourAccent: "#0f172a"
         }

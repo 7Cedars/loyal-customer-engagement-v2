@@ -117,7 +117,6 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     event LoyaltyCardBlocked(address indexed owner, bool indexed blocked);
     event CreationCardsAllowed(bool indexed allowed);
     event GiftsMinted(address indexed gift, uint256 indexed amount);
-    event ColourSchemeChanged(bytes indexed base, bytes indexed accent);
     event ImageUriChanged();
 
     //////////////////////////////////////////////////////////////////

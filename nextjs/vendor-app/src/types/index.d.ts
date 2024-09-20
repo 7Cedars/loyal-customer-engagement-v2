@@ -1,7 +1,7 @@
 import { Hex } from "viem";
 
 export type Program = {
-  address?: Hex; 
+  address: Hex; 
   name?: string;
   balance?: int;  
   colourBase: string; 
@@ -9,6 +9,12 @@ export type Program = {
   uriImage?: string;
   owner?: Hex; 
 }
+
+export type EventsInBlocks = {
+  startBlock: number; 
+  endBlock: number;
+  events: Event[]; 
+};
 
 export type GiftsInBlocks = {
   startBlock: number; 
@@ -49,21 +55,24 @@ export type Metadata = {
 }
 
 export type Event = {
-  address: EthAddress;
-  blockNumber: BigInt;
-  logIndex: number; 
-  args?: any; // this has to be fixed later. 
+  address: `0${string}`;
+  blockNumber: BigInt | null;
+  logIndex: number | null; 
   event?:
-    GiftListed | 
-    PointsExchanged | 
-    GiftRedeemed | 
-    CardBlocked | 
+    LoyaltyProgramDeployed | 
+    AllowedGiftSet |  
+    LoyaltyPointsExchangeForGift | 
+    LoyaltyGiftRedeemed | 
+    LoyaltyCardBlocked | 
     CreationCardsAllowed | 
     GiftsMinted | 
-    ColourSchemeChanged |
     ImageUriChanged;
+  args?: any; // this has to be fixed later. 
+  data?: any; 
   blockData?: Any
 }
+
+
 
 type GiftListed = {
 

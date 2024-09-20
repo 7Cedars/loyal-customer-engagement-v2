@@ -20,7 +20,6 @@ export const GiftInfo = ({
   const { writeContract, error } = useWriteContract()
   console.log("error: ", error)
 
-
   return (
     <div 
       className="w-full grow grid grid-cols-1 aria-selected:h-fit" 
@@ -82,6 +81,7 @@ export const GiftInfo = ({
           </div>
 
           <div className="h-12 p-1"> 
+            
             <Button onClick={() =>  writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,

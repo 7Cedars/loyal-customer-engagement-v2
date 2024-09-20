@@ -22,7 +22,6 @@ export const useGifts = () => {
 
   const getGiftsContractData = useCallback( 
     async (requestedGifts: `0x${string}`[]) => {
-      setStatus("isLoading") 
 
       let giftAddress: `0x${string}`
       let giftContractData: Gift[] = []
@@ -78,19 +77,15 @@ export const useGifts = () => {
                   additionalReq: parseBoolean(temp[4].result)
                 })
           } 
-          setStatus("isSuccess") 
           return giftContractData
         } catch (error) {
           setStatus("isError") 
           setError(error)
         }
       } 
-    setStatus("isSuccess")
   }, [ ])
 
   const getGiftsMetaData = async (gifts: Gift[]) => {
-    setStatus("isLoading")
-
     let gift: Gift
     let loyaltyGiftsMetadata: Gift[] = []
 
@@ -106,7 +101,6 @@ export const useGifts = () => {
                 metadata: parseMetadata(fetchedMetadata)})
           }
         } 
-        setStatus("isSuccess")
         return loyaltyGiftsMetadata
       } catch (error) {
         setStatus("isError")
@@ -122,14 +116,12 @@ export const useGifts = () => {
       // loading gifts saved in localStorage. 
       let localStore = localStorage.getItem("clp_v_gifts")
       const saved: GiftsInBlocks[] = localStore ? JSON.parse(localStore) : []
-
-      console.log("saved: ", saved)
+      setAllGifts(saved)
 
       // check if blocks have already been queried. 
-      const alreadyChecked = saved.find(gift => {
-        return gift.startBlock <= endBlock && startBlock <= gift.endBlock 
+      const alreadyChecked = saved.find(block => {
+        return block.startBlock <= endBlock && startBlock <= block.endBlock 
       })
-      console.log("alreadyChecked: ", alreadyChecked )
       if (alreadyChecked) {
         setStatus("isError")
         setError("requested blocks already queried") 
@@ -151,9 +143,7 @@ export const useGifts = () => {
           topics: log.topics 
         })
       })
-      console.log("logs: ", logs )
-      console.log("events: ", events )
-
+      
       // retrieve addresses and call subsequent data fetching functions. 
       const giftEvents = events as unknown as GiftDeployedEvent[]
       const requestedGifts = giftEvents.map(event => event.args.giftAddress)
