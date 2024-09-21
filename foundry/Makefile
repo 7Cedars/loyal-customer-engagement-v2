@@ -47,7 +47,7 @@ anvilDeploySampleGifts:
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFridayFifteen $(ANVIL_ARGS_0)
 
 anvilAll:
-# @forge script script/DeployFactoryPrograms.s.sol:DeployFactoryPrograms $(ANVIL_ARGS_0)
+	@forge script script/DeployFactoryPrograms.s.sol:DeployFactoryPrograms $(ANVIL_ARGS_0)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCoffee $(ANVIL_ARGS_0)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCupCake $(ANVIL_ARGS_0)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFridayFifteen $(ANVIL_ARGS_0)  

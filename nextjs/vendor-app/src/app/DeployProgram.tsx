@@ -230,7 +230,7 @@ export const DeployProgram = () => {
       <InputBox
         nameId = "uri"
         placeholder={"Enter a uri (https://...) to an image."}
-        onChange = {(event: ChangeEvent<HTMLInputElement>) => parseImage(event.target.value)} // this needs a parser.... 
+        onChange = {(event: ChangeEvent<HTMLInputElement>) => parseImage(event.target.value)} 
       />   
       </div>
     </> 

@@ -56,7 +56,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
         className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
         style={{color:accent}}
         >
-        Transaction 
+        Transactions
       </Link>
       
       <Link 
