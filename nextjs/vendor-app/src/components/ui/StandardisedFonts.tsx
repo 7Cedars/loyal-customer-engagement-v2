@@ -44,10 +44,10 @@ export const TitleText = ({
 
   return (
     <div className="grid grid-cols-1 px-2">
-      <div className={`text-center font-bold ${appearanceTitle[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-center font-bold break-words ${appearanceTitle[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
         {title}
       </div>
-      <div className={`text-center text-slate-400 ${appearanceSubtitle[size]}` } style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-center text-slate-400 break-words ${appearanceSubtitle[size]}` } style = {{color: `${selectedProgram.colourAccent}`}}>
         {subtitle}
       </div>
     </div>
@@ -63,10 +63,10 @@ export const SectionText = ({
 
   return (
     <div className="grid grid-cols-1 px-2">
-      <div className={`text-start font-bold ${appearanceTitle[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-start font-bold break-words ${appearanceTitle[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
         {text}
       </div>
-      <div className={`text-start text-slate-400 ${appearanceSubtitle[size]}` } style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-start text-slate-400 break-words ${appearanceSubtitle[size]}` } style = {{color: `${selectedProgram.colourAccent}`}}>
         {subtext}
       </div>
     </div>
@@ -80,8 +80,8 @@ export const NoteText = ({
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
 
   return (
-    <div className="grid grid-cols-1 gap-1 text-center text-gray-500 font-sm">
-      <div className={`text-center italic ${appearanceNote[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+    <div className="grid grid-cols-1 px-2 gap-1 text-start break-words text-gray-500 font-sm">
+      <div className={`text-start italic ${appearanceNote[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
         {message}
       </div>
     </div>

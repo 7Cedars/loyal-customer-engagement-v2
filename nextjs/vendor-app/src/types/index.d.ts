@@ -57,9 +57,9 @@ export type Metadata = {
 }
 
 export type Event = {
-  address: `0${string}`;
-  blockNumber: BigInt | null;
-  logIndex: number | null; 
+  address: `0${string}` | string;
+  blockNumber: BigInt | string;
+  logIndex: number | string | null; 
   event?:
     LoyaltyProgramDeployed | 
     AllowedGiftSet |  

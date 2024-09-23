@@ -109,12 +109,12 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     //////////////////////////////////////////////////////////////////
     //                          Events                              //
     //////////////////////////////////////////////////////////////////
-    event Log(string func, uint256 gas);
+    event Log(address indexed sender, uint256 indexed value, string func);
     event LoyaltyProgramDeployed(address indexed owner, address indexed program, uint256 indexed version);
     event AllowedGiftSet(address indexed loyaltyGift, bool indexed exchangeable, bool indexed redeemable);
-    event LoyaltyPointsExchangeForGift(address indexed owner, address indexed gift, uint256 indexed giftId);
-    event LoyaltyGiftRedeemed(address indexed owner, address indexed gift, uint256 indexed giftId);
-    event LoyaltyCardBlocked(address indexed owner, bool indexed blocked);
+    event LoyaltyPointsExchangeForGift(address indexed customer, address indexed gift, uint256 indexed giftId);
+    event LoyaltyGiftRedeemed(address indexed customer, address indexed gift, uint256 indexed giftId);
+    event LoyaltyCardBlocked(address indexed customer, bool indexed blocked);
     event CreationCardsAllowed(bool indexed allowed);
     event GiftsMinted(address indexed gift, uint256 indexed amount);
     event ImageUriChanged();
@@ -176,11 +176,11 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     // this should transfer directly to deposit! / NO! It should go to the balance of this account!
     // only the deposits of the _loyalty cards_ need to be filled up!
     fallback() external payable {
-        emit Log("fallback loyalty program", gasleft());
+        emit Log(msg.sender, msg.value,"fallback");
     }
 
     receive() external payable {
-        emit Log("receive loyalty program", gasleft());
+        emit Log(msg.sender, msg.value, "receive");
     }
 
     //////////////////////////////////////////////////////////////////

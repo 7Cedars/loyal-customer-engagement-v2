@@ -31,8 +31,13 @@ export const InputBox = ({
   return (
     <div className="w-full flex flex-row p-2">
       <input 
-        className={`w-full h-full grid grid-cols-1 text-md text-center border place-items-center rounded-lg p-2`}
-        style={{borderColor: selectedProgram.colourAccent, background: selectedProgram.colourBase}}
+        className={`w-full h-full grid grid-cols-1 aria-selected:border-2 text-md text-center border place-items-center rounded-lg p-2`}
+        style={{
+          color: selectedProgram.colourAccent, 
+          fontPalette: selectedProgram.colourAccent, 
+          borderColor: selectedProgram.colourAccent, 
+          background: selectedProgram.colourBase, 
+          }}
         disabled={disabled}
         type="text" 
         placeholder={placeholder}

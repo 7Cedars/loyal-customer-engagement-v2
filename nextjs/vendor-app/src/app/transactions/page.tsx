@@ -19,23 +19,13 @@ export default function Page() {
   const {data: blockNumber, isFetched: blockNumberIsFetched} = useBlockNumber()
   const settings = chainSettings(chainId)
 
-  console.log("prog.events: ", prog.events)
-
-
   useEffect(() => {
     if (settings && settings.fetchBlockAmount && blockNumberIsFetched) {
       const currentBlock: number = Number(blockNumber)
       let fromBlock = currentBlock - settings.fetchBlockAmount
-
       if (allEvents && allEvents.endBlock > fromBlock) { 
         fromBlock = allEvents.endBlock + 1
       }
-
-      console.log({
-        currentBlock: currentBlock, 
-        fromBlock: fromBlock
-      })
-
       if (currentBlock - fromBlock > settings.minimumBlocksToFetch) {
         fetchEvents(fromBlock, currentBlock) 
       }
@@ -45,30 +35,17 @@ export default function Page() {
   return (
     <Layout> 
       <TitleText title = "Transactions" size = {2} /> 
-      <section className="flex flex-col">
-        <div className="w-full md:w-96 self-center"> 
+      <section className="flex flex-col p-4">
+        <div className="w-full md:w-96 self-center pb-6"> 
           <InputBox nameId = {"SearchTransactions"} placeholder="Search transactions" /> 
         </div>
-        {allEvents?.events?.map((item, i) => 
-          <div key = {i}>
-            {item.event}
-            {item.args[0]}
-            <TransactionInfo event = {item}/>
-          </div>
-        )
-      }
-
-      </section>
-      
-
-      
-        
-      
-      <section 
-        className="flex flex-col divide-y justify-start p-2 overflow-auto border border-red-500"
-        style = {{color: prog.colourAccent}}
-      >
-        
+        <div className="flex flex-col overflow-auto">
+          {allEvents?.events?.map((item, i) => 
+            <div key = {i}>
+              <TransactionInfo event = {item}/>
+            </div>
+          )}
+        </div>
       </section>
     </Layout>
   )

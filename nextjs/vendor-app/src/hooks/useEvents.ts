@@ -134,9 +134,9 @@ export default function useEvents() {
         "allEventsTemp:", allEventsTemp
       )
       // sort queries by block number.  // I might still need to sort events. See later. 
-      // allEventsTemp.sort((a, b) => {
-      //   return a.startBlock > b.startBlock ? -1 : 1 // the latest block, with the largest block number, should end up first in line. 
-      // })
+      allEventsTemp.events.sort((a, b) => {
+        return a.blockNumber > b.blockNumber ? -1 : 1 // the latest block, with the largest block number, should end up first in line. 
+      })
 
       // store all items. 
       setFetchedEvents(eventsInBlocks)
