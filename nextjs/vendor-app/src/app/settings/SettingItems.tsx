@@ -3,11 +3,14 @@ import { InputBox } from "@/components/ui/InputBox";
 import { NoteText, SectionText, TitleText } from "@/components/ui/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import Image from "next/image";
-import { useWriteContract } from 'wagmi'
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { loyaltyProgramAbi } from "@/context/abi";
+import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { setProgram } from "@/redux/reducers/programReducer";
 
 export const ClearLocalStorage = () => {
   const [cleared, setCleared] = useState<boolean>(false);
@@ -33,11 +36,32 @@ export const ClearLocalStorage = () => {
 )}
 
 export const ChangeProgramImage = () => {
-  const [ uri, setUri ] = useState<string | undefined>() 
+  const [uri, setUri] = useState<string | undefined>() 
+  const [hex, setHex] = useState<`0x${string}`>()  
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-  const { writeContract, error, isError, isSuccess, failureReason } = useWriteContract()
+  const {connector} = useAccount(); 
+  const {data: hexTransaction, error, isError, isSuccess, failureReason, writeContract } = useWriteContract()
+  const {isError: isErrorTransaction, error: errorTransaction, isLoading: isLoadingTransaction, isSuccess: isSuccessTransaction } = useWaitForTransactionReceipt(
+    {  confirmations: 1, hash: hex })
+  const dispatch = useDispatch() 
 
+  console.log("connector wagmi account: ", connector)
   console.log("error: ", error)
+  console.log("errorTransaction: ", errorTransaction)
+
+  useEffect(() => {
+    setHex(undefined)
+    if (hexTransaction) setHex(hexTransaction) 
+  }, [hexTransaction])
+
+  useEffect(() => {
+    if (isSuccessTransaction) {
+      dispatch(setProgram({
+        ...prog, uriImage: uri
+      })) 
+
+    } 
+  }, [isSuccessTransaction])
 
   const parseImage = async (src: string) => { // I have this now also in parsers. replace at a later stage.     
     const res = await fetch(src);
@@ -98,7 +122,7 @@ export const ChangeProgramImage = () => {
           className="flex h-12 max-w-96 w-full mt-6"
           >
           <Button 
-            disabled = {!uri || uri.length == 0 }
+            disabled = {!uri || uri.length == 0 || isSuccessTransaction || isError || isErrorTransaction || isLoadingTransaction}
             onClick={() => writeContract({
               abi: loyaltyProgramAbi, 
               address: prog.address, 
@@ -106,7 +130,14 @@ export const ChangeProgramImage = () => {
               args: [uri]
             })
           }>
-            {isError ? `Error` : "Update image"}
+            {
+            isError || isErrorTransaction ? `Error` 
+            : 
+            isLoadingTransaction ? `Loading...`
+            :
+            isSuccessTransaction ? `Image successfully updated`
+            :
+            "Update image"}
           </Button>
         </div>
       </div>
@@ -152,17 +183,21 @@ export const ShowProgramAddress = () => {
 )}
 
 export const ExitProgram = () => {
-  const router = useRouter()
+  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
 
   return (
     <section className="my-2"> 
       <SectionText 
       text="Do you really want to exit?"
       />
-      <div className="flex h-12 max-w-96 w-full mt-6">
-        <Button onClick={() => router.push('/')}>
-          Yes, exit loyalty program. 
-        </Button>
+      <div className="flex h-12 max-w-96 w-full mt-6 z-10">
+      <Link 
+          href='/' 
+          className={`w-full h-full grid grid-cols-1 text-md text-center border content-center rounded-lg p-2 h-12 z-30`} 
+          style={{color: prog.colourAccent}}
+          >
+          Exit 
+      </Link>
       </div>
     </section>
 )}

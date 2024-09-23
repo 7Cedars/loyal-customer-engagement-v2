@@ -146,9 +146,10 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         string memory name,
         string memory colourScheme, // in the format of: '#111111;#ffffff'
         string memory cardImageUri,
+        address owner, 
         address entryPoint,
         address cardsFactory
-    ) ERC20(name, colourScheme) Ownable(msg.sender) noZeroAddress(entryPoint) noZeroAddress(cardsFactory) {
+    ) ERC20(name, colourScheme) Ownable(owner) noZeroAddress(entryPoint) noZeroAddress(cardsFactory) {
         _mint(address(this), type(uint256).max);
 
         imageUri = cardImageUri;
@@ -164,7 +165,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
             })
         );
 
-        emit LoyaltyProgramDeployed(owner(), address(this), LOYALTY_PROGRAM_VERSION);
+        emit LoyaltyProgramDeployed(owner, address(this), LOYALTY_PROGRAM_VERSION); // NB -- here something is wrong! 
     }
 
     //////////////////////////////////////////////////////////////////

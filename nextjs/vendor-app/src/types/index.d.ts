@@ -8,6 +8,7 @@ export type Program = {
   colourAccent: string; 
   uriImage?: string;
   owner?: Hex; 
+  events?: EventsInBlocks[]; 
 }
 
 export type EventsInBlocks = {

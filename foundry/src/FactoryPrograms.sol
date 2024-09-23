@@ -8,8 +8,8 @@ import {LoyaltyProgram} from "./LoyaltyProgram.sol";
 contract FactoryPrograms {
 
 /* State variables */
-address immutable public s_entryPoint; 
-address immutable public s_factoryCards;
+address immutable public ENTRY_POINT; 
+address immutable public FACTORY_CARDS;
 
 /* Events */
 event FactoryProgramsDeployed(address indexed entryPoint, address  indexed factoryCards);
@@ -17,20 +17,20 @@ event ProgramDeployed(address indexed program);
 
 /* Modifiers */
 constructor( 
-  address _anEntryPoint,
-  address _factoryCards
+  address entryPoint,
+  address factoryCards
   ) {
-    s_entryPoint = _anEntryPoint; 
-    s_factoryCards = _factoryCards; 
+    ENTRY_POINT = entryPoint; 
+    FACTORY_CARDS = factoryCards; 
 }
 
 function deployLoyaltyProgram(
-  string memory _name, 
-  string memory _colourScheme, // in the format of: '#111111;#ffffff'
-  string memory _cardImageUri
+  string memory name, 
+  string memory colourScheme, // in the format of: '#111111;#ffffff'
+  string memory cardImageUri
 ) public returns (LoyaltyProgram loyaltyProgram) {
     loyaltyProgram = new LoyaltyProgram(
-      _name, _colourScheme, _cardImageUri, s_entryPoint, s_factoryCards
+      name, colourScheme, cardImageUri, msg.sender, ENTRY_POINT, FACTORY_CARDS
     );
     emit ProgramDeployed(address(loyaltyProgram));
   } 

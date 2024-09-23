@@ -317,6 +317,7 @@ contract LoyaltyProgramTest is Test {
             name, 
             colourScheme, 
             cardImageUri,
+            vendorAddress, 
             config.entryPoint, 
             address(factoryCards)
         );

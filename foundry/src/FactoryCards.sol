@@ -20,12 +20,12 @@ import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPo
  * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
 contract FactoryCards {
-    LoyaltyCard public immutable cardImplementation;
+    LoyaltyCard public immutable CARD_IMPLEMENTATION;
 
     error FactoryCards__NotRegisteredCard(); 
 
     constructor(IEntryPoint _entryPoint) {
-        cardImplementation = new LoyaltyCard(_entryPoint);
+        CARD_IMPLEMENTATION = new LoyaltyCard(_entryPoint);
     }
 
     /**
@@ -60,7 +60,7 @@ contract FactoryCards {
             revert FactoryCards__NotRegisteredCard(); 
         }
         newCard = LoyaltyCard(payable(new ERC1967Proxy{salt : bytes32(salt)}(
-                address(cardImplementation),
+                address(CARD_IMPLEMENTATION),
                 abi.encodeCall(LoyaltyCard.initialize, (owner, loyaltyProgram))
             )));
     }
@@ -73,7 +73,7 @@ contract FactoryCards {
         return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(
-                    address(cardImplementation),
+                    address(CARD_IMPLEMENTATION),
                     abi.encodeCall(LoyaltyCard.initialize, (owner, loyaltyProgram))
                 )
             )));

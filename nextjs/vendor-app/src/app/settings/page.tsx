@@ -76,7 +76,7 @@ export default function Page() {
           selected = {selectedItem == 'exit'} 
           onClick={() => selectedItem == 'exit' ? setSelectedItem(undefined) : setSelectedItem('exit') }
           titleText="Exit program"
-          sizeFoldout={0}
+          sizeFoldout={1}
           >
            <ExitProgram />
         </SettingLayout>

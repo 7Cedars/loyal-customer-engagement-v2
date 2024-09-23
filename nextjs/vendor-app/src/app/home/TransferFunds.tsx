@@ -32,7 +32,7 @@ export const TransferFunds = () => {
       refetch()
       dispatch(setBalanceProgram(Number(balanceData?.value) / 10 ** balanceData?.decimals))  
     } 
-  }, [isSuccess, balanceData, dispatch])
+  }, [isSuccess, balanceData, dispatch, refetch])
 
   console.log("fetchStatus:", fetchStatus)
 

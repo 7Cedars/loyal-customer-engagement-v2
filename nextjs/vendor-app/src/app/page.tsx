@@ -1,7 +1,7 @@
 "use client"; 
 
 import { Button } from "../components/ui/Button";
-import { useAccount } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Program } from "../types";
@@ -13,6 +13,9 @@ import { useRouter } from 'next/navigation'
 import { useDispatch } from "react-redux";
 import { resetProgram, setProgram } from "@/redux/reducers/programReducer";
 import { Hex } from "viem";
+import { readContract } from '@wagmi/core'
+import { wagmiConfig } from "../../wagmi-config" 
+import { loyaltyProgramAbi } from "@/context/abi";
 
 export default function Home() {
   // FOR DEV ONLY // 
@@ -40,13 +43,23 @@ export default function Home() {
     dispatch(resetProgram(true)) 
   }, [, mode])
 
-  const handleSelectionProgram = (program: Program) => {
+  const handleSelectionProgram = async (program: Program) => {
+    console.log("handleSelectionProgram called")
+
+    const imageUri = await readContract(wagmiConfig, {
+      abi: loyaltyProgramAbi,
+      address: program.address,
+      functionName: 'imageUri',
+    })
+
+    console.log("imageUri: ", imageUri)
+    
     dispatch(setProgram({
       address: program.address, 
       name: program.name, 
       colourBase: program.colourBase, 
       colourAccent: program.colourAccent,
-      uriImage: program.uriImage
+      uriImage: imageUri as string
     }))
     router.push('/home')
   }

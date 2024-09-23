@@ -11,13 +11,20 @@ import { loyaltyProgramAbi } from "@/context/abi";
 import { publicClient } from "@/context/clients";
 import { useEffect } from "react";
 import { useAppSelector } from "@/redux/hooks";
+import { useAccount } from "wagmi";
+import { useDispatch } from "react-redux";
+import { setProgram } from "@/redux/reducers/programReducer";
 
 export default function useEvents() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {connector, chainId} = useAccount(); 
   const [fetchedEvents, setFetchedEvents] = useState<EventsInBlocks>()
   const [allEvents, setAllEvents] = useState<EventsInBlocks[]>()
   const [status, setStatus] = useState<Status>("isIdle") 
-  const [error, setError] = useState<any>(); 
+  const [error, setError] = useState<any>();
+  const dispatch = useDispatch()  
+
+  console.log("connector @useAccount", connector)
   
   const getBlockData = async (events: Event[]) => {
     let event: Event
@@ -41,8 +48,7 @@ export default function useEvents() {
 
   const fetchEvents = useCallback(
     async (startBlock: number, endBlock: number) => {
-      let localStore = localStorage.getItem("clp_v_events")
-      const saved: EventsInBlocks[] = localStore ? JSON.parse(localStore) : []
+      const saved: EventsInBlocks[] = prog.events ? prog.events : []  
       setAllEvents(saved)
 
       // check if blocks have already been queried. 
@@ -97,13 +103,13 @@ export default function useEvents() {
       // store all items. 
       setFetchedEvents(eventsInBlocks)
       setAllEvents(allEventsTemp)
+      // NB £CONTINUE HERE: EVENTS HAVE TO BE STORED IN THE PROGRAM REDUX object. NOT in local storage! 
       // a hack to correctly encode bigints. See https://github.com/GoogleChromeLabs/jsbi/issues/30 
-      localStorage.setItem("clp_v_events", JSON.stringify( 
-        allEventsTemp, (key, value) => 
-          typeof value === 'bigint' // if bigint... 
-        ? value.toString() // ...transfer to string. 
-        : value // return everything else unchanged
-      ));
+      
+      dispatch(setProgram({
+        ...prog, 
+        events: allEventsTemp
+      }))
       setStatus("isSuccess")
     }, [prog.address]
   ) 

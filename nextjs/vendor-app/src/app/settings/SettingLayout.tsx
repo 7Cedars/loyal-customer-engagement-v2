@@ -39,7 +39,7 @@ export const SettingLayout = ({
         className={`z-10 w-full h-fit flex flex-row justify-start pt-2`} 
         onClick={onClick}
         >
-        <TitleText size={1} title={titleText} /> 
+        <TitleText size={1} title={""} subtitle={titleText} /> 
       </button>
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}
