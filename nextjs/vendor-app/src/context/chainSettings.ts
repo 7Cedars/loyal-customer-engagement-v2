@@ -7,7 +7,7 @@ export const chainSettings = (chainId: number) => {
   switch (chainId) {
     case 31337: {
       return ({ // anvil
-          fetchBlockAmount: 100, 
+          fetchBlockAmount: 10_000, 
           minimumBlocksToFetch: 10, 
         })
     }

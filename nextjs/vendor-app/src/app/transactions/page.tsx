@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button"
 import { useEffect } from "react"
 import { useBlockNumber, useChainId } from 'wagmi'
 import { chainSettings } from '../../context/chainSettings'
+import { TransactionInfo } from "./TransactionInfo"
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -18,33 +19,22 @@ export default function Page() {
   const {data: blockNumber, isFetched: blockNumberIsFetched} = useBlockNumber()
   const settings = chainSettings(chainId)
 
-  console.log({
-    chainId: chainId,
-    blockNumberData : blockNumber, 
-    settings: settings
-  })
+  console.log("prog.events: ", prog.events)
 
-  console.log({
-    status: status,
-    allEvents: allEvents, 
-    fetchedEvents: fetchedEvents, 
-    error: error
-  })
-
-  console.log({
-    settings: settings, 
-    settingsfetchBlockAmount: settings?.fetchBlockAmount, 
-    blockNumberIsFetched: blockNumberIsFetched, 
-  })
 
   useEffect(() => {
     if (settings && settings.fetchBlockAmount && blockNumberIsFetched) {
       const currentBlock: number = Number(blockNumber)
       let fromBlock = currentBlock - settings.fetchBlockAmount
 
-      if (allEvents && allEvents[0].endBlock > fromBlock) { 
-        fromBlock = allEvents[0].endBlock + 1
+      if (allEvents && allEvents.endBlock > fromBlock) { 
+        fromBlock = allEvents.endBlock + 1
       }
+
+      console.log({
+        currentBlock: currentBlock, 
+        fromBlock: fromBlock
+      })
 
       if (currentBlock - fromBlock > settings.minimumBlocksToFetch) {
         fetchEvents(fromBlock, currentBlock) 
@@ -55,13 +45,23 @@ export default function Page() {
   return (
     <Layout> 
       <TitleText title = "Transactions" size = {2} /> 
-
+      <section className="flex flex-col">
         <div className="w-full md:w-96 self-center"> 
           <InputBox nameId = {"SearchTransactions"} placeholder="Search transactions" /> 
         </div>
-        <Button onClick={() => {fetchEvents(0, 50)}}>
-          Press here to test fetch events
-        </Button>
+        {allEvents?.events?.map((item, i) => 
+          <div key = {i}>
+            {item.event}
+            {item.args[0]}
+            <TransactionInfo event = {item}/>
+          </div>
+        )
+      }
+
+      </section>
+      
+
+      
         
       
       <section 

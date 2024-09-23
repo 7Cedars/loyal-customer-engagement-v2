@@ -10,7 +10,13 @@ const initialState: SelectedProgram = {
   selectedProgram: {
     address: '0x0', 
     colourBase: "#f1f5f9", 
-    colourAccent: "#0f172a"
+    colourAccent: "#0f172a", 
+    events:  {
+      startBlock: 0, 
+      endBlock: 1,
+      genesisReached: false, 
+      events: []
+    }
   }
 }
 
@@ -29,7 +35,13 @@ export const programSlice = createSlice({
         state.selectedProgram = {
           address: '0x0', 
           colourBase: "#f1f5f9", 
-          colourAccent: "#0f172a"
+          colourAccent: "#0f172a",
+          events:  {
+            startBlock: 0, 
+            endBlock: 1,
+            genesisReached: false, 
+            events: []
+          }
         }
       }
     }, 

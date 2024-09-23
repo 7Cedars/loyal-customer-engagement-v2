@@ -59,7 +59,13 @@ export default function Home() {
       name: program.name, 
       colourBase: program.colourBase, 
       colourAccent: program.colourAccent,
-      uriImage: imageUri as string
+      uriImage: imageUri as string,
+      events:  {
+        startBlock: 0, 
+        endBlock: 1,
+        genesisReached: false, 
+        events: []
+      }
     }))
     router.push('/home')
   }
