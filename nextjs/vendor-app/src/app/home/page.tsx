@@ -145,7 +145,7 @@ export default function Page() {
 
           
           <div 
-            className="flex flex-col grow-0 w-full opacity-0 aria-selected:opacity-100 aria-selected:grow transition:all ease-in-out duration-300 delay-300 h-2 border-x"
+            className="flex flex-col items-center justify-center grow-0 w-full opacity-0 aria-selected:opacity-100 aria-selected:grow transition:all ease-in-out duration-300 delay-300 h-2 border-x"
             aria-selected={mode != undefined} 
             style={{borderColor: prog.colourAccent}}
           > 

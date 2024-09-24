@@ -46,7 +46,7 @@ export const TransactionInfo = (transaction: TransactionEvent) => {
             />
             <div className="flex flex-col gap-1 items-start"> 
               <NoteText message = {`From: ${transaction.event.args.sender}`} size = {0} />
-              <NoteText message = {`Amount: ${transaction.event.args.value}`} size = {0} />
+              <NoteText message = {`Amount: ${transaction.event.args.value / 1e18} eth`} size = {0} />
             </div>
           </div>
         </section>

@@ -13,7 +13,7 @@ export default function Page() {
   return (
     <Layout> 
       <TitleText title = "Settings" size = {2} /> 
-      <div className="grow flex flex-col justify-start items-start  p-2">
+      <div className="grow flex flex-col justify-start items-start overflow-auto p-2">
         <SettingLayout 
           selected = {selectedItem == 'localStore'} 
           onClick={() => selectedItem == 'localStore' ? setSelectedItem(undefined) : setSelectedItem('localStore') }

@@ -37,7 +37,7 @@ export const TransferFunds = () => {
   console.log("fetchStatus:", fetchStatus)
 
   return (
-    <section className="grow flex flex-col items-center"> 
+    <section className="grow flex flex-col items-center justify-center"> 
       <a 
         className="text-2xl p-2"
         style={{color:prog.colourAccent}}
