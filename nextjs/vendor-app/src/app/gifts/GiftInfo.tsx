@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/Button";
+import { InputButton } from "@/components/ui/InputButton";
 import { NumLine } from "@/components/ui/NumLine";
-import { loyaltyProgramAbi } from "@/context/abi";
+import { NoteText, SectionText, TitleText } from "@/components/ui/StandardisedFonts";
+import { loyaltyGiftAbi, loyaltyProgramAbi } from "@/context/abi";
 import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
+import { Notable } from "next/font/google";
 import Image from "next/image";
 import { useState } from "react";
 import { useWriteContract } from "wagmi";
@@ -10,7 +13,6 @@ import { useWriteContract } from "wagmi";
 export const GiftInfo = ({
   address,  
   name,
-  symbol, 
   points,
   additionalReq, 
   metadata, 
@@ -21,14 +23,12 @@ export const GiftInfo = ({
   console.log("error: ", error)
 
   return (
-    <div 
-      className="w-full grow grid grid-cols-1 aria-selected:h-fit" 
-      style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} // can add background, but should not be necessary.   
-      aria-selected = {selected}
-      >
+    <main className="flex flex-col">
       <button 
-        className={`z-10 w-full h-fit flex flex-row items-center justify-start p-2`} 
+        className={`w-full h-fit flex flex-row items-center aria-selected:h-fit p-2`} 
+        style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} 
         onClick={() => setSelected(!selected)}
+        aria-disabled = {selected}
         >
         <Image
           className="w-fit h-fit rounded-lg p-2"
@@ -38,69 +38,120 @@ export const GiftInfo = ({
           src={metadata?.imageUri ? metadata.imageUri : ""} 
           alt="No valid image detected."
         />
-        <section className="grow flex flex-col p-1 text-left text-md">
-            <a className="font-bold">
-              {name}
-            </a>
-            <a className="">
-              {metadata?.description}
-            </a>
-            <a className="">
-              {points} points
-            </a>
-            <a className="">
-              Additional requirements: {additionalReq ? "yes" : "no"}
-            </a>
-        </section>
+        <div className="flex flex-col">
+          <SectionText
+          text={name}
+          subtext={`${points} points | ... available`}
+          size = {1} 
+          /> 
+          <NoteText 
+          message = {metadata ? metadata.description : "No description available"} 
+          size = {1}
+          />  
+          {/* <NoteText 
+          message = {additionalReq ? "See extended description for additional requirements" : "No additional requirements"} 
+          size = {1}
+          />   */}
+        </div>
       </button>
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}
       <div 
-        className="z-1 w-full grid grid-cols-1 ps-3 p-2 md:px-8 p-1 h-1 opacity-0 aria-selected:opacity-100 aria-selected:h-80 ease-in-out duration-300 delay-300"
+        className="z-1 w-full flex flex-col md:px-8 h-1 opacity-0 aria-selected:opacity-100 aria-selected:h-64 ease-in-out duration-300 delay-300"
         aria-selected = {selected}
         > 
-        {selected ? 
+        {/* {selected ?  */}
         <>
-          {additionalReq && String(metadata?.attributes[0].value).length > 0 ?  
-            <div>
-              Claim requirement: {metadata?.attributes[0].value}
-            </div>
-            : 
-            null
-          }
-          {additionalReq && String(metadata?.attributes[1].value).length > 0 ?  
-            <div>
-              Redeem requirement: {metadata?.attributes[1].value}
-            </div>
-            : 
-            null
-          }
-
-          <div> 
-            <NumLine onClick={( ) => {}} />
-          </div>
-
-          <div className="h-12 p-1"> 
+        <section className="pb-4 h-24">
+          <SectionText
+            text = "Additional requirements" 
+            size = {0}
+          /> 
+          <NoteText 
+            message = {
+              `Claim: ${
+              additionalReq && String(metadata?.attributes[0].value).length > 0 ? 
+              metadata?.attributes[0].value 
+              :
+              "none"}`
+            }
+            size = {0}
+          />
+          <NoteText 
+            message = {
+              `Redeem: ${
+              additionalReq && String(metadata?.attributes[1].value).length > 0 ? 
+              metadata?.attributes[1].value 
+              :
+              "none"}`
+            }
+            size={0}
+          />
+        </section>
             
-            <Button onClick={() =>  writeContract({ 
+        <SectionText
+          text = "Gift actions" 
+          size = {0}
+        /> 
+          <div className="p-2"> 
+            <NumLine onClick={(amount) =>  writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,
-                functionName: 'setLoyaltyGift',
+                functionName: 'mintGifts',
                 args: [
                   address,
+                  amount
+                ]
+              })
+            } 
+            size = {0} 
+            aria-disabled = {selected}/>
+          </div>
+
+          <div className="p-2"> 
+            <Button onClick={() => writeContract({ 
+                abi: loyaltyProgramAbi,
+                address: selectedProgram.address,
+                functionName: 'setAllowedGift',
+                args: [
+                  address,
+                  0, 
                   true,
                   true
                 ]
               })
-            }>
-              Select gift  
+            }
+            size = {0}
+            aria-disabled = {selected}
+            >
+              Allow gift to be exchanged for points   
             </Button>
           </div>
+
+          <div className="p-2">
+            <InputButton 
+            nameId ={"directTransfer"}
+            onClick = {(inputAddress) =>  writeContract({ 
+              abi: loyaltyGiftAbi,
+              address: inputAddress as `0x${string}`,
+              functionName: 'transferFrom',
+              args: [
+                selectedProgram.address,
+                inputAddress as `0x${string}`, 
+                0 // TO DO: fetch onwed tokenId, then transfer. 
+              ]
+            })}
+            buttonText="Direct transfer"
+            placeholder="Customer card address"
+            size = {0}
+            aria-disabled = {selected}
+            />
+          </div>
         </>
-        :
-        null
-        }
+        {/* : */}
+        {/* null */}
+        {/* } */}
       </div> 
-    </div>
+  </main>
   );
 };

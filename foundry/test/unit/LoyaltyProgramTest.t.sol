@@ -404,6 +404,8 @@ contract LoyaltyProgramTest is Test {
 
     function testRedeemGift() public giveCustomerCardPointsAndGift(customerAddress) {
       uint256 giftId = 0; // I can also programatically search this. TBI. 
+
+      vm.warp(1726840800); // = Tuesday 24 sept 2024. 
       
       // customer owner creates & signs request to redeem gift. 
       GiftToRedeem memory message = GiftToRedeem({

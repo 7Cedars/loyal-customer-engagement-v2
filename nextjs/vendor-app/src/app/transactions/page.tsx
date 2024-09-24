@@ -19,6 +19,7 @@ export default function Page() {
   const {data: blockNumber, isFetched: blockNumberIsFetched} = useBlockNumber()
   const settings = chainSettings(chainId)
 
+  // fetch events for blocks that are newer than those already fetched 
   useEffect(() => {
     if (settings && settings.fetchBlockAmount && blockNumberIsFetched) {
       const currentBlock: number = Number(blockNumber)
@@ -26,6 +27,8 @@ export default function Page() {
       if (allEvents && allEvents.endBlock > fromBlock) { 
         fromBlock = allEvents.endBlock + 1
       }
+      // only fetch blocks if these are more than a minimum amount of blocks. 
+      // avoids loop + unnecessary api calls. 
       if (currentBlock - fromBlock > settings.minimumBlocksToFetch) {
         fetchEvents(fromBlock, currentBlock) 
       }

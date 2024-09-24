@@ -1,7 +1,7 @@
 import { Gift, GiftsInBlocks, Status } from "@/types";
 import { readContracts } from '@wagmi/core'
 import { wagmiConfig } from '../../wagmi-config'
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { loyaltyGiftAbi } from "@/context/abi";
 import { Log, decodeEventLog } from "viem"
 import { publicClient } from "@/context/clients";
@@ -19,6 +19,17 @@ export const useGifts = () => {
   const [error, setError] = useState<any | null>(null)
   const [fetchedGifts, setFetchedGifts] = useState<GiftsInBlocks | undefined>() // latest fetched gifts
   const [allGifts, setAllGifts] = useState<GiftsInBlocks[]>() // all gifts ever fetched. nested array, sorted by block value. 
+
+  // at every refresh, the latest data from local store is loaded.  
+  useEffect(() => {
+    let localStore = localStorage.getItem("clp_v_gifts")
+    const saved: GiftsInBlocks[] = localStore ? JSON.parse(localStore) : [{
+      startBlock: 0, 
+      endBlock: 1,
+      gifts: []
+    }]
+    setAllGifts(saved)
+  }, [])
 
   const getGiftsContractData = useCallback( 
     async (requestedGifts: `0x${string}`[]) => {
@@ -114,9 +125,9 @@ export const useGifts = () => {
       setStatus("isLoading")
 
       // loading gifts saved in localStorage. 
-      let localStore = localStorage.getItem("clp_v_gifts")
-      const saved: GiftsInBlocks[] = localStore ? JSON.parse(localStore) : []
-      setAllGifts(saved)
+      // let localStore = localStorage.getItem("clp_v_gifts")
+      const saved: GiftsInBlocks[] = allGifts ? allGifts : []
+      // setAllGifts(saved)
 
       // check if blocks have already been queried. 
       const alreadyChecked = saved.find(block => {

@@ -3,6 +3,7 @@ import { Button } from "./Button";
 import Image from "next/image";
 
 type NumLineProps = {
+  size?: 0 | 1 | 2; 
   onClick: (arg0: number) => void;
   isLoading?: boolean;
 };
@@ -10,6 +11,7 @@ type NumLineProps = {
 const numbers = [1, 5, 25, 150] // this can be flexible input. 
 
 export const NumLine = ({
+  size = 1, 
   onClick,
   isLoading = false
 }: NumLineProps) => {
@@ -23,23 +25,27 @@ export const NumLine = ({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 w-full"  > 
+    <div className="w-full flex flex-row"  > 
       <div className="flex grow"> 
       {
         numbers.map(number => 
-          <div key = {number} className="flex grow p-1"> 
-            <Button onClick={() => setSelectedAmount(number)} >
-                  {number} 
+          <div key = {number} className="flex grow pe-1"> 
+            <Button 
+              onClick={() => setSelectedAmount(number)}
+              selected = {selectedAmount == number}
+              size = {size}
+              >
+                {number} 
             </Button>
           </div>
         )
       }
       </div> 
-      <div className="flex grow p-1"> 
+      <div className="flex w-24"> 
           { !isLoading ? 
 
-          <Button onClick={ () => handleClick(selectedAmount)} >
-              Mint {selectedAmount} Loyalty Gifts
+          <Button onClick={ () => handleClick(selectedAmount)}  size = {size} >
+              Mint
           </Button>
           : 
           <Button onClick={() => {}} >

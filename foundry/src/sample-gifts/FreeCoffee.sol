@@ -8,6 +8,7 @@ import {LoyaltyCard} from "../LoyaltyCard.sol";
 contract FreeCoffee is LoyaltyGift {
   uint256 public constant GIFT_COST = 2500; 
   bool public constant HAS_ADDITIONAL_REQUIREMENTS = false; 
+  // address[] wrappedgifts = []; // no wrapping possible. -- TBI. 
   
   constructor() 
     LoyaltyGift(
@@ -16,6 +17,7 @@ contract FreeCoffee is LoyaltyGift {
       "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmUfs1osq6KFJzHRdWEnrsmLq68CSgKJfTpSKXcTYuaNbd"
     ) {}
 
+  // to disallow exchanging of gift all together, just place in a revert. 
   function requirementsExchangeMet(address payable _card) external override returns (bool) {
     address payable loyaltyProgram = LoyaltyCard(_card).s_loyaltyProgram(); // gets the card's loyalty program. 
     uint256 balance = LoyaltyProgram(loyaltyProgram).balanceOf(_card); 
@@ -25,6 +27,7 @@ contract FreeCoffee is LoyaltyGift {
     return true;
   }
 
+  // to disallow redeeming of gift all together, just place in a revert. 
   function requirementsRedeemMet(address payable _card) external override returns (bool) { 
     // there are no specific requirements for redeeming this gift. 
     return true; 
