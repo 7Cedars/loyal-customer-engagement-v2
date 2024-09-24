@@ -164,7 +164,7 @@ contract LoyaltyCardFuzzTest is Test {
     loyaltyProgram.transferOwnership(vendorAddress);
 
     vm.startPrank(vendorAddress);
-    loyaltyProgram.setAllowedGift(address(freeCoffee), 0, true, true);
+    loyaltyProgram.setAllowedGift(address(freeCoffee), true, true);
     loyaltyProgram.mintGifts(address(freeCoffee), amountGifts);
     vm.stopPrank(); 
   }

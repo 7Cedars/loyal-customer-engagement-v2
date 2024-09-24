@@ -47,7 +47,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     error LoyaltyProgram__GiftExchangeFailed();
     error LoyaltyProgram__OnlyEntryPoint();
     error LoyaltyProgram__GiftAddressAndArrayDoNotAlign(); 
-    error LoyaltyProgram__GiftAlreadyAllowed(); 
+    error LoyaltyProgram__GiftAlreadySet(); 
 
     //////////////////////////////////////////////////////////////////
     //                   Type declarations                          //
@@ -117,6 +117,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     event LoyaltyCardBlocked(address indexed customer, bool indexed blocked);
     event CreationCardsAllowed(bool indexed allowed);
     event GiftsMinted(address indexed gift, uint256 indexed amount);
+    event GiftTransferred(address indexed to, address indexed gift, uint256 indexed giftId); 
     event ImageUriChanged();
 
     //////////////////////////////////////////////////////////////////
@@ -134,7 +135,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
             revert LoyaltyProgram__OLoyaltyProgram__NoZeroAddressnlyLoyaltyCard();
         }
         _;
-    }
+    } 
 
     //////////////////////////////////////////////////////////////////
     //                        FUNCTIONS                             //
@@ -348,34 +349,53 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
 
     /**
      * £todo: natspec
+     * note: only the owner can directly transfer a gift to another address. 
+     */
+    function transferGift(address customer, address gift, uint256 giftId) external onlyOwner {
+        address to = FactoryCards(CARD_FACTORY).getAddress(customer, payable(address(this)), SALT);
+        uint256 codeSize = to.code.length;
+        if (codeSize == 0) {
+            revert LoyaltyProgram__OnlyCardHolder();
+        }
+        if (!ERC165Checker.supportsInterface(gift, type(ILoyaltyGift).interfaceId)) {
+            revert LoyaltyProgram__IncorrectInterface(gift);
+        }
+        LoyaltyGift(gift).transferFrom(address(this), to, giftId);
+
+        emit GiftTransferred(to, gift, giftId);
+    }
+
+
+    /**
+     * £todo: natspec
      Note: this function is not called very often. But the array of gifts _is_ called very often 
      So the inefficiency (and complexity) of using an array in addition to the mapping is accepted.  
      Note: if deleting or updating a gift, index of non-zero is needed. 
      Note: index of 0 implies that it is a newly allowed gift. 
      */
-    function setAllowedGift(address gift, uint256 index, bool exchangeable, bool redeemable) external onlyOwner {
+    function setAllowedGift(address gift, bool exchangeable, bool redeemable) external onlyOwner {
         // checks 
         if (!ERC165Checker.supportsInterface(gift, type(ILoyaltyGift).interfaceId)) {
             revert LoyaltyProgram__IncorrectInterface(gift);
         }
-        if (index != 0 && allowedGiftsArray[index] != gift) {
-            revert LoyaltyProgram__GiftAddressAndArrayDoNotAlign();
-        }
         if (
-            index == 0 && 
-            allowedGifts[gift].redeemable == true || 
-            allowedGifts[gift].exchangeable == true 
+            allowedGifts[gift].redeemable == redeemable && 
+            allowedGifts[gift].exchangeable == exchangeable 
             ) {
-            revert LoyaltyProgram__GiftAlreadyAllowed();
+            revert LoyaltyProgram__GiftAlreadySet();
         }
-
-        // different actions re allowedGiftsArray according to index and logged gifts. 
-        if (index == 0) {
+        // note: a gift is only added to the array when BOTH exchangeable and redeemable are set to true.
+        if (exchangeable == true && redeemable == true) {
             allowedGiftsArray.push(gift); 
         }
-        if (index != 0 && exchangeable == false && redeemable == false) {
-            allowedGiftsArray[index] = allowedGiftsArray[allowedGiftsArray.length - 1];
-            allowedGiftsArray.pop();
+        // this is really quite expensive. 
+        if (exchangeable == false && redeemable == false) {
+            for (uint256 i; i < allowedGiftsArray.length; i++) {
+                if (allowedGiftsArray[i] == gift) {
+                    allowedGiftsArray[i] = allowedGiftsArray[allowedGiftsArray.length - 1];
+                    allowedGiftsArray.pop();
+                }
+            }
         }
         // updating the allowedGifts mapping.
         allowedGifts[gift].exchangeable = exchangeable;
@@ -466,15 +486,8 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     /**
      * £todo add natspec
      */
-    function getExchangableGifts() external view returns (address[] memory exchangableGifts) {
-        return exchangableGifts;
-    }
-
-    /**
-     * £todo add natspec
-     */
-    function getRedeemableGifts() external view returns (address[] memory redeemableGifts) {
-        return redeemableGifts;
+    function getAllowedGifts() external view returns (address[] memory allowedGifts) {
+        return allowedGiftsArray;
     }
 
     /**

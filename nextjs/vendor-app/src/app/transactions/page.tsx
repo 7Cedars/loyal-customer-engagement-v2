@@ -4,9 +4,7 @@ import { Layout } from "@/components/application/Layout"
 import { InputBox } from "@/components/ui/InputBox"
 import { TitleText } from "@/components/ui/StandardisedFonts"
 import { useAppSelector } from "@/redux/hooks"
-import { GiftInfo } from "../gifts/GiftInfo"
 import useEvents from "@/hooks/useEvents"
-import { Button } from "@/components/ui/Button"
 import { useEffect } from "react"
 import { useBlockNumber, useChainId } from 'wagmi'
 import { chainSettings } from '../../context/chainSettings'
@@ -38,11 +36,11 @@ export default function Page() {
   return (
     <Layout> 
       <TitleText title = "Transactions" size = {2} /> 
-      <section className="flex flex-col p-4">
-        <div className="w-full md:w-96 self-center pb-6"> 
+      <section className="h-full flex flex-col">
+        {/* <div className="w-full md:w-96 self-center pb-6"> 
           <InputBox nameId = {"SearchTransactions"} placeholder="Search transactions" /> 
-        </div>
-        <div className="flex flex-col overflow-auto">
+        </div> */}
+        <div className="flex flex-col h-full p-2 overflow-auto pb-20">
           {allEvents?.events?.map((item, i) => 
             <div key = {i}>
               <TransactionInfo event = {item}/>

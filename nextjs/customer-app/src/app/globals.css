@@ -31,3 +31,13 @@ body {
     text-wrap: balance;
   }
 }
+
+/* scrollbar changes layout */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}

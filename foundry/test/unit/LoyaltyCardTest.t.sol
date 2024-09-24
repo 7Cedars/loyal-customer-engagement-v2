@@ -303,7 +303,7 @@ contract LoyaltyCardTest is Test {
 
     // let loyalty project select and mint gift
     vm.startPrank(vendorAddress);
-    loyaltyProgram.setAllowedGift(address(fridayFifteen), 0, true, true);
+    loyaltyProgram.setAllowedGift(address(fridayFifteen), true, true);
     loyaltyProgram.mintGifts(address(fridayFifteen), amountGifts);
     vm.stopPrank(); 
   }

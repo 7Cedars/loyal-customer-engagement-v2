@@ -29,7 +29,7 @@ export const NumLine = ({
       <div className="flex grow"> 
       {
         numbers.map(number => 
-          <div key = {number} className="flex grow pe-1"> 
+          <div key = {number} className="flex grow pe-2"> 
             <Button 
               onClick={() => setSelectedAmount(number)}
               selected = {selectedAmount == number}

@@ -249,7 +249,7 @@ contract LoyaltyProgramTest is Test {
 
       // let loyalty project select and mint gift
       vm.startPrank(vendorAddress);
-      loyaltyProgram.setAllowedGift(address(fridayFifteen), 0, true, true);
+      loyaltyProgram.setAllowedGift(address(fridayFifteen), true, true);
       loyaltyProgram.mintGifts(address(fridayFifteen), amountGifts);
       vm.stopPrank(); 
       
@@ -323,29 +323,21 @@ contract LoyaltyProgramTest is Test {
         );
     }
 
-    function testAddingLoyaltyGiftEmitsEvent() public {
-        // £todo
+    function testAddedGiftsAreAddedToArray() public {
+      address[] memory giftArrayStart = loyaltyProgram.getAllowedGifts();
+      assert(giftArrayStart.length == 0);
+
+      vm.startPrank(vendorAddress);  
+      loyaltyProgram.setAllowedGift(address(fridayFifteen), true, true);
+      // loyaltyProgram.setAllowedGift(address(fridayFifteen), false, false);
+      vm.stopPrank(); 
+
+      // address giftEnd = loyaltyProgram.allowedGiftsArray(0);
+
+      address[] memory giftArrayEnd = loyaltyProgram.getAllowedGifts();
+      assert(giftArrayEnd.length == 1);
     }
 
-    function testAddingLoyaltyGiftFailsIfNotGiftContract() public {
-        // £todo
-    }
-
-    function testRemovingExchangeLoyaltyGiftEmitsEvent() public {
-        // £todo
-    }
-
-    function testRemovingRedeemLoyaltyGiftEmitsEvent() public {
-        // £todo
-    }
-
-    function testEmitsEventWhenCardIsBlocked() public {
-        // £todo
-    }
-
-    function testEmitsEventWhenCardUnblocked() public {
-        // £todo
-    }
 
 
     function testLoyaltyProgramCanReceiveEth() public {
@@ -377,7 +369,7 @@ contract LoyaltyProgramTest is Test {
       uint256 giftCost = fridayFifteen.GIFT_COST();
       
       vm.startPrank(vendorAddress);
-      loyaltyProgram.setAllowedGift(address(fridayFifteen), 0, true, true);
+      loyaltyProgram.setAllowedGift(address(fridayFifteen), true, true);
       loyaltyProgram.mintGifts(address(fridayFifteen), amountGifts);
       vm.stopPrank(); 
       
