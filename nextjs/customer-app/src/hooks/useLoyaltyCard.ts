@@ -2,7 +2,7 @@
 import { entryPointAbi, factoryCardsAbi, loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi"
 import { bundlerClient, publicClient, client } from "@/context/clients"
 import { useAppSelector } from "@/redux/hooks"
-import { usePrivy, useWallets } from "@privy-io/react-auth"
+import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth"
 import { ENTRYPOINT_ADDRESS_V07, parseAccount, UserOperation,  } from "permissionless"
 import { useCallback, useState } from "react"
 import { encodeFunctionData, pad } from "viem"
@@ -49,6 +49,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     async (
       loyaltyProgram: `0x${string}`, 
       salt: `0x${string}`,
+      embeddedWallet: ConnectedWallet, 
       cardAddress?: `0x${string}` | null | undefined, 
     ) => {
       if (!publicClient) {

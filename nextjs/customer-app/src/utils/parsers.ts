@@ -104,11 +104,11 @@ export const parseSignature = (signature: unknown): Hex => {
 };
 
 export const parseNumber = (number: unknown): number => {
-  if (!isNumber(number)) {
+  if (!isNumber(number) && !isBigInt(number) && !isString(number)) {
     throw new Error(`Incorrect number, not a number: ${number}`);
   }
   // here can additional checks later. 
-
+  
   return number as number;
 };
 

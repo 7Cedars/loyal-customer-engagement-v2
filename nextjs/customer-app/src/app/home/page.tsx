@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/Button";
 import { TitleText } from "@/components/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
-import { useBalance } from 'wagmi'
+import { useBalance, useReadContracts } from 'wagmi'
 import { ChevronUpIcon } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { setBalanceProgram } from "@/redux/reducers/programReducer";
@@ -13,7 +13,7 @@ import { QrScanner } from "./QrScanner";
 // import { bundlerClient, publicClient } from "@/context/clients";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { privateKeyToAccount } from "viem/accounts";
-import {Client, createClient, createWalletClient, custom, encodeFunctionData, http, numberToBytes, numberToHex} from 'viem';
+import {Client, createClient, createWalletClient, custom, encodeFunctionData, hexToBytes, http, numberToBytes, numberToHex} from 'viem';
 import { parseEthAddress } from "@/utils/parsers";
 import { foundry } from "viem/chains";
 import {bundlerActions, createSmartAccountClient, ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner} from "permissionless"; 
@@ -27,49 +27,76 @@ import { createBundlerClient, SmartAccountImplementation } from 'viem/account-ab
 import { loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi";
 import { publicClient } from "@/context/clients";
 import { toLoyaltyCardAccount } from "@/utils/toLoyaltyCardAccount";
-import { getBlock, sendTransaction, simulateContract, writeContract } from 'viem/actions'
+import { getBlock, readContract, sendTransaction, simulateContract, writeContract } from 'viem/actions'
+import { readContracts } from "wagmi/actions";
+import { wagmiConfig } from "@/context/wagmiConfig";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const randomNonce  = useRef<bigint>(BigInt(Math.round(Math.random() * 10 ** 18)))
   const {qrPoints} = useAppSelector(state => state.qrPoints)
   const [mode, setMode]  = useState()
+  const [pointsOnCard, setPointsOnCard] = useState<number>()
+  const [hasVoucherExpired, setHasVoucherExpired] = useState<boolean>()  
   const [transferMode, setTransferMode] = useState(false)
-  const {data: balanceData, refetch, fetchStatus} = useBalance({ address: prog.address })
   const {wallets, ready: walletsReady} = useWallets();
   const dispatch = useDispatch() 
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
-  // const [signature, setSignature] = useState<`0x${string}`>(); 
+  const fetchProgramData = useCallback(  
+    async () => {
+      if (loyaltyCard && loyaltyCard.address && prog.address && embeddedWallet) {
+        const loyaltyProgramContract = {
+          address: prog.address, 
+          abi: loyaltyProgramAbi,
+        } as const
 
-  useEffect(() => {
-    if (prog.address) {
-      fetchLoyaltyCard(prog.address, numberToHex(123456, {size: 32}))
+        const result = await readContracts(wagmiConfig, {
+          contracts: [
+            {
+              ...loyaltyProgramContract,
+              functionName: 'balanceOf',
+              args: [loyaltyCard?.address]
+            },
+            {
+              ...loyaltyProgramContract,
+              functionName: 's_executed',
+              args: [qrPoints.signature]
+            }
+          ],
+        })
+        setPointsOnCard(result[0].result as unknown as number)
+        setHasVoucherExpired(result[1].result as unknown as boolean)
+      }}, 
+    [loyaltyCard, prog.address, qrPoints.signature, embeddedWallet])
+      
+  useEffect(() => {    
+    if (prog.address && embeddedWallet) {
+      fetchLoyaltyCard(prog.address, numberToHex(123456,{size: 32}), embeddedWallet)
     }
-  }, [prog.address, fetchLoyaltyCard])
+  }, [prog.address, embeddedWallet])
 
   // step 1: check for qrData in redux 
   // step 2: writeContract: redeemPoints. 
   // step 3: check event. if success: show info box. 
 
-  // updating balance of program. 
+  // updating balance points of card. 
   useEffect(() => {
-    if (
-      balanceData && 
-      balanceData.decimals && 
-      Number(balanceData?.value) / 10 ** balanceData?.decimals != prog.balance) 
-      {
-        dispatch(setBalanceProgram(Number(balanceData?.value) / 10 ** balanceData?.decimals))  
-      }
-  }, [balanceData, prog, dispatch])
+    if (prog) {
+      fetchProgramData() 
+    }
+  }, [prog, fetchProgramData])
   
   return (
     <Layout> 
-      <TitleText title = {prog.name ? prog.name : "Home"} size = {2} /> 
+      <TitleText 
+        title = {prog.name ? prog.name : "Home"} 
+        subtitle= {pointsOnCard ?  `${pointsOnCard} points` : `0 points`} 
+        size = {2} 
+        /> 
       <div className="grow flex flex-col justify-start items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
-        {/* The following is just for dev purposes...  */}
           <Button onClick={() => {
             if (loyaltyCard) 
               sendUserOp(
@@ -85,7 +112,7 @@ export default function Page() {
                 numberToHex(123456, {size: 32})
               )
         }}> 
-            Here should be points on card
+            {hasVoucherExpired ?  `Voucher already claimed` : `Claim ${qrPoints.points} points from voucher`} 
           </Button>
         </div>
         <section 

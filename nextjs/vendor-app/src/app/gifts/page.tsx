@@ -26,10 +26,14 @@ export default function Page() {
     abi: loyaltyProgramAbi,
     functionName: 'getAllowedGifts'
   })
-  const allowedGifts = allowedGiftAddresses as `0x${string}`[] 
+  console.log("allowedGiftAddresses: ", allowedGiftAddresses)
+  const allowedGifts = allowedGiftAddresses ? allowedGiftAddresses as `0x${string}`[] : [] 
+  console.log("allowedGifts: ", allowedGifts)
+  console.log("statusReadContract: ", statusReadContract)
 
   // fetching allowed gifts every time mode is changed. 
   useEffect(() => {
+    console.log("refect called")
     refetch()
   }, [ , refetch, mode, chainId])
 

@@ -56,11 +56,15 @@ export default function Page() {
 
   return (
     <Layout> 
-      <TitleText title = {prog.name ? prog.name : "Home"} size = {2} /> 
+      <TitleText 
+        title = {prog.name ? prog.name : "Home"} 
+        subtitle={prog.balance == undefined ? `Fetching balance...`:`Balance: ${prog.balance} eth` } 
+        size = {2} 
+        /> 
       <div className="grow flex flex-col justify-center items-center">
-        <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
-          <Button onClick={() => {setTransferMode(true)}}>
-            {prog.balance == undefined ? `Fetching balance...`:`Balance: ${prog.balance} Eth` } 
+        <div className="w-full sm:w-4/5 lg:w-1/2 h-fit p-2 mt-6">
+          <Button onClick={() => {setTransferMode(!transferMode)}}>
+            Transfer eth
           </Button>
         </div>
         <section 

@@ -33,8 +33,8 @@ export type QrData = undefined | {
 
 export type QrPoints = {
   program: Hex; 
-  points: bigint; 
-  uniqueNumber: bigint; 
+  points: number; 
+  uniqueNumber: number; 
   signature: Hex; 
 }
 

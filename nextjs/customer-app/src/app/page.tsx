@@ -28,10 +28,12 @@ export default function Home() {
 
   const qrData = useRef<QrPoints>({
     program: params.get('prg') ? parseHex(params.get('prg'))  :'0x',
-    points: params.get('pts') ? parseBigInt(params.get('pts')) : 0n,
-    uniqueNumber: params.get('un') ? parseBigInt(params.get('un')) : 0n,
+    points: params.get('pts') ? parseNumber(params.get('pts')) : 0,
+    uniqueNumber: params.get('un') ? parseNumber(params.get('un')) : 0,
     signature: params.get('sig') ? parseHex(params.get('sig')) : '0x'
   })
+
+  console.log({qrData})
 
   const programContract = {
     address: qrData.current.program, 
@@ -123,36 +125,41 @@ export default function Home() {
             </div>
             <div className="w-full grid grid-cols-1"> 
             { 
-              prog && programData && !programData[0].result && qrData.current && !user ? 
-                <Button onClick={login}>
-                  This voucher is worth {qrData.current.points} points. Connect to claim your points.
-                </Button>
-              : 
-                prog && programData && programData[0].result && qrData.current && !user ? 
-                <Button onClick={login}>
-                  This voucher has expired. Log in to see your loyalty card. 
-                </Button>
-              : 
-                qrData.current.program != undefined ? 
-                <Button disabled>
-                  The qrCode is invalid. Please try again with another Qrcode.
-                </Button>
-              : 
-                user ? 
-                <Button onClick={logout}> 
-                  {` Connected to: ${
-                    user.email ? user.email.address
-                    : 
-                    user.phone ? user.phone.number
-                    :
-                    user.wallet?.address 
-                  }`
-                }
-                </Button> 
-              : 
-                <Button onClick={login}> 
-                  Connect
-                </Button> 
+              isFetched ?
+                prog && programData && !programData[0].result && qrData.current && !user ? 
+                  <Button onClick={login}>
+                    This voucher is worth {qrData.current.points} points. Connect to claim your points.
+                  </Button>
+                : 
+                  prog && programData && programData[0].result && qrData.current && !user ? 
+                  <Button onClick={login}>
+                    This voucher has expired. Log in to see your loyalty card. 
+                  </Button>
+                : 
+                  qrData.current.program != undefined ? 
+                  <Button disabled>
+                    The qrCode is invalid. Please try again with another Qrcode.
+                  </Button>
+                : 
+                  user ? 
+                  <Button onClick={logout}> 
+                    {` Connected to: ${
+                      user.email ? user.email.address
+                      : 
+                      user.phone ? user.phone.number
+                      :
+                      user.wallet?.address 
+                    }`
+                  }
+                  </Button> 
+                : 
+                  <Button onClick={login}> 
+                    Connect
+                  </Button> 
+              :
+              <Button onClick={login} disabled> 
+                Loading...
+              </Button> 
               }
           </div> 
         </div>
