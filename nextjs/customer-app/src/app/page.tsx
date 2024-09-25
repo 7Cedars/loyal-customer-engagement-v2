@@ -32,7 +32,6 @@ export default function Home() {
     uniqueNumber: params.get('un') ? parseNumber(params.get('un')) : 0,
     signature: params.get('sig') ? parseHex(params.get('sig')) : '0x'
   })
-
   console.log({qrData})
 
   const programContract = {

@@ -121,33 +121,32 @@ export default function Page() {
 
           {/* Top bar, always visible */}
           <section 
-            className="z-10 h-12 flex flex-row justify-between items-center w-full border rounded-t-full"
-            style = {{borderColor: prog.colourAccent, borderBottom: prog.colourBase}}
+            className="flex flex-col w-full justify-between items-center h-14 z-10 border border-b-0 rounded-t-full"
             >
-               <button onClick={() => mode == undefined? setMode("Give Points") : setMode(undefined)} > 
-                  <div 
-                  className="ms-8 h-8 w-8 rotate-180 aria-selected:rotate-0 transition:all ease-in-out duration-300 delay-300"
-                  aria-selected={mode == undefined} 
-                  > 
-                  <ChevronUpIcon
-                    className={""}
-                    style={{color:prog.colourAccent}}
-                  />
-                  </div> 
+            <div 
+              className="flex flex-row justify-between items-center w-full m-1"
+              style = {{borderColor: prog.colourAccent, borderBottom: prog.colourBase}}
+              >
+                <button 
+                  className="grow h-full"
+                  onClick={() => mode == undefined? setMode("Give Points") : setMode(undefined)} > 
                 </button>     
-              <div className="max-w-7xl w-1/2">
-                <TabChoice 
-                  optionOne = "Give Points" 
-                  optionTwo = "Redeem Gift" 
-                  onChange={(target) => {setMode(target)}}
-                  />
-              </div>
-              {/* empty box to help with outline */}
-              <div className="me-8 h-8 w-8" >  
+                <div className="max-w-7xl w-1/2">
+                  <TabChoice 
+                    optionOne = "Give Points" 
+                    optionTwo = "Redeem Gift" 
+                    initialChoice = {mode == "Give Points" ? 0 : 1}
+                    onChange={(target) => {target == mode ? setMode(undefined) : setMode(target)}}
+                    />
+                </div>
+                <button 
+                  className="grow h-full"
+                  onClick={() => mode == undefined? setMode("Give Points") : setMode(undefined)} > 
+                </button> 
             </div>
           </section>
 
-          
+        
           <div 
             className="flex flex-col items-center justify-center grow-0 w-full opacity-0 aria-selected:opacity-100 aria-selected:grow transition:all ease-in-out duration-300 delay-300 h-2 border-x"
             aria-selected={mode != undefined} 

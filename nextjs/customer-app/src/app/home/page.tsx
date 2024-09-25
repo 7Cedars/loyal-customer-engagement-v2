@@ -35,7 +35,7 @@ export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const randomNonce  = useRef<bigint>(BigInt(Math.round(Math.random() * 10 ** 18)))
   const {qrPoints} = useAppSelector(state => state.qrPoints)
-  const [mode, setMode]  = useState()
+  const [mode, setMode]  = useState<"qrscan" | undefined>()
   const [pointsOnCard, setPointsOnCard] = useState<number>()
   const [hasVoucherExpired, setHasVoucherExpired] = useState<boolean>()  
   const [transferMode, setTransferMode] = useState(false)
@@ -96,7 +96,7 @@ export default function Page() {
         size = {2} 
         /> 
       <div className="grow flex flex-col justify-start items-center">
-        <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2">
+        <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2 mt-4">
           <Button onClick={() => {
             if (loyaltyCard) 
               sendUserOp(
@@ -140,25 +140,22 @@ export default function Page() {
 
           {/* Top bar, always visible */}
           <section 
-            className="z-10 h-12 flex flex-row justify-between items-center w-full border rounded-t-full"
-            style = {{borderColor: prog.colourAccent, borderBottom: prog.colourBase}}
+            className="flex flex-col w-full justify-between items-center h-12 z-10 border border-b-0 rounded-t-full"
             >
-               <button onClick={() => {}} > 
-                  <div 
-                  className="ms-8 h-8 w-8 rotate-180 aria-selected:rotate-0 transition:all ease-in-out duration-300 delay-300"
-                  aria-selected={mode == undefined} 
+            <div 
+              className="flex flex-row justify-between items-center w-full m-1"
+              style = {{borderColor: prog.colourAccent, borderBottom: prog.colourBase}}
+              >
+                <button 
+                  className="grow h-full mt-2"
+                  onClick={() => mode == undefined? setMode("qrscan") : setMode(undefined)} 
+                  style = {{color: prog.colourAccent}}
                   > 
-                  <ChevronUpIcon
-                    className={""}
-                    style={{color:prog.colourAccent}}
+                  <TitleText 
+                  title="Scan Qr Code"
+                  size={1}
                   />
-                  </div> 
                 </button>     
-              <div className="max-w-7xl w-1/2">
-                Scan Qr Code
-              </div>
-              {/* empty box to help with outline */}
-              <div className="me-8 h-8 w-8" >  
             </div>
           </section>
 
