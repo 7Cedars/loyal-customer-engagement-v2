@@ -23,7 +23,7 @@ export default function Page() {
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
-  const fetchProgramData = useCallback(  
+  const fetchDataFromProgram = useCallback(  
     async () => {
       if (loyaltyCard && loyaltyCard.address && prog.address && embeddedWallet) {
         const loyaltyProgramContract = {
@@ -48,20 +48,21 @@ export default function Page() {
         setPointsOnCard(result[0].result as unknown as number)
         setHasVoucherExpired(result[1].result as unknown as boolean)
       }}, 
-    [loyaltyCard, prog.address, qrPoints.signature, embeddedWallet])
+    [loyaltyCard, prog.address, qrPoints.signature, embeddedWallet]
+  )
       
   useEffect(() => {    
     if (prog.address && embeddedWallet) {
       fetchLoyaltyCard(prog.address, numberToHex(123456,{size: 32}), embeddedWallet)
     }
-  }, [prog.address, embeddedWallet])
+  }, [prog.address, embeddedWallet, fetchLoyaltyCard])
 
   // updating balance points of card. 
   useEffect(() => {
     if (prog) {
-      fetchProgramData() 
+      fetchDataFromProgram() 
     }
-  }, [prog, fetchProgramData])
+  }, [prog, fetchDataFromProgram])
   
   return (
     <Layout> 

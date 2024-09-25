@@ -72,11 +72,12 @@ export const useGifts = () => {
             })
 
               if (
-                temp[0].status == "success" && 
-                temp[1].status == "success" && 
-                temp[2].status == "success" && 
-                temp[3].status == "success" && 
-                temp[4].status == "success"
+                !temp.find(item => {item.status != "success"})
+                // temp[0].status == "success" && 
+                // temp[1].status == "success" && 
+                // temp[2].status == "success" && 
+                // temp[3].status == "success" && 
+                // temp[4].status == "success"
               )
               
               giftContractData.push({

@@ -53,7 +53,7 @@ export const GiftInfo = ({
         <div className="flex flex-col">
           <SectionText
           text={name}
-          subtext={`${points} points ${additionalReq ? `+ ${additionalReq}` : ""}`}
+          // subtext={`${points} points ${additionalReq ? `+ ${additionalReq}` : ""}`}
           size = {1} 
           /> 
           <NoteText 
@@ -65,23 +65,16 @@ export const GiftInfo = ({
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}
       <div 
-        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 disabled aria-selected:opacity-100 aria-selected:h-32 ease-in-out duration-300 delay-300"
+        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 disabled aria-selected:opacity-100 aria-selected:h-24 ease-in-out duration-300 delay-300"
         aria-selected = {selected}
         style = {selected ? {} : {pointerEvents: "none"}}
         > 
 
-        <div className="pb-2">
-          <SectionText
-              text = {`Available gifts: ${Number(data)}`} 
-              size = {0}
-            /> 
-        </div>
-
-        <div className="pb-4">
+        <div className="pb-4 h-12">
           <SectionText
             text = {`Additional requirements: ${
               additionalReq && String(metadata?.attributes[0].value).length > 0 ? 
-                metadata?.attributes[0].value 
+                metadata?.attributes[1].value 
                 :
                 "none"}`
               }
@@ -90,22 +83,14 @@ export const GiftInfo = ({
         </div>
 
         <div className="p-2"> 
-          <Button onClick={() => {
-            if (loyaltyCard) 
-              sendUserOp(
-                loyaltyCard, 
-                'exchangePointsForGift', 
-                [
-                  address, 
-                  embeddedWallet?.address ? embeddedWallet.address : '0x' 
-                ], 
-                numberToHex(123456, {size: 32})
-              )
-            }} 
+          {/* This should trigger signing transaction & creation of qr code 
+          The function to use to retrieve tokenIds (or rather giftIds) LoyaltyGift is 'tokenOfOwnerByIndex' 
+          */}
+          <Button onClick={() => {}}
             size = {0}
             aria-disabled = {selected}
             >
-            Exchange points for gift
+            Redeem gift
           </Button>
         </div>
         

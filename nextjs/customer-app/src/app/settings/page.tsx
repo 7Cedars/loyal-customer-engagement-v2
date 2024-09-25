@@ -44,7 +44,7 @@ export default function Page() {
         <SettingLayout 
           selected = {selectedItem == 'ownerAddress'} 
           onClick={() => selectedItem == 'ownerAddress' ? setSelectedItem(undefined) : setSelectedItem('ownerAddress') }
-          titleText="Show owner address"
+          titleText="Show card owner address"
           sizeFoldout={5}
           >
            <ShowCardOwner /> 
