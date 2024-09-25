@@ -2,7 +2,7 @@ import { Gift, Status } from "@/types";
 import { readContracts } from '@wagmi/core'
 import { wagmiConfig } from '../context/wagmiConfig'
 import { useCallback, useEffect, useRef, useState } from "react";
-import { loyaltyGiftAbi } from "@/context/abi";
+import { loyaltyGiftAbi, loyaltyProgramAbi } from "@/context/abi";
 import { Hex, Log } from "viem"
 import { whiteListedGifts } from '../context/whitelistedGifts';
 import { publicClient } from '../context/clients'
@@ -10,23 +10,26 @@ import { publicClient } from '../context/clients'
 import { useAppSelector } from "@/redux/hooks";
 import { useDispatch } from "react-redux";
 import { parseBigIntToNumber, parseBoolean, parseEthAddress, parseMetadata, parseString, parseUri } from "@/utils/parsers";
+import { useReadContract } from "wagmi";
+import { readContract } from "wagmi/actions";
+import { setProgram } from "@/redux/reducers/programReducer";
 
 export const useGifts = () => {
-  const [ status, setStatus ] = useState<Status>("isIdle")
-  const statusAtGetGiftsContractData = useRef<Status>("isIdle") 
-  const statusAtMetadata = useRef<Status>("isIdle") 
-  const [data, setData] = useState<Gift[] | undefined>() 
+  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const [status, setStatus ] = useState<Status>("isIdle")
+  const [error, setError] = useState<any | null>(null)
   const [gifts, setGifts] = useState<Gift[] | undefined>() 
+  const dispatch = useDispatch() 
 
-  const getGiftsContractData = useCallback( async () => {
-    statusAtGetGiftsContractData.current = "isLoading" 
+  const getGiftsContractData = useCallback( 
+    async (requestedGifts: `0x${string}`[]) => {
 
     let giftAddress: Hex
     let giftContractData: Gift[] = []
 
     if (publicClient) { 
       try {
-        for await (giftAddress of whiteListedGifts) {
+        for await (giftAddress of requestedGifts) {
 
           const giftContract = {
             address: giftAddress,
@@ -75,25 +78,21 @@ export const useGifts = () => {
                 additionalReq: parseBoolean(temp[4].result)
               })
         } 
-        setData(giftContractData)
-        statusAtGetGiftsContractData.current = "isSuccess"
+        return giftContractData
       } catch (error) {
-        statusAtGetGiftsContractData.current = "isError" 
+        setStatus("isError") 
+        setError(error)
       }
     } 
+  }, [ ])
 
-    statusAtGetGiftsContractData.current = "isSuccess"
-  }, [ publicClient ])
-
-  const getGiftsMetaData = async () => {
-    statusAtMetadata.current = "isLoading"
-
+  const getGiftsMetaData = async (gifts: Gift[]) => {
     let gift: Gift
     let loyaltyGiftsMetadata: Gift[] = []
 
-    if (data && publicClient) {
+    if (publicClient) {
       try {
-        for await (gift of data) {
+        for await (gift of gifts) {
           if (gift.uri) {
             const fetchedMetadata: unknown = await(
               await fetch(gift.uri)
@@ -103,50 +102,44 @@ export const useGifts = () => {
                 metadata: parseMetadata(fetchedMetadata)})
           }
         } 
-        statusAtMetadata.current = "isSuccess"
-        setData(loyaltyGiftsMetadata)
+        return loyaltyGiftsMetadata
       } catch (error) {
-        statusAtMetadata.current = "isError"
+        setStatus("isError") 
+        setError(error)
       }
     }
   }
 
-  // initiates the loading of gifts at refresh. 
-  useEffect(()=>{
-    let localStore = localStorage.getItem("clp_v_gifts")
-    const saved: Gift[] = localStore ? JSON.parse(localStore) : []
-    setGifts(saved)
-    setStatus("isSuccess")
+  const fetchGifts = useCallback(
+    async () => {
+      setStatus("isLoading")
 
-    if (saved.length == 0) getGiftsContractData() 
-  }, [ getGiftsContractData])
+      if (prog.address) {
+        const allowedGifts = await readContract(wagmiConfig, {
+          abi: loyaltyProgramAbi,
+          address: prog.address,
+          functionName: 'getAllowedGifts'
+        })
 
-  // managing flow of data fetching and saving
-  useEffect(() => {
-    if ( 
-      statusAtGetGiftsContractData.current == "isSuccess" && 
-      statusAtMetadata.current == "isIdle" 
-      ) { 
-        getGiftsMetaData() 
-    } 
-    if ( 
-      statusAtGetGiftsContractData.current == "isSuccess" && 
-      statusAtMetadata.current == "isSuccess" 
-      ) {
-        setGifts(data)
-        localStorage.setItem("clp_v_gifts", JSON.stringify(data)); 
-        setStatus("isSuccess")
-    }
-  }, [ getGiftsMetaData ])
+        const savedGifts = prog.gifts ? prog.gifts.map(gift => gift.address) : []
 
-  useEffect(() => {
-    if (
-      statusAtGetGiftsContractData.current == "isLoading" ||
-      statusAtMetadata.current == "isLoading"
-      ) {
-        setStatus("isLoading")
+        if (JSON.stringify(savedGifts)==JSON.stringify(allowedGifts)) {
+          console.log("gifts already saved.")
+          setGifts(prog.gifts)
+          setStatus("isSuccess")
+        } else {
+          const giftContractData = await getGiftsContractData(allowedGifts as `0x${string}`[])
+          const giftContractwithMetadata = giftContractData ? await getGiftsMetaData(giftContractData) : []
+  
+          setGifts(giftContractwithMetadata)
+          dispatch(setProgram({
+            ...prog, 
+            gifts: giftContractwithMetadata
+          }))
+          setStatus("isSuccess")
+        }   
       }
-  }, [ data ])
+    }, [getGiftsContractData, dispatch, prog])
 
-  return {status, gifts}
+  return {status, error, gifts, fetchGifts}
 }

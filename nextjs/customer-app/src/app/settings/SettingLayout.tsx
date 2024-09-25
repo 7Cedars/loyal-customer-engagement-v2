@@ -1,4 +1,4 @@
-import { TitleText } from "@/components/ui/StandardisedFonts";
+import { TitleText } from "@/components/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
 
 type ButtonProps = {

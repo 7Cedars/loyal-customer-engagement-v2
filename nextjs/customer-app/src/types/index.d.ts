@@ -10,14 +10,15 @@ export type Program = {
   cardsFactory?: Hex;
   entryPoint?: Hex;
   owner?: Hex; 
+  gifts?: Gift[]; 
 }
 
 export type Gift = {
   address: Hex;
   name: string; 
-  symbol: string; 
+  symbol?: string; 
   points: number; 
-  uri: string;
+  uri?: string;
   additionalReq: boolean; 
   metadata?: Metadata; 
 };

@@ -6,10 +6,8 @@
 import { useCallback, useRef, useState } from "react";
 import { Status, Event, EventsInBlocks } from "@/types";
 import { decodeEventLog, Log } from "viem";
-import { parseEthAddress, parseEventLogs } from "@/utils/parsers";
 import { loyaltyProgramAbi } from "@/context/abi";
 import { publicClient } from "@/context/clients";
-import { useEffect } from "react";
 import { useAppSelector } from "@/redux/hooks";
 import { useAccount } from "wagmi";
 import { useDispatch } from "react-redux";

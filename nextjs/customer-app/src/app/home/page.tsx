@@ -4,43 +4,22 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/Button";
 import { TitleText } from "@/components/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
-import { useBalance, useReadContracts } from 'wagmi'
-import { ChevronUpIcon } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useRef, useState } from "react";
-import { setBalanceProgram } from "@/redux/reducers/programReducer";
-import { useDispatch } from "react-redux";
 import { QrScanner } from "./QrScanner";
-// import { bundlerClient, publicClient } from "@/context/clients";
-import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { privateKeyToAccount } from "viem/accounts";
-import {Client, createClient, createWalletClient, custom, encodeFunctionData, hexToBytes, http, numberToBytes, numberToHex} from 'viem';
-import { parseEthAddress } from "@/utils/parsers";
-import { foundry } from "viem/chains";
-import {bundlerActions, createSmartAccountClient, ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner} from "permissionless"; 
-import {signerToSimpleSmartAccount, SimpleSmartAccount, SmartAccount} from "permissionless/accounts";
-import { setAbstractAccount } from "@/redux/reducers/abstractAccountReducer";
-import { useSendTransaction } from 'wagmi'
-import { parseEther } from 'viem'
+import { useWallets } from "@privy-io/react-auth";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
-// import { bundlerClient } from '../../context/clients' 
-import { createBundlerClient, SmartAccountImplementation } from 'viem/account-abstraction'
-import { loyaltyCardAbi, loyaltyProgramAbi } from "@/context/abi";
-import { publicClient } from "@/context/clients";
-import { toLoyaltyCardAccount } from "@/utils/toLoyaltyCardAccount";
-import { getBlock, readContract, sendTransaction, simulateContract, writeContract } from 'viem/actions'
+import { loyaltyProgramAbi } from "@/context/abi";
 import { readContracts } from "wagmi/actions";
 import { wagmiConfig } from "@/context/wagmiConfig";
+import { numberToHex } from "viem";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-  const randomNonce  = useRef<bigint>(BigInt(Math.round(Math.random() * 10 ** 18)))
   const {qrPoints} = useAppSelector(state => state.qrPoints)
   const [mode, setMode]  = useState<"qrscan" | undefined>()
   const [pointsOnCard, setPointsOnCard] = useState<number>()
   const [hasVoucherExpired, setHasVoucherExpired] = useState<boolean>()  
-  const [transferMode, setTransferMode] = useState(false)
   const {wallets, ready: walletsReady} = useWallets();
-  const dispatch = useDispatch() 
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
@@ -76,10 +55,6 @@ export default function Page() {
       fetchLoyaltyCard(prog.address, numberToHex(123456,{size: 32}), embeddedWallet)
     }
   }, [prog.address, embeddedWallet])
-
-  // step 1: check for qrData in redux 
-  // step 2: writeContract: redeemPoints. 
-  // step 3: check event. if success: show info box. 
 
   // updating balance points of card. 
   useEffect(() => {
@@ -152,7 +127,7 @@ export default function Page() {
                   style = {{color: prog.colourAccent}}
                   > 
                   <TitleText 
-                  title="Scan Qr Code"
+                  title="Scan voucher & get points!"
                   size={1}
                   />
                 </button>     

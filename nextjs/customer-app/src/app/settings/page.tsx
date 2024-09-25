@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout"
 import { TitleText } from "../../components/StandardisedFonts"
 import { SettingLayout } from "./SettingLayout"
 import { useState } from "react"
-import { ChangeProgramImage, ClearLocalStorage, Disclaimer, ExitProgram, ShowProgramAddress } from "./SettingItems"
+import { ClearLocalStorage, Disclaimer, ShowProgramAddress, Logout } from "./SettingItems"
 
 export default function Page() {
   const [selectedItem, setSelectedItem] = useState<string>(); 
@@ -24,15 +24,6 @@ export default function Page() {
         </SettingLayout>
 
         <SettingLayout 
-          selected = {selectedItem == 'progImage'} 
-          onClick={() => selectedItem == 'progImage' ? setSelectedItem(undefined) : setSelectedItem('progImage') }
-          titleText="Change program image"
-          sizeFoldout={6}
-          >
-            <ChangeProgramImage />
-        </SettingLayout>
-
-        <SettingLayout 
           selected = {selectedItem == 'progAddress'} 
           onClick={() => selectedItem == 'progAddress' ? setSelectedItem(undefined) : setSelectedItem('progAddress') }
           titleText="Show program address"
@@ -42,25 +33,12 @@ export default function Page() {
         </SettingLayout>
 
         <SettingLayout 
-          selected = {selectedItem == 'creationCards'} 
-          onClick={() => selectedItem == 'creationCards' ? setSelectedItem(undefined) : setSelectedItem('creationCards') }
-          titleText="(Dis)allow creation loyalty cards"
-          sizeFoldout={0}
+          selected = {selectedItem == 'cardAddress'} 
+          onClick={() => selectedItem == 'cardAddress' ? setSelectedItem(undefined) : setSelectedItem('cardAddress') }
+          titleText="Show card address"
+          sizeFoldout={5}
           >
-            <div>
-            TO BE IMPLEMENTED 
-            </div>
-        </SettingLayout>
-
-        <SettingLayout 
-          selected = {selectedItem == 'blockCard'} 
-          onClick={() => selectedItem == 'blockCard' ? setSelectedItem(undefined) : setSelectedItem('blockCard') }
-          titleText="Block loyalty card"
-          sizeFoldout={0}
-          >
-            <div>
-            TO BE IMPLEMENTED
-            </div>
+           TO BE IMPLEMENTED
         </SettingLayout>
 
         <SettingLayout 
@@ -73,12 +51,12 @@ export default function Page() {
         </SettingLayout>
 
         <SettingLayout 
-          selected = {selectedItem == 'exit'} 
-          onClick={() => selectedItem == 'exit' ? setSelectedItem(undefined) : setSelectedItem('exit') }
+          selected = {selectedItem == 'logout'} 
+          onClick={() => selectedItem == 'logout' ? setSelectedItem(undefined) : setSelectedItem('logout') }
           titleText="Exit program"
           sizeFoldout={1}
           >
-           <ExitProgram />
+           <Logout />
         </SettingLayout>
 
       </div>
