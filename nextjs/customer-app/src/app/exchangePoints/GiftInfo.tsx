@@ -1,10 +1,13 @@
 import { Button } from "@/components/Button";
 import { NoteText, SectionText } from "@/components/StandardisedFonts";
 import { loyaltyGiftAbi } from "@/context/abi";
+import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
+import { useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useState } from "react";
+import { numberToHex } from "viem";
 import { useReadContract, useWriteContract } from "wagmi";
 
 export const GiftInfo = ({
@@ -16,15 +19,17 @@ export const GiftInfo = ({
 }: Gift) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
-  const { writeContract, error } = useWriteContract()
   const { data, isError, isLoading, status, refetch } = useReadContract({
     address: address,
     abi: loyaltyGiftAbi,
     functionName: 'balanceOf',
     args: [selectedProgram.address]
   })
+  const {wallets, ready: walletsReady} = useWallets();
+  const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
+  const {loyaltyCard, error: errorCard, isLoading: isLoadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
-  console.log({data, error, isError, isLoading, status})
+  console.log({data, isError, isLoading, status, walletsReady, errorCard, isLoadingCard})
 
   return (
     <main 
@@ -85,11 +90,22 @@ export const GiftInfo = ({
         </div>
 
         <div className="p-2"> 
-          <Button onClick={() => {}} 
+          <Button onClick={() => {
+            if (loyaltyCard) 
+              sendUserOp(
+                loyaltyCard, 
+                'exchangePointsForGift', 
+                [
+                  address, 
+                  embeddedWallet?.address ? embeddedWallet.address : '0x' 
+                ], 
+                numberToHex(123456, {size: 32})
+              )
+            }} 
             size = {0}
             aria-disabled = {selected}
             >
-              Request gift
+            Request gift
           </Button>
         </div>
         

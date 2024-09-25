@@ -11,6 +11,9 @@ import { loyaltyProgramAbi } from "@/context/abi";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { setProgram } from "@/redux/reducers/programReducer";
+import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
+import { useWallets } from "@privy-io/react-auth";
+import { numberToHex } from "viem";
 
 export const ClearLocalStorage = () => {
   const [cleared, setCleared] = useState<boolean>(false);
@@ -74,29 +77,106 @@ export const ShowProgramAddress = () => {
 
 export const ShowCardAddress = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {wallets, ready: walletsReady} = useWallets();
+  const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
+  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+
+  useEffect(() => {
+    if (prog.address && embeddedWallet) 
+    fetchLoyaltyCard(
+      prog.address, 
+      numberToHex(123456, {size: 32}), 
+      embeddedWallet
+    ) 
+  }, [prog, embeddedWallet, fetchLoyaltyCard])
+
+  console.log({error, isLoading})
 
   return (
     <section className="my-2"> 
-      <SectionText 
-      text="The address of this loyalty card is:"
-      subtext={prog.address}
-      />
-       <div className="pt-6 p-1">
-          <QRCode 
-            value={ prog.address ? prog.address : '0x0'}
-            style={{ 
-              height: "250px", 
-              width: "250px", 
-              objectFit: "cover", 
-              background: 'white', 
-              padding: '16px', 
-            }}
-            bgColor="#ffffff" // "#0f172a" 1e293b
-            fgColor="#000000" // "#e2e8f0"
-            level='M'
-            className="rounded-lg"
+      { loyaltyCard ? 
+      <>
+        <SectionText 
+        text="The address of this loyalty card is:"
+        subtext={loyaltyCard.address}
+        />
+        <div className="pt-6 p-1">
+            <QRCode 
+              value={loyaltyCard.address}
+              style={{ 
+                height: "250px", 
+                width: "250px", 
+                objectFit: "cover", 
+                background: 'white', 
+                padding: '16px', 
+              }}
+              bgColor="#ffffff" // "#0f172a" 1e293b
+              fgColor="#000000" // "#e2e8f0"
+              level='M'
+              className="rounded-lg"
+            />
+          </div>
+        </>
+        :
+        <>
+          <SectionText 
+          text="Loading address of loyalty card."
           />
-        </div>
+          <div className="pt-6 p-1">
+              <QRCode 
+                value={ '0x0'}
+                style={{ 
+                  height: "250px", 
+                  width: "250px", 
+                  objectFit: "cover", 
+                  background: 'white', 
+                  padding: '16px', 
+                }}
+                bgColor="#ffffff" // "#0f172a" 1e293b
+                fgColor="#000000" // "#e2e8f0"
+                level='M'
+                className="rounded-lg"
+              />
+            </div>
+          </>
+        }
+    </section>
+)}
+
+export const ShowCardOwner = () => {
+  const {wallets, ready: walletsReady} = useWallets();
+  const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
+
+  return (
+    <section className="my-2"> 
+    { embeddedWallet ? 
+      <>
+        <SectionText 
+        text="The address of the owner of this loyalty card is:"
+        subtext={embeddedWallet.address}
+        />
+        <div className="pt-6 p-1">
+            <QRCode 
+              value={embeddedWallet.address}
+              style={{ 
+                height: "250px", 
+                width: "250px", 
+                objectFit: "cover", 
+                background: 'white', 
+                padding: '16px', 
+              }}
+              bgColor="#ffffff" // "#0f172a" 1e293b
+              fgColor="#000000" // "#e2e8f0"
+              level='M'
+              className="rounded-lg"
+            />
+          </div>
+        </>
+          :
+          <SectionText 
+          text="Loading the address of the owner of this loyalty card."
+          />
+        }
     </section>
 )}
 

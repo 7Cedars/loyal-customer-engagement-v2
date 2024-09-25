@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout"
 import { TitleText } from "../../components/StandardisedFonts"
 import { SettingLayout } from "./SettingLayout"
 import { useState } from "react"
-import { ClearLocalStorage, Disclaimer, ShowProgramAddress, Logout } from "./SettingItems"
+import { ClearLocalStorage, Disclaimer, ShowProgramAddress, Logout, ShowCardAddress, ShowCardOwner } from "./SettingItems"
 
 export default function Page() {
   const [selectedItem, setSelectedItem] = useState<string>(); 
@@ -38,7 +38,16 @@ export default function Page() {
           titleText="Show card address"
           sizeFoldout={5}
           >
-           TO BE IMPLEMENTED
+           <ShowCardAddress /> 
+        </SettingLayout>
+
+        <SettingLayout 
+          selected = {selectedItem == 'ownerAddress'} 
+          onClick={() => selectedItem == 'ownerAddress' ? setSelectedItem(undefined) : setSelectedItem('ownerAddress') }
+          titleText="Show owner address"
+          sizeFoldout={5}
+          >
+           <ShowCardOwner /> 
         </SettingLayout>
 
         <SettingLayout 

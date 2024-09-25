@@ -31,7 +31,7 @@ export const SettingLayout = ({
 
   return (
     <div 
-      className="w-full grid grid-cols-1 justify-items-start content-start h-fit pt-1 border-b-2 border-blue-500" 
+      className="w-full grid grid-cols-1 justify-items-start content-start h-fit pt-1 border-b" 
       style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} // can add background, but should not be necessary.   
       aria-selected = {selected}
       >

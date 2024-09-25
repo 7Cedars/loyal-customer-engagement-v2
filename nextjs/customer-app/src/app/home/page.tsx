@@ -86,7 +86,7 @@ export default function Page() {
                 ], 
                 numberToHex(123456, {size: 32})
               )
-        }}> 
+          }}> 
             {hasVoucherExpired ?  `Voucher already claimed` : `Claim ${qrPoints.points} points from voucher`} 
           </Button>
         </div>
