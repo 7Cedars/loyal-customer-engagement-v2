@@ -80,6 +80,12 @@ export const DeployProgram = () => {
           colourBase: parseString(programInfo[1].result).split(`;`)[0], 
           colourAccent: parseString(programInfo[1].result).split(`;`)[1], 
           uriImage: parseString(programInfo[2].result), 
+          events: {
+            startBlock: 0,
+            endBlock: 0,
+            genesisReached: false, 
+            events: []
+          }
         })
         localStorage.setItem("clp_v_programs", JSON.stringify(savedPrograms.current)); 
         console.log("savedPrograms:", savedPrograms.current)
@@ -133,6 +139,7 @@ export const DeployProgram = () => {
         <NoteText 
           message = "Required. This name CANNOT be changed after deployment."
           size = {0}
+          align={1}
           /> 
       </div>
 
@@ -160,6 +167,7 @@ export const DeployProgram = () => {
       <NoteText 
         message = "The colour scheme can NOT be changed after deployment."
         size = {0}
+        align={1}
         /> 
 
       <TabChoice 
@@ -196,6 +204,7 @@ export const DeployProgram = () => {
         <NoteText 
           message = "Optional. The image can be changed after deployment."
           size = {0}
+          align={1}
           /> 
       </div>
       <section className="h-fit w-full grid grid-cols-1 p-2 place-items-center content-center">
@@ -225,6 +234,7 @@ export const DeployProgram = () => {
       <NoteText 
           message = "Only png images allowed. Full url required, including 'https://'."
           size = {0}
+          align={1}
           /> 
 
       <InputBox

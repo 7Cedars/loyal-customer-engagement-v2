@@ -1,19 +1,38 @@
 "use client"
 
-import { Button } from "@/components/Button";
 import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi";
 import { setProgram } from "@/redux/reducers/programReducer";
 import { setQrPoints } from "@/redux/reducers/qrPointsReducer";
 import { Program, QrPoints } from "@/types";
-import { parseBigInt, parseHex, parseNumber, parseString } from "@/utils/parsers";
+import {  parseHex, parseNumber, parseString } from "@/utils/parsers";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { useSetActiveWallet } from "@privy-io/wagmi";
 import Image from "next/image";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Hex, hexToBytes, stringToHex } from "viem";
 import { useReadContracts } from 'wagmi'
+
+type ButtonProps = {
+  disabled?: boolean;
+  children: any;
+  onClick?: () => void;
+};
+
+const CustomButton = ({
+  disabled = false,
+  onClick,
+  children,
+}: ButtonProps) => {
+  return (
+    <button 
+      className={`w-full h-full grid grid-cols-1 disabled:opacity-50 text-center border content-center rounded-lg text-md p-2 h-12 border-gray-950`}  
+      onClick={onClick} 
+      disabled={disabled}
+      >
+      {children}
+    </button>
+  );
+};
 
 export default function Home() {
   const params = useSearchParams(); 
@@ -126,22 +145,22 @@ export default function Home() {
             { 
               isFetched ?
                 prog && programData && !programData[0].result && qrData.current && !user ? 
-                  <Button onClick={login}>
+                  <CustomButton onClick={login}>
                     This voucher is worth {qrData.current.points} points. Connect to claim your points.
-                  </Button>
+                  </CustomButton>
                 : 
                   prog && programData && programData[0].result && qrData.current && !user ? 
-                  <Button onClick={login}>
+                  <CustomButton onClick={login}>
                     This voucher has expired. Log in to see your loyalty card. 
-                  </Button>
+                  </CustomButton>
                 : 
                   qrData.current.program != undefined ? 
-                  <Button disabled>
+                  <CustomButton disabled>
                     The qrCode is invalid. Please try again with another Qrcode.
-                  </Button>
+                  </CustomButton>
                 : 
                   user ? 
-                  <Button onClick={logout}> 
+                  <CustomButton onClick={logout}> 
                     {` Connected to: ${
                       user.email ? user.email.address
                       : 
@@ -150,15 +169,15 @@ export default function Home() {
                       user.wallet?.address 
                     }`
                   }
-                  </Button> 
+                  </CustomButton> 
                 : 
-                  <Button onClick={login}> 
+                  <CustomButton onClick={login}> 
                     Connect
-                  </Button> 
+                  </CustomButton> 
               :
-              <Button onClick={login} disabled> 
+              <CustomButton onClick={login} disabled> 
                 Loading...
-              </Button> 
+              </CustomButton> 
               }
           </div> 
         </div>

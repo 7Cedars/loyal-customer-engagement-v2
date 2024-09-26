@@ -6,8 +6,10 @@ import { loyaltyGiftAbi, loyaltyProgramAbi } from "@/context/abi";
 import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useReadContract, useWriteContract } from "wagmi";
+import { useCallback, useEffect, useState } from "react";
+import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { wagmiConfig } from "../../../wagmi-config";
+import { readContracts } from '@wagmi/core'
 
 export const GiftSelected = ({
   address,  
@@ -18,7 +20,10 @@ export const GiftSelected = ({
 }: Gift) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
-  const { writeContract, error } = useWriteContract()
+  const {connector} = useAccount(); 
+  const { writeContract, error, data: transactionHash } = useWriteContract()
+  const { data: receipt, isError: isErrorReceipt, isLoading: isLoadingReceipt, isSuccess: isSuccessReceipt, error: errorReceipt } = useWaitForTransactionReceipt(
+    {  confirmations: 1, hash: transactionHash })
   const { data, isError, error: errorReadContract, isLoading, status, refetch } = useReadContract({
     address: address,
     abi: loyaltyGiftAbi,
@@ -26,14 +31,36 @@ export const GiftSelected = ({
     args: [selectedProgram.address]
   })
 
-  console.log({
-    data: data,
-    isError: isError, 
-    isLoading: isLoading,
-    status: status
-  })
+  const fetchOwnedTokenId = useCallback(
+    async (ownerAddress: `0x${string}`, giftAddress: `0x${string}`) => {
+      const giftContract = {
+        address: giftAddress,
+        abi: loyaltyGiftAbi,
+      } as const
 
-  console.log("error: ", error)
+      try {      
+        const result = await readContracts(wagmiConfig, {
+          contracts: [
+            {
+              ...giftContract,
+              functionName: 'tokenOfOwnerByIndex',
+              args: [ownerAddress, 0]
+            },
+          ]
+        })
+        console.log(result)
+          // if (result && result[0].status == 'success') {     
+          //   setAllowedGifts(result[0].result as `0x${string}`[]) 
+          // } 
+      } catch(error) {
+        console.log(error)
+      }
+    }, []
+  )
+
+  console.log({ data, isError, isLoading, status, transactionHash, error, receipt, isErrorReceipt, isSuccessReceipt, errorReceipt, connector })
+
+
 
   return (
     <main 
@@ -165,19 +192,28 @@ export const GiftSelected = ({
             >
               Disallow customers to claim and redeem gift   
             </Button>
+
+            <Button onClick={() => fetchOwnedTokenId(
+              selectedProgram.address, '0x051472E0c61b12beB86Eab55242a090d3ffa31C3' as `0x${string}`)
+            }
+            size = {0}
+            aria-disabled = {selected}
+            >
+              Test fetchOwnedTokenId
+            </Button>
           </div>
 
           <div className="p-2">
             <InputButton 
             nameId ={"directTransfer"}
             onClick = {(inputAddress) =>  writeContract({ 
-              abi: loyaltyGiftAbi,
-              address: inputAddress as `0x${string}`,
-              functionName: 'transferFrom',
+              abi: loyaltyProgramAbi,
+              address: selectedProgram.address,
+              functionName: 'transferGift',
               args: [
-                selectedProgram.address,
-                inputAddress as `0x${string}`, 
-                0 // TO DO: fetch onwed tokenId, then transfer. 
+                inputAddress as `0x${string}`,
+                address,  
+                0n // TO DO: fetch onwed tokenId, then transfer. 
               ]
             })}
             buttonText="Direct transfer"
@@ -194,3 +230,4 @@ export const GiftSelected = ({
   </main>
   );
 };
+

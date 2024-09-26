@@ -61,22 +61,16 @@ export const useGifts = () => {
             ], 
           })
 
-            if (
-              temp[0].status == "success" && 
-              temp[1].status == "success" && 
-              temp[2].status == "success" && 
-              temp[3].status == "success" && 
-              temp[4].status == "success"
-            )
-             
-            giftContractData.push({
-                address: parseEthAddress(giftAddress), 
-                name: parseString(temp[0].result), 
-                symbol: parseString(temp[1].result), 
-                points: parseBigIntToNumber(temp[2].result), 
-                uri: parseUri(temp[3].result), 
-                additionalReq: parseBoolean(temp[4].result)
-              })
+          if (!temp.find(item => {item.status != "success"})) // check if all items.status in the array of items are "success". 
+            
+          giftContractData.push({
+              address: parseEthAddress(giftAddress), 
+              name: parseString(temp[0].result), 
+              symbol: parseString(temp[1].result), 
+              points: parseBigIntToNumber(temp[2].result), 
+              uri: parseUri(temp[3].result), 
+              additionalReq: parseBoolean(temp[4].result)
+            })
         } 
         return giftContractData
       } catch (error) {

@@ -1,41 +1,56 @@
 "use client"; 
 
 import { Layout } from "@/components/application/Layout"
-import { TitleText } from "@/components/ui/StandardisedFonts"
+import { NoteText, SectionText, TitleText } from "@/components/ui/StandardisedFonts"
 import { GiftAvailable } from "./GiftAvailable";
 import { GiftSelected } from "./GiftSelected";
 import { InputBox } from "@/components/ui/InputBox";
+import { readContracts } from '@wagmi/core'
 import { TabChoice } from "@/components/ui/TabChoice";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Gift, GiftsInBlocks } from "@/types";
 import { useGifts } from "@/hooks/useGifts";
 import { chainSettings } from "@/context/chainSettings";
 import { useBlockNumber, useChainId, useReadContract } from "wagmi";
 import { useAppSelector } from "@/redux/hooks";
 import { loyaltyProgramAbi } from "@/context/abi";
+import { wagmiConfig } from "../../../wagmi-config";
 
 export default function Page() {
-  const [mode, setMode] = useState<string>()
+  const [mode, setMode] = useState<string>("Available")
+  const [allowedGifts, setAllowedGifts] = useState<`0x${string}`[]>()
   const {status, allGifts, fetchedGifts, fetchGifts, error} = useGifts()
   const {data: blockNumber, isFetched: blockNumberIsFetched} = useBlockNumber()
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const chainId = useChainId()
   const settings = chainSettings(chainId)
-  const { data: allowedGiftAddresses, isError, error: errorReadContract, isLoading, status: statusReadContract, refetch } = useReadContract({
-    address: prog.address,
-    abi: loyaltyProgramAbi,
-    functionName: 'getAllowedGifts'
-  })
-  console.log("allowedGiftAddresses: ", allowedGiftAddresses)
-  const allowedGifts = allowedGiftAddresses ? allowedGiftAddresses as `0x${string}`[] : [] 
-  console.log("allowedGifts: ", allowedGifts)
-  console.log("statusReadContract: ", statusReadContract)
 
-  // fetching allowed gifts every time mode is changed. 
-  useEffect(() => {
-    console.log("refect called")
-    refetch()
-  }, [ , refetch, mode, chainId])
+  console.log({allowedGifts})
+  console.log({status, allGifts})
+
+  const fetchAllowedGifts = useCallback(
+    async () => {
+      const programContract = {
+        address: prog.address,
+        abi: loyaltyProgramAbi,
+      } as const
+      try {
+      const result = await readContracts(wagmiConfig, {
+        contracts: [
+          {
+            ...programContract,
+            functionName: 'getAllowedGifts',
+          },
+        ]
+      })
+        if (result && result[0].status == 'success') {     
+          setAllowedGifts(result[0].result as `0x${string}`[]) 
+        } 
+      } catch(error) {
+        console.log(error)
+      }
+    }, [prog.address]
+  )
 
   // fetch events for blocks that are newer than those already fetched 
   useEffect(() => {
@@ -48,15 +63,15 @@ export default function Page() {
       }
       // only fetch blocks if these are more than a minimum amount of blocks. 
       // avoids loop + unnecessary api calls. 
-      console.log({
-        fromBlock: fromBlock, 
-        currentBlock: currentBlock
-      })
       if (currentBlock - fromBlock > settings.minimumBlocksToFetch) {
         fetchGifts(fromBlock, currentBlock) 
       }
     }
-  }, [ blockNumberIsFetched, allGifts, blockNumber, fetchGifts, settings, status ])
+  }, [ , blockNumberIsFetched, allGifts, blockNumber, fetchGifts, settings, status ])
+
+  useEffect(() => {
+    if (mode == "Selected") fetchAllowedGifts() 
+  }, [fetchAllowedGifts, mode])
 
   return (
     <Layout>  
@@ -68,7 +83,7 @@ export default function Page() {
         onChange={(choice) => setMode(choice)}
       /> 
 
-      { mode == "Available" ? 
+      { mode == "Available" && allGifts ? 
         <>
           <section 
             className="flex flex-col h-full justify-start p-2 overflow-auto pb-20"
@@ -76,9 +91,6 @@ export default function Page() {
 
             {allGifts?.map((gifts: GiftsInBlocks) => 
               gifts.gifts.map(gift => 
-                allowedGifts.includes(gift.address) ? 
-                null
-                : 
                 <GiftAvailable 
                 key = {gift.address} 
                 address = {gift.address} 
@@ -93,7 +105,7 @@ export default function Page() {
               }        
           </section>
         </>
-        :
+        : mode != "Available" && allowedGifts && allowedGifts.length > 0 ?
         <>          
           <section 
             className="flex flex-col h-full justify-start p-2 overflow-auto pb-20"
@@ -115,6 +127,18 @@ export default function Page() {
                 null
                 ))
               }        
+          </section>
+        </>
+        :
+        <>          
+          <section 
+            className="flex flex-col h-full justify-start p-2 overflow-auto pb-20"
+            >
+          <NoteText 
+            message ={"No selected gifts found"}
+            size = {1}
+            align = {1}
+          />
           </section>
         </>
         }

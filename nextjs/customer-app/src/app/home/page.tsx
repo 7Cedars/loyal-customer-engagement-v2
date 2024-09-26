@@ -23,6 +23,10 @@ export default function Page() {
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
+  console.log("use LoyaltyCard:", {
+    error, isLoading, loyaltyCard
+  })
+
   const fetchDataFromProgram = useCallback(  
     async () => {
       if (loyaltyCard && loyaltyCard.address && prog.address && embeddedWallet) {

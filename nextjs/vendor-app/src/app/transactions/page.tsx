@@ -3,7 +3,6 @@
 import { Layout } from "@/components/application/Layout"
 import { InputBox } from "@/components/ui/InputBox"
 import { TitleText } from "@/components/ui/StandardisedFonts"
-import { useAppSelector } from "@/redux/hooks"
 import useEvents from "@/hooks/useEvents"
 import { useEffect } from "react"
 import { useBlockNumber, useChainId } from 'wagmi'
@@ -11,7 +10,6 @@ import { chainSettings } from '../../context/chainSettings'
 import { TransactionInfo } from "./TransactionInfo"
 
 export default function Page() {
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {status, error, fetchEvents, allEvents, fetchedEvents } = useEvents()
   const chainId = useChainId()
   const {data: blockNumber, isFetched: blockNumberIsFetched} = useBlockNumber()

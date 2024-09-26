@@ -70,10 +70,10 @@ export const SectionText = ({
 
   return (
     <div className="grid grid-cols-1 px-2">
-      <div className={`text-start font-bold break-words ${appearanceTitle[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-start font-bold break-words select-all ${appearanceTitle[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
         {text}
       </div>
-      <div className={`text-start text-slate-400 break-words ${appearanceSubtitle[size]}` } style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-start text-slate-400 break-words select-all ${appearanceSubtitle[size]}` } style = {{color: `${selectedProgram.colourAccent}`}}>
         {subtext}
       </div>
     </div>
@@ -89,7 +89,7 @@ export const NoteText = ({
 
   return (
     <div className={`grid grid-cols-1 px-2 gap-1 break-words text-gray-500 font-sm`}>
-      <div className={`${alignText[align]} italic ${appearanceNote[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`${alignText[align]} italic select-all ${appearanceNote[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
         {message}
       </div>
     </div>

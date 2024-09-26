@@ -3,7 +3,7 @@ import { InputBox } from "../../components/InputBox";
 import { NoteText, SectionText, TitleText } from "@/components/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import Image from "next/image";
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
@@ -14,6 +14,7 @@ import { setProgram } from "@/redux/reducers/programReducer";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { useWallets } from "@privy-io/react-auth";
 import { numberToHex } from "viem";
+import { ToSmartAccountReturnType } from "viem/account-abstraction";
 
 export const ClearLocalStorage = () => {
   const [cleared, setCleared] = useState<boolean>(false);
@@ -32,6 +33,48 @@ export const ClearLocalStorage = () => {
       <div className="flex h-12 max-w-96 w-full mt-6">
         <Button onClick={() => handleClearLocalStorage()}>
           {cleared ? "Local storage cleared" : "Yes, delete Local Storage." } 
+        </Button>
+      </div>
+    </section>
+)}
+
+export const LoyaltyCardTests = () => {
+  const {wallets, ready: walletsReady} = useWallets();
+  const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
+  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  
+  console.log("@LoyaltyCardTest:", {loyaltyCard})
+
+  const handleTest = useCallback(
+    async (loyaltyCard: ToSmartAccountReturnType | undefined) => {
+      console.log("@LoyaltyCardTest: handleTest triggered")
+      if (loyaltyCard) {
+      const resultCardTest = await loyaltyCard.isDeployed()
+      console.log("@LoyaltyCardTest:", {resultCardTest})
+      } else {
+        console.log("@LoyaltyCardTest: no loyalty card found")
+      }
+    } , []
+  )
+
+  // useEffect(() => {
+  //   if (prog.address && embeddedWallet) 
+  //   fetchLoyaltyCard(
+  //     prog.address, 
+  //     numberToHex(123456, {size: 32}), 
+  //     embeddedWallet
+  //   ) 
+  // }, [prog, embeddedWallet, fetchLoyaltyCard])
+
+  return (
+    <section className="my-2"> 
+      <SectionText 
+      text="Loyalty Card Tests"
+      />
+      <div className="flex h-12 max-w-96 w-full mt-6">
+        <Button onClick={() => { handleTest(loyaltyCard ? loyaltyCard : undefined) } }>
+          Test 
         </Button>
       </div>
     </section>

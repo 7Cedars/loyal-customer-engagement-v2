@@ -4,8 +4,8 @@ import { bundlerClient, publicClient, client } from "@/context/clients"
 import { useAppSelector } from "@/redux/hooks"
 import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth"
 import { ENTRYPOINT_ADDRESS_V07, parseAccount, UserOperation,  } from "permissionless"
-import { useCallback, useState } from "react"
-import { encodeFunctionData, pad } from "viem"
+import { useCallback, useEffect, useState } from "react"
+import { encodeFunctionData, numberToHex, pad } from "viem"
 import { getUserOperationHash, ToSmartAccountReturnType } from "viem/account-abstraction"
 import { toSmartAccount } from 'viem/account-abstraction'
 
@@ -259,7 +259,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         
         const fetchedGasPrice: gasPriceProps = await bundlerClient.getUserOperationGasPrice() 
 
-
         console.log("fetchedGasPrice.standard.maxFeePerGas: ", fetchedGasPrice.standard.maxFeePerGas)
         console.log("preVerificationGas: ", preVerificationGas)
         const owner = parseAccount(embeddedWallet.address as `0x${string}`)
@@ -368,6 +367,16 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
           Error("sendUserOp: userOperation did not come through")
         }
       }, [])
+
+  useEffect(() => {
+    if (prog && prog.address && embeddedWallet) {
+      fetchLoyaltyCard(
+        prog.address, 
+        numberToHex(123456, {size: 32}), 
+        embeddedWallet
+      )
+    }
+  }, [prog, embeddedWallet, fetchLoyaltyCard])
 
     return { fetchLoyaltyCard, loyaltyCard, isLoading, error, createUserOp, userOp, sendUserOp};
   

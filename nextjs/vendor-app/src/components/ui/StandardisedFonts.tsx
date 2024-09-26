@@ -15,6 +15,7 @@ type SectionTextProps = {
 type NoteTextProps = {
   message: string; 
   size?: 0 | 1 | 2;
+  align?: 0 | 1 | 2;
 }
 
 const appearanceTitle = [
@@ -33,6 +34,12 @@ const appearanceNote = [
   "text-xs",
   "text-md",
   "text-lg"
+]
+
+const alignText = [
+  "text-start",
+  "text-center",
+  "text-end"
 ]
 
 export const TitleText = ({
@@ -73,15 +80,17 @@ export const SectionText = ({
   );
 };
 
+
 export const NoteText = ({
   message, 
   size = 1,
+  align = 0
 }: NoteTextProps) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
 
   return (
-    <div className="grid grid-cols-1 px-2 gap-1 text-start break-words text-gray-500 font-sm">
-      <div className={`text-start italic ${appearanceNote[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+    <div className={`grid grid-cols-1 px-2 gap-1 break-words text-gray-500 font-sm`}>
+      <div className={`${alignText[align]} italic ${appearanceNote[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
         {message}
       </div>
     </div>

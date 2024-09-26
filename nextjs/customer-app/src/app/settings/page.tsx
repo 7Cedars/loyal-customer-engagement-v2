@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout"
 import { TitleText } from "../../components/StandardisedFonts"
 import { SettingLayout } from "./SettingLayout"
 import { useState } from "react"
-import { ClearLocalStorage, Disclaimer, ShowProgramAddress, Logout, ShowCardAddress, ShowCardOwner } from "./SettingItems"
+import { ClearLocalStorage, Disclaimer, ShowProgramAddress, Logout, ShowCardAddress, ShowCardOwner, LoyaltyCardTests } from "./SettingItems"
 
 export default function Page() {
   const [selectedItem, setSelectedItem] = useState<string>(); 
@@ -21,6 +21,15 @@ export default function Page() {
           sizeFoldout={1}
           >
            <ClearLocalStorage/>
+        </SettingLayout>
+
+        <SettingLayout 
+          selected = {selectedItem == 'test'} 
+          onClick={() => selectedItem == 'test' ? setSelectedItem(undefined) : setSelectedItem('test') }
+          titleText="Loyalty Card Test"
+          sizeFoldout={1}
+          >
+           <LoyaltyCardTests/>
         </SettingLayout>
 
         <SettingLayout 

@@ -3,8 +3,8 @@ import "./globals.css";
 import Providers from "../context/providers" 
 
 export const metadata: Metadata = {
-  title: 'Customer Loyalty Program - customer',
-  description: 'Customer Loyalty Program build with NextJS and Wagmi, with backend in solidity.',
+  title: 'Customer Loyalty app',
+  description: 'A modular and open-source dApp for customer engagement programs - customer app.',
 }
 
 export default function RootLayout({
