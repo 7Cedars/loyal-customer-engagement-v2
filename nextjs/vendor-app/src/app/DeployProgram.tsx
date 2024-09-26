@@ -8,19 +8,13 @@ import { InputBox } from "../components/ui/InputBox"
 import Image from "next/image";
 import { Button } from "../components/ui/Button"
 import { Hex, Log } from "viem"
-import { useWriteContract, useWatchContractEvent } from "wagmi"
+import { useWriteContract, useWatchContractEvent, useChainId } from "wagmi"
 import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi"
 import { parseEthAddress, parseDeployLogs, parseString } from "../utils/parsers"
-import { fromHexColourToBytes } from '../utils/transformData'
 import { Program, Status } from '@/types'
 import { readContracts } from '@wagmi/core'
 import { wagmiConfig } from '../../wagmi-config'
-
-type ImageLoaderProps = {
-  src: string; 
-  width: number; 
-  quality: number; 
-}
+import { chainSettings } from '@/context/chainSettings'
 
 export const DeployProgram = () => {
   const [ name, setName ] = useState<string | undefined>() 
@@ -30,8 +24,10 @@ export const DeployProgram = () => {
   const [ uri, setUri ] = useState<string | undefined>() 
   const [ tab, setTab ] = useState<string>("Base") 
   const { writeContract } = useWriteContract()
-  const cardsFactory: Hex = parseEthAddress(process.env.NEXT_PUBLIC_CARDS_FACTORY) 
-  const programsFactory: Hex = parseEthAddress(process.env.NEXT_PUBLIC_PROGRAMS_FACTORY) 
+  const chainId = useChainId() 
+  const deployed = chainSettings(chainId) 
+  console.log({deployed})
+  const programsFactory: Hex = deployed ? deployed.factoryProgramsAddress : '0x0'
 
   const OPTIONS: EmblaOptionsType = {}
   const savedPrograms = useRef<Program[]>([]) ; 

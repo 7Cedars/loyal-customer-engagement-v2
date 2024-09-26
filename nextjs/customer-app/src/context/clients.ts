@@ -4,24 +4,26 @@ import { pimlicoBundlerActions } from "permissionless/actions/pimlico";
 // import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico";
 import { http, createPublicClient, createClient } from "viem";
 import { createBundlerClient, toCoinbaseSmartAccount } from 'viem/account-abstraction'
-import { foundry } from "viem/chains";
+import { foundry, optimismSepolia } from "viem/chains";
 import { useWalletClient } from "wagmi";
 
 export const client = createClient({
-  chain: foundry,
-  transport: http("http://localhost:8545"), 
+  chain: optimismSepolia,
+  // transport: http("http://localhost:8545"), 
+  transport: http(process.env.NEXT_PUBLIC_ALCHEMY_OPT_SEPOLIA_HTTPS)
 });
 
 export const publicClient = createPublicClient({
-  chain: foundry,
-  transport: http("http://localhost:8545"), 
+  chain: optimismSepolia,
+  // transport: http("http://localhost:8545"), 
+  transport: http(process.env.NEXT_PUBLIC_ALCHEMY_OPT_SEPOLIA_HTTPS)
 });
  
 export const bundlerClient = createBundlerClient({ 
   // client: publicClient, 
-  chain: foundry,
-  // transport: http(process.env.NEXT_PUBLIC_BUNDLER, 
-  transport: http("http://localhost:4337", 
+  chain: optimismSepolia,
+  transport: http(process.env.NEXT_PUBLIC_BUNDLER, 
+  // transport: http("http://localhost:4337", 
     { timeout: 30_000 }
   ), // check 
 })

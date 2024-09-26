@@ -8,6 +8,8 @@ import { useCallback, useEffect, useState } from "react"
 import { encodeFunctionData, numberToHex, pad } from "viem"
 import { getUserOperationHash, ToSmartAccountReturnType } from "viem/account-abstraction"
 import { toSmartAccount } from 'viem/account-abstraction'
+import { chainSettings } from "../context/chainSettings"
+import { useChainId } from "wagmi"
 
 // 
 // See the docs at: https://docs.privy.io/guide/react/recipes/account-abstraction/pimlico 
@@ -36,14 +38,13 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
   const [loyaltyCard, setLoyaltyCard] = useState<ToSmartAccountReturnType>(); 
   const [userOp, setUserOp] = useState<UserOperation<"v0.7">>(); 
 
-  console.log("error: ", error)
-
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {signMessage} = usePrivy();
   const {wallets, ready: walletsReady} = useWallets();
+  const chainId = useChainId() 
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
 
-  console.log("userOp: ", userOp); 
+  const deployed = chainSettings(chainId) 
 
   const fetchLoyaltyCard = useCallback(
     async (
@@ -71,7 +72,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
       } as const
       const factory = {
         abi: factoryCardsAbi,
-        address:  process.env.NEXT_PUBLIC_CARDS_FACTORY,
+        address: deployed?.factoryCardsAddress,
       } as const
 
       const owner = parseAccount(embeddedWallet.address as `0x${string}`)
@@ -111,7 +112,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         async getAddress(): Promise<`0x${string}`> {
           try { 
             const cardAddress = await publicClient.readContract({
-              address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
+              address: deployed?.factoryCardsAddress as `0x${string}`,
               abi: factoryCardsAbi,
               functionName: 'getAddress',
               args: [embeddedWallet.address, loyaltyProgram, pad(salt)]
@@ -131,7 +132,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
                 functionName: 'createAccount',
                 args: [embeddedWallet.address, loyaltyProgram, pad(salt)],
               })
-              return {factory: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`, factoryData}
+              return {factory: deployed?.factoryCardsAddress as `0x${string}`, factoryData}
             } catch(error) {
               setError(`Error @getFactoryArgs: ${error}`)
               return { factory: '0x', factoryData: '0x' }
@@ -266,7 +267,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         } as const
         const factory = {
           abi: factoryCardsAbi,
-          address:  process.env.NEXT_PUBLIC_CARDS_FACTORY,
+          address:  deployed?.factoryCardsAddress,
         } as const
         const key = 0n; 
         const factoryData = encodeFunctionData({
@@ -283,7 +284,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
           isDeployed = await loyaltyCard.isDeployed() 
           
           cardAddress = await publicClient.readContract({
-            address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
+            address: deployed?.factoryCardsAddress as `0x${string}`,
             abi: factoryCardsAbi,
             functionName: 'getAddress',
             args: [embeddedWallet.address, loyaltyProgram, pad(salt)]

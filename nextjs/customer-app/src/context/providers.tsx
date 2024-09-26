@@ -1,7 +1,7 @@
 'use client';
 
 import { PrivyClientConfig, PrivyProvider } from '@privy-io/react-auth';
-import {base, baseGoerli, foundry, mainnet, sepolia, polygon, polygonMumbai} from 'viem/chains';
+import {base, baseGoerli, foundry, mainnet, sepolia, polygon, polygonMumbai, optimismSepolia, arbitrumSepolia} from 'viem/chains';
 // import { ReduxProvider } from "./reduxProvider"
 import { wagmiConfig } from './wagmiConfig'  
 import {WagmiProvider} from '@privy-io/wagmi';
@@ -13,7 +13,7 @@ const queryClient = new QueryClient()
 
 const privyConfig: PrivyClientConfig = {
   defaultChain: foundry,
-  supportedChains: [foundry, mainnet, sepolia, base, baseGoerli, polygon, polygonMumbai], // add arbitrum, optimism + testnets. 
+  supportedChains: [foundry, mainnet, sepolia, base, baseGoerli, polygon, polygonMumbai, optimismSepolia, arbitrumSepolia], 
   embeddedWallets: {
     createOnLogin: 'users-without-wallets',
     requireUserPasswordOnCreate: true,

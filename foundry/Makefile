@@ -61,13 +61,13 @@ anvilAll:
 OPT_SEPOLIA_TEST_ARGS := --fork-url $(OPT_SEPOLIA_RPC_URL) 
 OPT_SEPOLIA_DEPLOY_ARGS := --rpc-url $(OPT_SEPOLIA_RPC_URL) --account dev_2 --sender ${DEV2_ADDRESS} --broadcast --verify --etherscan-api-key $(OPT_ETHERSCAN_API_KEY) -vvvv
 
-testDeploy: 
+testOptDeploy: 
 	@forge script script/DeployFactoryPrograms.s.sol:DeployFactoryPrograms $(OPT_SEPOLIA_TEST_ARGS)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCoffee $(OPT_SEPOLIA_TEST_ARGS)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCupCake $(OPT_SEPOLIA_TEST_ARGS)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFridayFifteen $(OPT_SEPOLIA_TEST_ARGS)
 
-deploy:
+optDeploy:
 	@forge script script/DeployFactoryPrograms.s.sol:DeployFactoryPrograms $(OPT_SEPOLIA_DEPLOY_ARGS)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCoffee $(OPT_SEPOLIA_DEPLOY_ARGS)
 	@forge script script/DeployLoyaltyGifts.s.sol:DeployFreeCupCake $(OPT_SEPOLIA_DEPLOY_ARGS)
