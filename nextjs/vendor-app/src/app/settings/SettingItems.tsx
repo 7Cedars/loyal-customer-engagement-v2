@@ -29,7 +29,7 @@ export const ClearLocalStorage = () => {
       />
       <div className="flex h-12 max-w-96 w-full mt-6">
         <Button onClick={() => handleClearLocalStorage()}>
-          {cleared ? "Local storage cleared" : "Yes, delete Local Storage." } 
+          {cleared ? "Local storage cleared" : "Yes, delete Local Storage" } 
         </Button>
       </div>
     </section>

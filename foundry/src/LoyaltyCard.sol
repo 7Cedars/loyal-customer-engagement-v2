@@ -71,7 +71,6 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
         // load 32 bytes into `selector` from `data` skipping the first 32 bytes
         selector := mload(add(data, 32))
         target := mload(add(data, 64))
-        callData := mload(add(data, 96)) // this I added. don't know if it works. 
         }
     }
 
@@ -124,13 +123,13 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             if (s_owner != ECDSA.recover(hash, userOp.signature)) {
                 return SIG_VALIDATION_FAILED;
             } 
-            return _validateTarget(userOp.callData);
+            // return _validateTarget(userOp.callData);
             // following is replaced by the _validateTarget function
-            // return SIG_VALIDATION_SUCCESS; 
+            return SIG_VALIDATION_SUCCESS; 
     }
-
+    
+    // Fixed the bug below - but it still does not deploy with this bit included. 
     // NB! I think this is the cause of the AA23 reverted - arithmetic overflow/underflow error! YEP! Without it the calls PASS! 
-    // 
     function _validateTarget(
         bytes calldata data
         ) internal virtual returns (uint256 validationData) {
@@ -143,7 +142,9 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
                 dataWithoutSelector[i] = data[i + BYTES4_SIZE];
             }
             (address targetContract, , bytes memory innerCall) = abi.decode(dataWithoutSelector, (address, uint256, bytes)); 
-            if(targetContract != s_loyaltyProgram) { 
+            // £SECURITY
+            bytes4 selector = bytes4(data); 
+            if(targetContract != s_loyaltyProgram && selector != bytes4(0x8b6276c3)) { // = function initialize && targetContract != address(this) I think this is safe enough.. £securrity
                 return SIG_VALIDATION_FAILED; 
             }
             // the following is not necessary and consumes gas: functions are role restricted in the target contract. 

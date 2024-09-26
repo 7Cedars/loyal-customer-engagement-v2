@@ -197,8 +197,8 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         address program,
         uint256 points,
         uint256 uniqueNumber,
-        bytes memory programSignature,
-        address ownerCard
+        address ownerCard, 
+        bytes memory programSignature
     ) external {
         // filling up RequestGift struct with provided data.
         pointsToRequest.program = program;

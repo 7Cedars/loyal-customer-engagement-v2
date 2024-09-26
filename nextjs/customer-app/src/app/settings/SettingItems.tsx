@@ -15,6 +15,9 @@ import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { useWallets } from "@privy-io/react-auth";
 import { numberToHex } from "viem";
 import { ToSmartAccountReturnType } from "viem/account-abstraction";
+import { readContract } from "viem/actions";
+import { readContracts } from "wagmi/actions";
+import { wagmiConfig } from "@/context/wagmiConfig";
 
 export const ClearLocalStorage = () => {
   const [cleared, setCleared] = useState<boolean>(false);
@@ -49,8 +52,22 @@ export const LoyaltyCardTests = () => {
   const handleTest = useCallback(
     async (loyaltyCard: ToSmartAccountReturnType | undefined) => {
       console.log("@LoyaltyCardTest: handleTest triggered")
-      if (loyaltyCard) {
-      const resultCardTest = await loyaltyCard.isDeployed()
+      if (loyaltyCard && prog.address) {
+
+      const programContract = {
+        address: prog.address,
+        abi: loyaltyProgramAbi,
+      } as const
+
+      const resultCardTest = await readContracts(wagmiConfig, {
+        contracts: [
+          {
+            ...programContract, 
+              functionName: 'balanceOf',
+              args: [loyaltyCard.address] 
+          }]
+        })
+      console.log("@LoyaltyCardTest loyaltyCard.isDeployed:", loyaltyCard.isDeployed())
       console.log("@LoyaltyCardTest:", {resultCardTest})
       } else {
         console.log("@LoyaltyCardTest: no loyalty card found")

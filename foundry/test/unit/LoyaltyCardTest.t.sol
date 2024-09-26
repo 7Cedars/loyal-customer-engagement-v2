@@ -206,8 +206,8 @@ contract LoyaltyCardTest is Test {
       requestPointsVoucher.program, 
       requestPointsVoucher.points, 
       requestPointsVoucher.uniqueNumber, 
-      requestPointsVoucher.signature, 
-      customerAddress
+      customerAddress, 
+      requestPointsVoucher.signature
     ); 
 
     _; 
@@ -253,8 +253,8 @@ contract LoyaltyCardTest is Test {
       requestPointsVoucher.program, 
       requestPointsVoucher.points, 
       requestPointsVoucher.uniqueNumber, 
-      requestPointsVoucher.signature, 
-      customer
+      customer, 
+      requestPointsVoucher.signature
     ); 
     
     // customer exchanges points for gift. 

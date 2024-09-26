@@ -196,8 +196,8 @@ contract LoyaltyProgramTest is Test {
         requestPointsVoucher.program, 
         requestPointsVoucher.points, 
         requestPointsVoucher.uniqueNumber, 
-        requestPointsVoucher.signature, 
-        customerAddress
+        customerAddress, 
+        requestPointsVoucher.signature 
       ); 
 
       _; 
@@ -243,8 +243,8 @@ contract LoyaltyProgramTest is Test {
         requestPointsVoucher.program, 
         requestPointsVoucher.points, 
         requestPointsVoucher.uniqueNumber, 
-        requestPointsVoucher.signature, 
-        customer
+        customer, 
+        requestPointsVoucher.signature 
       ); 
 
       // let loyalty project select and mint gift

@@ -14,8 +14,8 @@ interface ILoyaltyProgram is IERC165, IERC721Receiver, IERC20 {
         address program,
         uint256 points, 
         uint256 uniqueNumber, 
-        bytes memory programSignature, 
-        address ownerCard
+        address ownerCard, 
+        bytes memory programSignature
     ) external; 
 
     function exchangePointsForGift(

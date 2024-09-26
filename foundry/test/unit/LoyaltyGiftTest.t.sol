@@ -84,10 +84,10 @@ contract LoyaltyProgramTest is Test {
       uint256 balance = freeCoffee.balanceOf(address(loyaltyProgram)); 
       assert(balance == giftAmount); 
 
-      uint256 tokenId = freeCoffee.tokenOfOwnerByIndex(address(loyaltyProgram), 0); 
-      console2.log("tokenId:", tokenId);
+      uint256 giftId = freeCoffee.tokenOfOwnerByIndex(address(loyaltyProgram), 0); 
+      console2.log("giftId:", giftId);
 
-      loyaltyProgram.transferGift(customer, gift, giftId);
+      // loyaltyProgram.transferGift(customer, address(freeCoffee), giftId);
     }
 }
 

@@ -34,3 +34,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+
+"0x8b6276c3000000000000000000000000fbd745797a0fb50429f0a2b04581092798fdf30b0000000000000000000000000000000000000000000000000000000000001388000000000000000000000000000000000000000000000000034312e4e3ab372000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000f3e62d66a0d0062ce7c439959f85efd61db2f1e200000000000000000000000000000000000000000000000000000000000000412535001e2935ee2b54625ac074f81fde0d9628c3dc2078b7db4d0b07d5d30a05689b0303bc07c1bea1569fea4721b1c0fd3d4073db0d3c01ba5ee85c616ac5231c00000000000000000000000000000000000000000000000000000000000000"
+
+"8b6276c3" == requestPoints
+
+address program, == fbd745797a0fb50429f0a2b04581092798fdf30b
+uint256 points, == 1388 (at least, I think this is 5000 in bytes)
+uint256 uniqueNumber == 0000034312e4e3ab37200
+bytes memory programSignature,
+address ownerCard

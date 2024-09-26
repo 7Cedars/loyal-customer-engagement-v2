@@ -50,7 +50,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
       loyaltyProgram: `0x${string}`, 
       salt: `0x${string}`,
       embeddedWallet: ConnectedWallet, 
-      cardAddress?: `0x${string}` | null | undefined, 
     ) => {
       if (!publicClient) {
         setError("No publicClient available");
@@ -81,7 +80,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
       setError(null);
 
       const account = await toSmartAccount({
-        address: cardAddress, 
+        // address: cardAddress, 
         client: client,
         entryPoint: {
           abi: entryPointAbi,
@@ -110,8 +109,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
 
         // Get the address of the Smart Account.
         async getAddress(): Promise<`0x${string}`> {
-          if (cardAddress) return cardAddress
-
           try { 
             const cardAddress = await publicClient.readContract({
               address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
@@ -127,14 +124,14 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         },
 
         // Build the Factory properties for the Smart Account.
-        async getFactoryArgs(): Promise<{ factory?: `0x${string}` | undefined; factoryData?: `0x${string}` | undefined}> {
+        async getFactoryArgs(): Promise<{ factory?: `0x${string}` | undefined; factoryData?: `0x${string}` | undefined}> { 
             try { 
               const factoryData = encodeFunctionData({
-                abi: factory.abi,
+                abi: factoryCardsAbi,
                 functionName: 'createAccount',
-                args: [owner.address, prog.address, pad(salt)],
+                args: [embeddedWallet.address, loyaltyProgram, pad(salt)],
               })
-              return { factory: factory.address as `0x${string}`, factoryData }
+              return {factory: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`, factoryData}
             } catch(error) {
               setError(`Error @getFactoryArgs: ${error}`)
               return { factory: '0x', factoryData: '0x' }
@@ -236,7 +233,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     }, [])
 
     const createUserOp = useCallback(
-      async (functionName: string, args: any[], salt: `0x${string}`) => {
+      async (loyaltyProgram:  `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: `0x${string}`) => {
         const callGasLimit: bigint = 75900n
         const preVerificationGas: bigint = 247487n
         const verificationGasLimit: bigint = 526114n
@@ -275,18 +272,21 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         const factoryData = encodeFunctionData({
           abi: factory.abi,
           functionName: 'createAccount',
-          args: [owner.address, prog.address, pad(salt)],
+          args: [owner.address, loyaltyProgram, pad(salt)],
         })
 
         let nonce; 
         let cardAddress;
+        let isDeployed; 
         
         try {
+          isDeployed = await loyaltyCard.isDeployed() 
+          
           cardAddress = await publicClient.readContract({
             address: process.env.NEXT_PUBLIC_CARDS_FACTORY as `0x${string}`,
             abi: factoryCardsAbi,
             functionName: 'getAddress',
-            args: [embeddedWallet.address, prog.address, pad(salt)]
+            args: [embeddedWallet.address, loyaltyProgram, pad(salt)]
           })
 
           console.log("address @createUserOp", cardAddress)
@@ -294,10 +294,11 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
           try {
             nonce = await publicClient.readContract({
               address: entryPoint.address,
-              abi: loyaltyCardAbi,
+              abi: entryPointAbi,
               functionName: 'getNonce', 
               args: [cardAddress, key],
             })
+            console.log("getNonce result @customer:", nonce)
           } catch {
             nonce = 0n
           } 
@@ -318,9 +319,9 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
             /** The amount of gas to allocate the main execution call */
             callGasLimit: callGasLimit, 
             /** Account factory. Only for new accounts. */
-            factory: factory.address as `0x${string}`,
+            factory: isDeployed ? undefined : factory.address as `0x${string}`,
             /** Data for account factory. */
-            factoryData: factoryData, 
+            factoryData: isDeployed ? undefined : factoryData, 
             /** Maximum fee per gas. */
             maxFeePerGas: fetchedGasPrice.standard.maxFeePerGas,
             /** Maximum priority fee per gas. */
@@ -354,10 +355,10 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     }, [])
 
     const sendUserOp = useCallback(
-      async (loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: `0x${string}`) => {
+      async (loyaltyProgram: `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: `0x${string}`) => {
         console.log("sendUserOp called")
 
-        const userOperation = await createUserOp(functionName, args, salt);
+        const userOperation = await createUserOp(loyaltyProgram, loyaltyCard, functionName, args, salt);
         if (userOperation) {
           const signature = await loyaltyCard.signUserOperation(userOperation);
           const userOpSigned = {...userOperation, signature: signature} 

@@ -46,6 +46,9 @@ contract FactoryCards {
     //             abi.encodeCall(SimpleAccount.initialize, (owner))
     //         )));
     // }
+
+    // I MIGHT HAVE TO HARD CODE THE LOYALTYPROG HERE... 
+    // As in: it should be an immutable state variable???  
     function createAccount(
       address owner, 
       address payable loyaltyProgram, 

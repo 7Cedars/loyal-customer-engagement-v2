@@ -12,6 +12,7 @@ import { loyaltyProgramAbi } from "@/context/abi";
 import { readContracts } from "wagmi/actions";
 import { wagmiConfig } from "@/context/wagmiConfig";
 import { numberToHex } from "viem";
+import { useTransaction } from "wagmi";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -22,9 +23,16 @@ export default function Page() {
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const {data} = useTransaction({blockHash: '0x4ca7ee652d57678f26e887c149ab0735f41de37bcad58c9f6d3ed5824f15b74d', index:0})
+  console.log({data})
+  // 0x29e81dd870270bb951e437677b471318a3afa266d61233a0569661b26462b2ff
+//0xba1182ea90dd1b9082ec76dd573a463e886268eedb401f4a27fc4c401cce25ac
 
   console.log("use LoyaltyCard:", {
     error, isLoading, loyaltyCard
+  })
+  console.log({
+    embeddedWallet
   })
 
   const fetchDataFromProgram = useCallback(  
@@ -59,7 +67,7 @@ export default function Page() {
     if (prog.address && embeddedWallet) {
       fetchLoyaltyCard(prog.address, numberToHex(123456,{size: 32}), embeddedWallet)
     }
-  }, [prog.address, embeddedWallet, fetchLoyaltyCard])
+  }, [, prog.address, embeddedWallet, fetchLoyaltyCard])
 
   // updating balance points of card. 
   useEffect(() => {
@@ -78,16 +86,17 @@ export default function Page() {
       <div className="grow flex flex-col justify-start items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2 mt-4">
           <Button onClick={() => {
-            if (loyaltyCard) 
+            if (loyaltyCard && prog.address && embeddedWallet) 
               sendUserOp(
+                prog.address, 
                 loyaltyCard, 
                 'requestPoints', 
                 [
                   qrPoints.program, 
                   qrPoints.points, 
                   qrPoints.uniqueNumber, 
-                  qrPoints.signature,
-                  embeddedWallet?.address ? embeddedWallet.address : '0x' 
+                  embeddedWallet.address, 
+                  qrPoints.signature
                 ], 
                 numberToHex(123456, {size: 32})
               )
