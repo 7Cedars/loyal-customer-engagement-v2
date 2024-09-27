@@ -98,7 +98,7 @@ export default function Page() {
                   embeddedWallet.address, 
                   qrPoints.signature
                 ], 
-                numberToHex(123456, {size: 32})
+                123456n
               )
           }}> 
             {hasVoucherExpired ?  `Voucher already claimed` : `Claim ${qrPoints.points} points from voucher`} 

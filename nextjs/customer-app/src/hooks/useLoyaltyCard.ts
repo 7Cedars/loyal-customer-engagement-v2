@@ -202,7 +202,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
           const cardAddress = await this.getAddress()
 
           const userOpHash = getUserOperationHash({
-            chainId: 31337, // chainId,
+            chainId: chainId, // chainId,
             entryPointAddress: entryPoint.address,
             entryPointVersion: entryPoint.version,
             userOperation: {
@@ -234,10 +234,10 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     }, [])
 
     const createUserOp = useCallback(
-      async (loyaltyProgram:  `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: `0x${string}`) => {
-        const callGasLimit: bigint = 75900n
-        const preVerificationGas: bigint = 247487n
-        const verificationGasLimit: bigint = 526114n
+      async (loyaltyProgram:  `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: bigint) => {
+        const callGasLimit: bigint = 1659000n
+        const preVerificationGas: bigint = 26196976n
+        const verificationGasLimit: bigint = 7261140n
   
         if (!publicClient) {
           setError("No publicClient available");
@@ -273,7 +273,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         const factoryData = encodeFunctionData({
           abi: factory.abi,
           functionName: 'createAccount',
-          args: [owner.address, loyaltyProgram, pad(salt)],
+          args: [owner.address, loyaltyProgram, salt],
         })
 
         let nonce; 
@@ -287,7 +287,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
             address: deployed?.factoryCardsAddress as `0x${string}`,
             abi: factoryCardsAbi,
             functionName: 'getAddress',
-            args: [embeddedWallet.address, loyaltyProgram, pad(salt)]
+            args: [embeddedWallet.address, loyaltyProgram, salt]
           })
 
           console.log("address @createUserOp", cardAddress)
@@ -320,9 +320,9 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
             /** The amount of gas to allocate the main execution call */
             callGasLimit: callGasLimit, 
             /** Account factory. Only for new accounts. */
-            factory: isDeployed ? undefined : factory.address as `0x${string}`,
+            factory: nonce == 0n ? factory.address as `0x${string}` : undefined,
             /** Data for account factory. */
-            factoryData: isDeployed ? undefined : factoryData, 
+            factoryData: nonce == 0n ? factoryData : undefined, 
             /** Maximum fee per gas. */
             maxFeePerGas: fetchedGasPrice.standard.maxFeePerGas,
             /** Maximum priority fee per gas. */
@@ -356,7 +356,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     }, [])
 
     const sendUserOp = useCallback(
-      async (loyaltyProgram: `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: `0x${string}`) => {
+      async (loyaltyProgram: `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: bigint) => {
         console.log("sendUserOp called")
 
         const userOperation = await createUserOp(loyaltyProgram, loyaltyCard, functionName, args, salt);

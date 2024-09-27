@@ -4,7 +4,7 @@ import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi";
 import { setProgram } from "@/redux/reducers/programReducer";
 import { setQrPoints } from "@/redux/reducers/qrPointsReducer";
 import { Program, QrPoints } from "@/types";
-import {  parseHex, parseNumber, parseString } from "@/utils/parsers";
+import {  parseBigInt, parseHex, parseNumber, parseString } from "@/utils/parsers";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -44,19 +44,21 @@ export default function Home() {
   // see docs: https://github.com/privy-io/wagmi-demo/blob/main/app/page.tsx 
   const {ready, user, authenticated, login, connectWallet, logout, linkWallet} = usePrivy();
   const {wallets, ready: walletsReady} = useWallets();
-
+  
   const qrData = useRef<QrPoints>({
-    program: params.get('prg') ? parseHex(params.get('prg'))  :'0x',
-    points: params.get('pts') ? parseNumber(params.get('pts')) : 0,
-    uniqueNumber: params.get('un') ? parseNumber(params.get('un')) : 0,
-    signature: params.get('sig') ? parseHex(params.get('sig')) : '0x'
+    program: params.get('prg') ? parseHex(params.get('prg'))  : null,
+    points: params.get('pts') ? parseBigInt(params.get('pts')) : null, // NUMBER?! 
+    uniqueNumber: params.get('un') ? parseBigInt(params.get('un')) : null,  // NUMBER?! 
+    signature: params.get('sig') ? parseHex(params.get('sig')) : null
   })
   console.log({qrData})
 
   const programContract = {
-    address: qrData.current.program, 
+    address: qrData.current.program ? qrData.current.program  : '0x', 
     abi: loyaltyProgramAbi,
   } as const 
+
+  console.log({programContract})
  
   const {data: programData, isFetched} = useReadContracts({
     contracts: [
@@ -94,23 +96,24 @@ export default function Home() {
   })
 
   useEffect(() => {
-    if (qrData.current && isFetched && programData) {
+    if (qrData.current && qrData.current.program != "0x" && isFetched && programData) {
       dispatch(setQrPoints(qrData.current)) 
 
       console.log("programData: ", programData)
 
-      const qrProgram: Program = { 
-        address: qrData.current.program, 
-        name: parseString(programData[2].result), 
-        colourBase: parseString(programData[3].result).split(`;`)[0], 
-        colourAccent: parseString(programData[3].result).split(`;`)[1], 
-        uriImage: parseString(programData[4].result), 
-        cardsFactory: parseHex(programData[5].result),
-        entryPoint: parseHex(programData[6].result)
+      if (qrData.current.program) {
+        const qrProgram: Program = { 
+          address: qrData.current.program, 
+          name: parseString(programData[2].result), 
+          colourBase: parseString(programData[3].result).split(`;`)[0], 
+          colourAccent: parseString(programData[3].result).split(`;`)[1], 
+          uriImage: parseString(programData[4].result), 
+          cardsFactory: parseHex(programData[5].result),
+          entryPoint: parseHex(programData[6].result)
+        }
+        setProg(qrProgram)
+        dispatch(setProgram(qrProgram))
       }
-      setProg(qrProgram)
-      dispatch(setProgram(qrProgram))
-
       if (user) router.push('/home')
     } 
   }, [qrData, dispatch, isFetched, programData, user, router])
@@ -154,14 +157,17 @@ export default function Home() {
                     This voucher has expired. Log in to see your loyalty card. 
                   </CustomButton>
                 : 
-                  qrData.current.program != undefined ? 
+                  qrData.current.program != '0x' ? 
                   <CustomButton disabled>
                     The qrCode is invalid. Please try again with another Qrcode.
                   </CustomButton>
                 : 
                   user ? 
+                  <div className="flex flex-col gap-4 items-center">
                   <CustomButton onClick={logout}> 
-                    {` Connected to: ${
+                    Disconnect
+                  </CustomButton> 
+                  {` Connected to: ${
                       user.email ? user.email.address
                       : 
                       user.phone ? user.phone.number
@@ -169,7 +175,7 @@ export default function Home() {
                       user.wallet?.address 
                     }`
                   }
-                  </CustomButton> 
+                  </div>
                 : 
                   <CustomButton onClick={login}> 
                     Connect

@@ -33,10 +33,10 @@ export type QrData = undefined | {
 }
 
 export type QrPoints = {
-  program: Hex; 
-  points: number; 
-  uniqueNumber: number; 
-  signature: Hex; 
+  program: Hex | null; 
+  points: bigint | null; 
+  uniqueNumber: bigint | null; 
+  signature: Hex | null; 
 }
 
 // NB 0 = claim req

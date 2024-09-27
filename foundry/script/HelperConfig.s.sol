@@ -98,7 +98,7 @@ contract HelperConfig is Script {
         // console2.log(address(entryPoint));
 
         localNetworkConfig = NetworkConfig({
-            entryPoint: 0x0000000071727De22E5E9d8BAf0edAc6f37da032,  // address(entryPoint), //  0x0000000071727De22E5E9d8BAf0edAc6f37da032,
+            entryPoint:  address(entryPoint),  // address(entryPoint), //  0x0000000071727De22E5E9d8BAf0edAc6f37da032,
             account: ANVIL_DEFAULT_ACCOUNT,
             key: 0
         });

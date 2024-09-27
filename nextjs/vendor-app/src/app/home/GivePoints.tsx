@@ -17,7 +17,7 @@ export const GivePoints = () => {
 
   // named list of all type definitions
   const types = {
-    RequestPoints: [
+    PointsToRequest: [
       { name: 'program', type: 'address' },
       { name: 'points', type: 'uint256' },
       { name: 'uniqueNumber', type: 'uint256' }
@@ -25,7 +25,7 @@ export const GivePoints = () => {
   } as const
 
   const handleSigning = () => {
-    uniqueNumber.current = BigInt(Math.random() * 10 ** 18) 
+    uniqueNumber.current = BigInt(1) 
 
     if (prog.address) {
       const message = {
@@ -36,7 +36,7 @@ export const GivePoints = () => {
     
       signTypedData({
         types, 
-        primaryType: 'RequestPoints',
+        primaryType: 'PointsToRequest',
         message
       })} 
   }

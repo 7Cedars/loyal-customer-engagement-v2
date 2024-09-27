@@ -120,7 +120,6 @@ export const DeployProgram = () => {
       setUri("/logo.png") // "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC") 
       console.log("image did not pass test")
     }
-
   }
 
   const nameProgram: React.JSX.Element = (
