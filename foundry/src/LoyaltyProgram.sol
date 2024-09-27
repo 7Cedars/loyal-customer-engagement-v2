@@ -360,7 +360,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         if (!ERC165Checker.supportsInterface(gift, type(ILoyaltyGift).interfaceId)) {
             revert LoyaltyProgram__IncorrectInterface(gift);
         }
-        LoyaltyGift(gift).transferFrom(address(this), to, giftId);
+        LoyaltyGift(gift).transferGift(to, giftId);
 
         emit GiftTransferred(to, gift, giftId);
     }

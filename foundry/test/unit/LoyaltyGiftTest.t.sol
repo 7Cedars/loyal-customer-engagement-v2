@@ -25,13 +25,17 @@ contract LoyaltyProgramTest is Test {
     FreeCoffee freeCoffee; 
     HelperConfig.NetworkConfig config; 
     FactoryCards factoryCards; 
+    LoyaltyCard loyaltyCard; 
 
     /* State variables */
     uint256 vendorKey = vm.envUint("DEFAULT_ANVIL_KEY_0");
     address vendorAddress = vm.addr(vendorKey);
+    uint256 customerKey = vm.envUint("DEFAULT_ANVIL_KEY_1");
+    address customerAddress = vm.addr(customerKey);
     address ownerProgram;
 
     uint256 giftAmount = 15;  
+    uint256 SALT = 123456; 
 
     /* Events */
 
@@ -78,6 +82,8 @@ contract LoyaltyProgramTest is Test {
       ownerProgram = loyaltyProgram.owner();
       vm.prank(ownerProgram); 
       loyaltyProgram.transferOwnership(vendorAddress);
+
+      loyaltyCard = factoryCards.createAccount(customerAddress, payable(address(loyaltyProgram)), SALT);
     }
 
     function testDirectTransferWorks() public mintGifts(giftAmount) {
@@ -87,7 +93,12 @@ contract LoyaltyProgramTest is Test {
       uint256 giftId = freeCoffee.tokenOfOwnerByIndex(address(loyaltyProgram), 0); 
       console2.log("giftId:", giftId);
 
-      // loyaltyProgram.transferGift(customer, address(freeCoffee), giftId);
+      vm.prank(vendorAddress); 
+      loyaltyProgram.transferGift(customerAddress, address(freeCoffee), giftId);
+      
+      uint256 balanceCard = freeCoffee.balanceOf(address(loyaltyCard)); 
+      assert(balanceCard == 1); 
+
     }
 }
 

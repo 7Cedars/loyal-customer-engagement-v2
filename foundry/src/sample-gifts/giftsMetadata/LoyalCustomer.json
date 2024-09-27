@@ -1,26 +1,14 @@
 {
-  "title": "Gold Token",
-  "description": "Access to gold tier gifts. A customer cannot request this token: it needs to be transferred by vendor.",
-  "image": "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmUpGnYfQtbbavTJpqmKotQhiL6RnPUo3zQWq4AYiGMwLG",
+  "title": "A Free tour for Loyal Customers",
+  "description": "Access to a free tour to one of our shops!",
+  "image": "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC",
   "attributes": [
     {
-      "trait_type": "additional_requirements",
-      "value": "none"
+      "trait_type": "claim_requirements",
+      "value": "Need to have a Gold Token on your card."
     },
     {
-      "trait_type": "vendor_message_at_claim",
-      "value": "none"
-    },
-    {
-      "trait_type": "customer_message_at_claim",
-      "value": "none"
-    },
-    {
-      "trait_type": "vendor_message_at_voucher_redeem",
-      "value": "none"
-    },
-    {
-      "trait_type": "customer_message_at_voucher_redeem",
+      "trait_type": "redeem_requirements",
       "value": "none"
     }
   ]

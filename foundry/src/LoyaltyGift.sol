@@ -24,6 +24,7 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
     error LoyaltyGift_CardDoesNotOwnGift(); 
     error LoyaltyGift__IncorrectInterface(); 
     error LoyaltyGift_UnrecognisedFunctionCall(); 
+    error LoyaltyGift_ProgramDoesNotOwnGift(); 
 
     uint256 private _nextTokenId;
     string public i_uri;
@@ -63,6 +64,17 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
     
         (address card) = _update(msg.sender, _giftId, address(0)); 
         return card != address(0); 
+    } 
+
+    /**
+        £todo natspec 
+     */
+    function transferGift(address card, uint256 giftId) external onlyLoyaltyProgram returns (bool success) {
+        if (ownerOf(giftId) != msg.sender) {
+            revert LoyaltyGift_ProgramDoesNotOwnGift(); 
+        }
+        (address _card) = _update(card, giftId, address(0)); 
+        return _card != address(0); 
     } 
 
     function pause() public onlyOwner {

@@ -23,7 +23,7 @@ export const chainSettings = (chainId: number) => {
     }
     case 11155420: {
       return ({ // opt sepolia
-          fetchBlockAmount: 10_000,
+          fetchBlockAmount: 50_000,
           minimumBlocksToFetch: 100, 
           factoryCardsAddress: '0x4f6158ceb0120791deb1816b0f778ec731266b41' as `0x${string}`, 
           factoryProgramsAddress: '0x6a3a88c3683a0c489a29f1ad6c1e8af1b34e793a' as `0x${string}`
