@@ -5,7 +5,7 @@ import {LoyaltyGift} from "../LoyaltyGift.sol";
 import {LoyaltyProgram} from "../LoyaltyProgram.sol";
 import {LoyaltyCard} from "../LoyaltyCard.sol";
 
-contract FreeCoffee is LoyaltyGift {
+contract GoldToken is LoyaltyGift {
   uint256 public constant GIFT_COST = 2500; 
   bool public constant HAS_ADDITIONAL_REQUIREMENTS = false; 
   // address[] wrappedgifts = []; // no wrapping possible. -- TBI. 
@@ -14,7 +14,7 @@ contract FreeCoffee is LoyaltyGift {
     LoyaltyGift(
       "GoldToken", 
       "LPX", 
-      "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmUfs1osq6KFJzHRdWEnrsmLq68CSgKJfTpSKXcTYuaNbd" // UPDATE 
+      "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmYSGqDMSWEkpE6DnrA57915iuctFhraQY9Hxvx52C5y3x" 
     ) {}
 
   // to disallow exchanging of gift all together, just place in a revert. 

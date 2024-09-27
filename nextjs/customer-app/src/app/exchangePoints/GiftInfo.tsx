@@ -4,11 +4,12 @@ import { loyaltyGiftAbi } from "@/context/abi";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
+import { parseRequirementReply } from "@/utils/parsers";
 import { useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useState } from "react";
 import { numberToHex } from "viem";
-import { useReadContract, useWriteContract } from "wagmi";
+import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
 
 export const GiftInfo = ({
   address,  
@@ -17,17 +18,30 @@ export const GiftInfo = ({
   additionalReq, 
   metadata, 
 }: Gift) => {
+  const giftContract = { address: address, abi: loyaltyGiftAbi } as const
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
-  const { data, isError, isLoading, status, refetch } = useReadContract({
-    address: address,
-    abi: loyaltyGiftAbi,
-    functionName: 'balanceOf',
-    args: [selectedProgram.address]
-  })
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error: errorCard, isLoading: isLoadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const { data, isError, error: errorReadContract, isLoading, status, refetch } = useReadContracts({
+    contracts: [
+      {...giftContract, 
+        functionName: 'balanceOf',
+        args: [selectedProgram.address]
+      }, 
+      {...giftContract, 
+        functionName: 'requirementsExchangeMet',
+        args: [selectedProgram.address]
+      }
+    ]
+  })
+
+  const requirements = data?.map(item => {
+    return parseRequirementReply(item.error)
+  }) 
+
+  console.log({requirements})
 
   console.log({data, isError, isLoading, status, walletsReady, errorCard, isLoadingCard})
 
@@ -72,7 +86,7 @@ export const GiftInfo = ({
 
         <div className="pb-2">
           <SectionText
-              text = {`Available gifts: ${Number(data)}`} 
+              text = {`Available gifts: ${ data ? Number(data[0].result): 0}`} 
               size = {0}
             /> 
         </div>
@@ -90,25 +104,38 @@ export const GiftInfo = ({
         </div>
 
         <div className="p-2"> 
-          <Button onClick={() => {
-            if (loyaltyCard) 
-              sendUserOp(
-                loyaltyCard, 
-                'exchangePointsForGift', 
-                [
-                  address, 
-                  embeddedWallet?.address ? embeddedWallet.address : '0x' 
-                ], 
-                numberToHex(123456, {size: 32})
-              )
-            }} 
-            size = {0}
-            aria-disabled = {selected}
-            >
-            Exchange points for gift
-          </Button>
+         {
+          requirements && requirements[0] == undefined ? 
+            <Button onClick={() => {
+              if (loyaltyCard && selectedProgram && selectedProgram.address) 
+                sendUserOp(
+                  selectedProgram.address, 
+                  loyaltyCard, 
+                  'exchangePointsForGift', 
+                  [
+                    address, 
+                    embeddedWallet?.address ? embeddedWallet.address : '0x' 
+                  ], 
+                  123456n
+                )
+              }} 
+              size = {0}
+              aria-disabled = {selected}
+              >
+              Exchange points for gift
+            </Button>
+          :
+          requirements ?
+            <Button onClick={() => {}}  
+              size = {0}
+              aria-disabled = {true}
+              >
+              {requirements[0]} 
+            </Button>
+          : 
+          null
+        }
         </div>
-        
       </div>  
   </main>
   );

@@ -7,12 +7,11 @@ import {LoyaltyGift} from "../src/LoyaltyGift.sol";
 import {FreeCoffee} from "../src/sample-gifts/FreeCoffee.sol";
 import {FreeCupCake} from "../src/sample-gifts/FreeCupCake.sol";
 import {FridayFifteen} from "../src/sample-gifts/FridayFifteen.sol";
+import {GoldToken} from "../src/sample-gifts/GoldToken.sol";
 
-
+bytes32 constant SALT = bytes32(hex'7ceda522'); 
 
 contract DeployFreeCoffee is Script {
-    bytes32 SALT = bytes32(hex'7ceda521'); 
-
     function run() external returns (FreeCoffee) {
         vm.startBroadcast();
         FreeCoffee freeCoffee = new FreeCoffee{salt: SALT}();
@@ -22,8 +21,6 @@ contract DeployFreeCoffee is Script {
 }
 
 contract DeployFreeCupCake is Script {
-    bytes32 SALT = bytes32(hex'7ceda521'); 
-
     function run() external returns (FreeCupCake) {
         vm.startBroadcast();
         FreeCupCake freeCupCake = new FreeCupCake{salt: SALT}();
@@ -33,13 +30,21 @@ contract DeployFreeCupCake is Script {
 }
 
 contract DeployFridayFifteen is Script {
-    bytes32 SALT = bytes32(hex'7ceda521'); 
-
     function run() external returns (FridayFifteen) {
         vm.startBroadcast();
         FridayFifteen fridayFifteen = new FridayFifteen{salt: SALT}();
         vm.stopBroadcast();
         
         return fridayFifteen;
+    }
+}
+
+contract DeployGoldToken is Script {
+    function run() external returns (GoldToken) {
+        vm.startBroadcast();
+        GoldToken goldToken = new GoldToken{salt: SALT}();
+        vm.stopBroadcast();
+        
+        return goldToken;
     }
 }

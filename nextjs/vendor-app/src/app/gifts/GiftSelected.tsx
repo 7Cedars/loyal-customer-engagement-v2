@@ -7,9 +7,10 @@ import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useAccount, useReadContract, useReadContracts, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { wagmiConfig } from "../../../wagmi-config";
 import { readContracts } from '@wagmi/core'
+import { parseRequirementReply } from "@/utils/parsers";
 
 export const GiftSelected = ({
   address,  
@@ -18,26 +19,37 @@ export const GiftSelected = ({
   additionalReq, 
   metadata, 
 }: Gift) => {
+  const giftContract = { address: address, abi: loyaltyGiftAbi } as const
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
   const {connector} = useAccount(); 
   const { writeContract, error, data: transactionHash } = useWriteContract()
   const { data: receipt, isError: isErrorReceipt, isLoading: isLoadingReceipt, isSuccess: isSuccessReceipt, error: errorReceipt } = useWaitForTransactionReceipt(
-    {  confirmations: 1, hash: transactionHash })
-  const { data, isError, error: errorReadContract, isLoading, status, refetch } = useReadContract({
-    address: address,
-    abi: loyaltyGiftAbi,
-    functionName: 'balanceOf',
-    args: [selectedProgram.address]
+    {  confirmations: 1, hash: transactionHash }
+  )
+  const { data, isError, error: errorReadContract, isLoading, status, refetch } = useReadContracts({
+    contracts: [
+      {...giftContract, 
+        functionName: 'balanceOf',
+        args: [selectedProgram.address]
+      }, 
+      {...giftContract, 
+        functionName: 'requirementsExchangeMet',
+        args: [selectedProgram.address]
+      }, 
+      {...giftContract, 
+        functionName: 'requirementsRedeemMet',
+        args: [selectedProgram.address]
+      }
+    ]
   })
+
+  const requirements = data?.map(item => {
+    return parseRequirementReply(item.error)
+  }) 
 
   const fetchOwnedTokenId = useCallback(
     async (ownerAddress: `0x${string}`, giftAddress: `0x${string}`) => {
-      const giftContract = {
-        address: giftAddress,
-        abi: loyaltyGiftAbi,
-      } as const
-
       try {      
         const result = await readContracts(wagmiConfig, {
           contracts: [
@@ -59,8 +71,6 @@ export const GiftSelected = ({
   )
 
   console.log({ data, isError, isLoading, status, transactionHash, error, receipt, isErrorReceipt, isSuccessReceipt, errorReceipt, connector })
-
-
 
   return (
     <main 
@@ -100,7 +110,7 @@ export const GiftSelected = ({
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}
       <div 
-        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 disabled aria-selected:opacity-100 aria-selected:h-80 ease-in-out duration-300 delay-300"
+        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 disabled aria-selected:opacity-100 aria-selected:h-64 ease-in-out duration-300 delay-300"
         aria-selected = {selected}
         style = {selected ? {} : {pointerEvents: "none"}}
         > 
@@ -108,7 +118,7 @@ export const GiftSelected = ({
         <>
         <section className="pb-2">
         <SectionText
-            text = {`Available gifts: ${Number(data)}`} 
+            text = {`Available gifts: ${ data ? Number(data[0].result): 0}`} 
             size = {0}
           /> 
         </section>
@@ -139,11 +149,7 @@ export const GiftSelected = ({
           />
         </section>
             
-        <SectionText
-          text = "Gift actions" 
-          size = {0}
-        /> 
-          <div className="p-2"> 
+          <div className="px-2 h-10 my-2"> 
             <NumLine onClick={(amount) =>  writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,
@@ -158,8 +164,11 @@ export const GiftSelected = ({
             aria-disabled = {selected}/>
           </div>
 
-          <div className="p-2 flex flex-row gap-2"> 
-            <Button onClick={() => writeContract({ 
+          {
+          requirements && requirements[1] != "Not implemented" ? 
+          <>
+            <div className="px-2 my-2 min-h-10 h-fit flex flex-row gap-2"> 
+              <Button onClick={() => writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,
                 functionName: 'setAllowedGift',
@@ -168,42 +177,34 @@ export const GiftSelected = ({
                   false,
                   true
                 ]
-              })
-            }
-            size = {0}
-            aria-disabled = {selected}
-            >
-              Disallow customers to claim gift in exchange for points   
-            </Button>
-   
-            <Button onClick={() => writeContract({ 
-                abi: loyaltyProgramAbi,
-                address: selectedProgram.address,
-                functionName: 'setAllowedGift',
-                args: [
-                  address,
-                  false,
-                  false
-                ]
-              })
-            }
-            size = {0}
-            aria-disabled = {selected}
-            >
-              Disallow customers to claim and redeem gift   
-            </Button>
-
-            <Button onClick={() => fetchOwnedTokenId(
-              selectedProgram.address, '0x051472E0c61b12beB86Eab55242a090d3ffa31C3' as `0x${string}`)
-            }
-            size = {0}
-            aria-disabled = {selected}
-            >
-              Test fetchOwnedTokenId
-            </Button>
-          </div>
-
-          <div className="p-2">
+                })
+              }
+              size = {0}
+              aria-disabled = {selected}
+              >
+              Disallow claim    
+              </Button>
+    
+              <Button onClick={() => writeContract({ 
+                  abi: loyaltyProgramAbi,
+                  address: selectedProgram.address,
+                  functionName: 'setAllowedGift',
+                  args: [
+                    address,
+                    false,
+                    false
+                  ]
+                })
+              }
+              size = {0}
+              aria-disabled = {selected}
+              >
+                Disallow claim and redeem   
+              </Button>
+            </div> 
+          </>
+          : 
+          <div className="px-2 my-2 min-h-10 h-fit flex">
             <InputButton 
             nameId ={"directTransfer"}
             onClick = {(inputAddress) =>  writeContract({ 
@@ -222,11 +223,9 @@ export const GiftSelected = ({
             aria-disabled = {selected}
             />
           </div>
-        </>
-        {/* : */}
-        {/* null */}
-        {/* } */}
-      </div> 
+          } 
+          </> 
+        </div>
   </main>
   );
 };

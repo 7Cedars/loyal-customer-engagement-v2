@@ -325,3 +325,26 @@ export const parseDeployLogs = (logs: Log[]): Event[] => {
       return ""
     }
   }
+
+  export const parseRequirementReply = (rawReply: unknown): boolean | string  => {
+    if (typeof rawReply == null) {
+      return false
+    }
+    try {
+      String(rawReply)
+    } catch {
+      throw new Error('Incorrect or missing data at rawReply');
+    }
+
+    if (typeof rawReply === 'boolean') {
+      return rawReply
+    }
+
+    if (typeof rawReply !== 'boolean') {
+      return String(rawReply).split("\n")[1]
+    }
+
+    else {
+      return false 
+    }
+  };

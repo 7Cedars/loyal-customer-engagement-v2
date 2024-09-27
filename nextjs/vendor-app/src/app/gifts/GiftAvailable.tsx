@@ -73,7 +73,7 @@ export const GiftAvailable = ({
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}
       <div 
-        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 aria-selected:opacity-100 aria-selected:h-72 ease-in-out duration-300 delay-300"
+        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 aria-selected:opacity-100 aria-selected:h-48 ease-in-out duration-300 delay-300"
         aria-selected = {selected}
         style = {selected ? {} : {pointerEvents: "none"}}
         > 
@@ -112,11 +112,11 @@ export const GiftAvailable = ({
           />
         </section>
             
-        <SectionText
+        {/* <SectionText
           text = "Gift actions" 
           size = {0}
-        /> 
-          <div className="p-2"> 
+        />  */}
+          {/* <div className="p-2"> 
             <NumLine onClick={(amount) =>  writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,
@@ -129,9 +129,9 @@ export const GiftAvailable = ({
             } 
             size = {0} 
             aria-disabled = {selected}/>
-          </div>
+          </div> */}
 
-          <div className="p-2"> 
+          <div className="px-2 h-10"> 
             <Button onClick={() => writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,
@@ -146,11 +146,11 @@ export const GiftAvailable = ({
             size = {0}
             aria-disabled = {selected}
             >
-              Allow customers to claim gift in exchange for points
+              Select gift
             </Button>
           </div>
 
-          <div className="p-2">
+          {/* <div className="p-2">
             <InputButton 
             nameId ={"directTransfer"}
             onClick = {(inputAddress) =>  writeContract({ 
@@ -168,7 +168,7 @@ export const GiftAvailable = ({
             size = {0}
             aria-disabled = {selected}
             />
-          </div>
+          </div> */}
         </>
         {/* :
         null

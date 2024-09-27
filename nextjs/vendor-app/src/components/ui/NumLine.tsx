@@ -25,7 +25,7 @@ export const NumLine = ({
   }
 
   return (
-    <div className="w-full flex flex-row"  > 
+    <div className="w-full h-full flex flex-row"  > 
       <div className="flex grow"> 
       {
         numbers.map(number => 
