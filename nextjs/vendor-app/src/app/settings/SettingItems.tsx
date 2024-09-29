@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ChangeEvent, useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import Image from "next/image";
-import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { loyaltyProgramAbi } from "@/context/abi";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
@@ -166,6 +166,42 @@ export const ShowProgramAddress = () => {
        <div className="pt-6 p-1">
           <QRCode 
             value={prog.address}
+            style={{ 
+              height: "250px", 
+              width: "250px", 
+              objectFit: "cover", 
+              background: 'white', 
+              padding: '16px', 
+            }}
+            bgColor="#ffffff" // "#0f172a" 1e293b
+            fgColor="#000000" // "#e2e8f0"
+            level='M'
+            className="rounded-lg"
+          />
+        </div>
+    </section>
+)}
+
+
+export const ShowProgramOwner = () => {
+  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const { data, isError, isLoading, status, refetch } = useReadContract({
+    address: prog.address,
+    abi: loyaltyProgramAbi,
+    functionName: 'owner'
+  })
+
+  console.log({dataProgramOwner: data})
+
+  return (
+    <section className="my-2"> 
+      <SectionText 
+      text="See the address of the owner of this program is:"
+      subtext={data as `0x${string}`}
+      />
+       <div className="pt-6 p-1">
+          <QRCode 
+            value={data as `0x${string}`}
             style={{ 
               height: "250px", 
               width: "250px", 

@@ -4,7 +4,7 @@ import { Layout } from "@/components/application/Layout"
 import { TitleText } from "@/components/ui/StandardisedFonts"
 import { SettingLayout } from "./SettingLayout"
 import { useState } from "react"
-import { ChangeProgramImage, ClearLocalStorage, Disclaimer, ExitProgram, ShowProgramAddress } from "./SettingItems"
+import { ChangeProgramImage, ClearLocalStorage, Disclaimer, ExitProgram, ShowProgramAddress, ShowProgramOwner } from "./SettingItems"
 
 export default function Page() {
   const [selectedItem, setSelectedItem] = useState<string>(); 
@@ -39,6 +39,15 @@ export default function Page() {
           sizeFoldout={5}
           >
            <ShowProgramAddress /> 
+        </SettingLayout>
+
+        <SettingLayout 
+          selected = {selectedItem == 'progOwner'} 
+          onClick={() => selectedItem == 'progOwner' ? setSelectedItem(undefined) : setSelectedItem('progOwner') }
+          titleText="Show program owner address"
+          sizeFoldout={5}
+          >
+           <ShowProgramOwner /> 
         </SettingLayout>
 
         <SettingLayout 

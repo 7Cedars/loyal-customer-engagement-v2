@@ -57,7 +57,6 @@ contract LoyaltyProgramTest is Test {
     // EIP712 domain separator
     struct EIP712Domain {
         string name;
-        string version;
         uint256 chainId;
         address verifyingContract;
     }
@@ -126,7 +125,7 @@ contract LoyaltyProgramTest is Test {
       DOMAIN_SEPARATOR =_hashDomain(
             EIP712Domain({
                 name: "Highstreet Hopes",
-                version: LOYALTY_PROGRAM_VERSION,
+                // version: LOYALTY_PROGRAM_VERSION,
                 chainId: block.chainid,
                 verifyingContract: address(loyaltyProgram)
             })
@@ -162,7 +161,7 @@ contract LoyaltyProgramTest is Test {
       DOMAIN_SEPARATOR =_hashDomain(
             EIP712Domain({
                 name: "Highstreet Hopes",
-                version: LOYALTY_PROGRAM_VERSION,
+                // version: LOYALTY_PROGRAM_VERSION,
                 chainId: block.chainid,
                 verifyingContract: address(loyaltyProgram)
             })
@@ -209,7 +208,7 @@ contract LoyaltyProgramTest is Test {
       DOMAIN_SEPARATOR =_hashDomain(
             EIP712Domain({
                 name: "Highstreet Hopes",
-                version: LOYALTY_PROGRAM_VERSION,
+                // version: LOYALTY_PROGRAM_VERSION,
                 chainId: block.chainid,
                 verifyingContract: address(loyaltyProgram)
             })
@@ -358,38 +357,49 @@ contract LoyaltyProgramTest is Test {
 
     function testHashingAndSigningRequestPoints() public {
       uint256 uniqueNumber = 1; 
-
+      uint256 points = 250; 
+      uint256 burnerWalletKey = vm.envUint("BURNET_WALLET_KEY");
+      address burnerWallet = vm.envAddress("BURNER_WALLET");
+      console2.log("burnerWalletKey", burnerWalletKey); 
+      address programAddress = 0x0Ad4017904Acf30DD74f3A7C18D8A18fA3931686; 
+      
       bytes32 DOMAIN_SEPARATOR_TEMP =_hashDomain(
             EIP712Domain({
-                name: "test",
-                version: LOYALTY_PROGRAM_VERSION,
-                chainId: 11155420, // NB! 
-                verifyingContract: address(loyaltyProgram)
+                name: "test2",
+                chainId: 31337, 
+                verifyingContract: programAddress
             })
         );
-      uint256 points = 500; 
-       
+      
       // loyalty program owner creates voucher for 5000 points. 
       PointsToRequest memory message = PointsToRequest({
-          program: address(loyaltyProgram),
+          program: programAddress,
           points: points, 
           uniqueNumber: uniqueNumber
       });
 
       // vender signs the voucher
       bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR_TEMP, hashPointsToRequest(message));
+      console2.log("DIGEST IN TEST"); 
       console2.logBytes32(digest);
 
-      (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
+      (uint8 v, bytes32 r, bytes32 s) = vm.sign(burnerWalletKey, digest);
       bytes memory signature = abi.encodePacked(r, s, v);
-      
-      requestPointsVoucher = RequestPointsVoucher({
-        program: address(loyaltyProgram),
-        points: points,
-        uniqueNumber: uniqueNumber, 
-        signature: signature
-      }); 
 
+      console2.logBytes(signature); 
+
+      // transferring ownership of program to burnetWallet
+      vm.prank(vendorAddress); 
+      loyaltyProgram.transferOwnership(burnerWallet);
+      console2.log("ownerProgram", loyaltyProgram.owner()); 
+
+      loyaltyProgram.requestPoints({
+        program: programAddress,
+        points: points,
+        uniqueNumber: uniqueNumber,
+        ownerCard: burnerWallet, 
+        programSignature: signature
+      }); 
     } 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -485,13 +495,12 @@ contract LoyaltyProgramTest is Test {
                 )
             )));
     }
-
+    
     function _hashDomain(EIP712Domain memory domain) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)"),
                 keccak256(bytes(domain.name)),
-                domain.version,
                 domain.chainId,
                 domain.verifyingContract
             )

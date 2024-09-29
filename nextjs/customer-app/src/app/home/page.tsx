@@ -25,8 +25,8 @@ export default function Page() {
   const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
   const {data} = useTransaction({blockHash: '0x4ca7ee652d57678f26e887c149ab0735f41de37bcad58c9f6d3ed5824f15b74d', index:0})
   console.log({data})
-  // 0x29e81dd870270bb951e437677b471318a3afa266d61233a0569661b26462b2ff
-//0xba1182ea90dd1b9082ec76dd573a463e886268eedb401f4a27fc4c401cce25ac
+
+
 
   console.log("use LoyaltyCard:", {
     error, isLoading, loyaltyCard
@@ -35,6 +35,7 @@ export default function Page() {
     embeddedWallet
   })
 
+
   const fetchDataFromProgram = useCallback(  
     async () => {
       if (loyaltyCard && loyaltyCard.address && prog.address && embeddedWallet) {
@@ -42,6 +43,9 @@ export default function Page() {
           address: prog.address, 
           abi: loyaltyProgramAbi,
         } as const
+
+        const isDeployed = await loyaltyCard?.isDeployed() 
+        console.log("isDeployed", isDeployed) 
 
         const result = await readContracts(wagmiConfig, {
           contracts: [

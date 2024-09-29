@@ -19,7 +19,6 @@ export const GivePoints = () => {
   // named list of all type definitions
   const domain = {
     name: prog.name, 
-    version: prog.version, 
     chainId: chainId,
     verifyingContract: prog.address
   } as const

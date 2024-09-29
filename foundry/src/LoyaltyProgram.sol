@@ -24,6 +24,9 @@ import {FactoryCards} from "./FactoryCards.sol";
 import {ILoyaltyGift} from "./interfaces/ILoyaltyGift.sol";
 import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
+// FOR TESTING ONLY // 
+import {Test, console2} from "lib/forge-std/src/Test.sol";
+
 contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
@@ -56,7 +59,6 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     // EIP712 domain separator
     struct EIP712Domain {
         string name;
-        string version;
         uint256 chainId;
         address verifyingContract;
     }
@@ -101,7 +103,6 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     bytes32 private immutable DOMAIN_SEPARATOR;
     address public immutable ENTRY_POINT;
     address public immutable CARD_FACTORY;
-    string public constant LOYALTY_PROGRAM_VERSION = "alpha.1";
 
     uint256 private constant MAX_INCREASE_NONCE = 100;
     uint256 private constant SALT = 123456;
@@ -110,7 +111,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     //                          Events                              //
     //////////////////////////////////////////////////////////////////
     event Log(address indexed sender, uint256 indexed value, string func);
-    event LoyaltyProgramDeployed(address indexed owner, address indexed program, string version);
+    event LoyaltyProgramDeployed(address indexed owner, address indexed program);
     event AllowedGiftSet(address indexed loyaltyGift, bool indexed exchangeable, bool indexed redeemable);
     event LoyaltyPointsExchangeForGift(address indexed customer, address indexed gift, uint256 indexed giftId);
     event LoyaltyGiftRedeemed(address indexed customer, address indexed gift, uint256 indexed giftId);
@@ -160,13 +161,12 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
         DOMAIN_SEPARATOR = hashDomain(
             EIP712Domain({
                 name: name,
-                version: LOYALTY_PROGRAM_VERSION,
                 chainId: block.chainid,
                 verifyingContract: address(this)
             })
         );
 
-        emit LoyaltyProgramDeployed(owner, address(this), LOYALTY_PROGRAM_VERSION); // NB -- here something is wrong! 
+        emit LoyaltyProgramDeployed(owner, address(this)); // NB -- here something is wrong! 
     }
 
     //////////////////////////////////////////////////////////////////
@@ -207,12 +207,17 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
 
         // creating digest & using it to recover loyalty program  address.
         bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(pointsToRequest));
+        console2.log("DIGEST IN CONTRACT"); 
+        console2.logBytes32(digest); 
+        
         address signer = digest.recover(programSignature);
 
         // Checks.
         if (signer != owner()) {
             revert LoyaltyProgram__RequestNotFromProgramOwner();
         }
+
+        // £todo: need additional check that program == address(this)? 
 
         // Check that digest has not already been executed.
         if (s_executed[programSignature]) {
@@ -496,9 +501,8 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     function hashDomain(EIP712Domain memory domain) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)"),
                 keccak256(bytes(domain.name)),
-                domain.version,
                 domain.chainId,
                 domain.verifyingContract
             )

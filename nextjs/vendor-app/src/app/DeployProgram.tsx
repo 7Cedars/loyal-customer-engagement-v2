@@ -72,6 +72,7 @@ export const DeployProgram = () => {
       ) {
         savedPrograms.current.push({
           address: deployEvents[0].args.programAddress, 
+          version: "alpha.2", 
           name: parseString(programInfo[0].result), 
           colourBase: parseString(programInfo[1].result).split(`;`)[0], 
           colourAccent: parseString(programInfo[1].result).split(`;`)[1], 

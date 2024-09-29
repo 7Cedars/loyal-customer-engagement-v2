@@ -90,11 +90,7 @@ export default function Home() {
       {
         ...programContract, 
         functionName: 'entryPoint'
-      },
-      {
-        ...programContract, 
-        functionName: 'LOYALTY_PROGRAM_VERSION'
-      },
+      }
     ]
   })
 
@@ -112,8 +108,7 @@ export default function Home() {
           colourAccent: parseString(programData[3].result).split(`;`)[1], 
           uriImage: parseString(programData[4].result), 
           cardsFactory: parseHex(programData[5].result),
-          entryPoint: parseHex(programData[6].result),
-          version: parseString(programData[7].result)
+          entryPoint: parseHex(programData[6].result)
         }
         setProg(qrProgram)
         dispatch(setProgram(qrProgram))

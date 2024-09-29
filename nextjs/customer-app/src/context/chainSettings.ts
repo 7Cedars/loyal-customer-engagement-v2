@@ -19,8 +19,8 @@ export const chainSettings = (chainId: number) => {
     }
     case 11155420: {
       return ({ // opt sepolia
-          factoryCardsAddress: '0x41d79A3E7268fD4cB69bC612706e5aE6CabcB79c' as `0x${string}`, 
-          factoryProgramsAddress: '0x87050ba7f4c38A23b97e693FaD6fE51D0e86557B' as `0x${string}`
+          factoryCardsAddress: '0x6F5202Cc0B36287513f3197FDd515FE7d6befBC4' as `0x${string}`, 
+          factoryProgramsAddress: '0x37FD9cA01307708E29812621991eA7DF04e3E539' as `0x${string}`
         })
     }
     case 421614: {
