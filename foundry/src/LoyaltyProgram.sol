@@ -56,7 +56,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     // EIP712 domain separator
     struct EIP712Domain {
         string name;
-        uint256 version;
+        string version;
         uint256 chainId;
         address verifyingContract;
     }
@@ -101,16 +101,16 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     bytes32 private immutable DOMAIN_SEPARATOR;
     address public immutable ENTRY_POINT;
     address public immutable CARD_FACTORY;
+    string public constant LOYALTY_PROGRAM_VERSION = "alpha.1";
 
     uint256 private constant MAX_INCREASE_NONCE = 100;
-    uint256 private constant LOYALTY_PROGRAM_VERSION = 2;
     uint256 private constant SALT = 123456;
 
     //////////////////////////////////////////////////////////////////
     //                          Events                              //
     //////////////////////////////////////////////////////////////////
     event Log(address indexed sender, uint256 indexed value, string func);
-    event LoyaltyProgramDeployed(address indexed owner, address indexed program, uint256 indexed version);
+    event LoyaltyProgramDeployed(address indexed owner, address indexed program, string version);
     event AllowedGiftSet(address indexed loyaltyGift, bool indexed exchangeable, bool indexed redeemable);
     event LoyaltyPointsExchangeForGift(address indexed customer, address indexed gift, uint256 indexed giftId);
     event LoyaltyGiftRedeemed(address indexed customer, address indexed gift, uint256 indexed giftId);
@@ -496,7 +496,7 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     function hashDomain(EIP712Domain memory domain) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256("EIP712Domain(string name,uint256 version,uint256 chainId,address verifyingContract)"),
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                 keccak256(bytes(domain.name)),
                 domain.version,
                 domain.chainId,

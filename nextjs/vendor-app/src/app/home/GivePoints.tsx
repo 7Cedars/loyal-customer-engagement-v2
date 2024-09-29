@@ -3,19 +3,27 @@ import { NumPad } from "@/components/ui/NumPad"
 import { useAppSelector } from "@/redux/hooks"
 import { useEffect, useRef, useState } from "react"
 import QRCode from "react-qr-code";
-import { useSignTypedData } from "wagmi";
+import { useChainId, useSignTypedData } from "wagmi";
 
 export const GivePoints = () => {
   const [mode, setMode] = useState<'points' | 'qr'>('points')
   const [amountPoints, setAmountPoints] = useState<number>(0)
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const chainId = useChainId(); 
   const { data: signature, isPending, isError, error, isSuccess, signTypedData, reset } = useSignTypedData()
-  const uniqueNumber  = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
+  const uniqueNumber = BigInt(1) // useRef<bigint>(BigInt(Math.random() * 10 ** 18))
 
   console.log("signature: ", signature)
   console.log("isError, error:", error)
 
   // named list of all type definitions
+  const domain = {
+    name: prog.name, 
+    version: prog.version, 
+    chainId: chainId,
+    verifyingContract: prog.address
+  } as const
+
   const types = {
     PointsToRequest: [
       { name: 'program', type: 'address' },
@@ -24,22 +32,11 @@ export const GivePoints = () => {
     ],
   } as const
 
-  const handleSigning = () => {
-    uniqueNumber.current = BigInt(1) 
-
-    if (prog.address) {
-      const message = {
-        program: prog.address,
-        points:  BigInt(amountPoints),
-        uniqueNumber: uniqueNumber.current,
-      } as const
-    
-      signTypedData({
-        types, 
-        primaryType: 'PointsToRequest',
-        message
-      })} 
-  }
+  const message = {
+    program: prog.address,
+    points:  BigInt(amountPoints),
+    uniqueNumber: uniqueNumber,
+  } as const
 
   useEffect(() => {
     if (isSuccess) setMode('qr')
@@ -57,7 +54,12 @@ export const GivePoints = () => {
         <NumPad onChange={(amount) =>{setAmountPoints(amount)}}/>
       </div>
       <div className="w-full h-12 p-1">
-        <Button onClick={() => handleSigning()} >
+        <Button onClick={() => signTypedData({
+                domain, 
+                types, 
+                primaryType: 'PointsToRequest',
+                message
+              })} >
           Create QR
         </Button>
       </div>
@@ -68,7 +70,7 @@ export const GivePoints = () => {
     <section className="grow flex flex-col items-center justify-center">
         <div className="p-1">
           <QRCode 
-            value={`${process.env.NEXT_PUBLIC_C_URI}?prg=${prog.address}&pts=${amountPoints}&un=${uniqueNumber.current}&sig=${signature}`}
+            value={`${process.env.NEXT_PUBLIC_C_URI}?prg=${prog.address}&pts=${amountPoints}&un=${uniqueNumber}&sig=${signature}`}
             style={{ 
               height: "350px", 
               width: "350px", 

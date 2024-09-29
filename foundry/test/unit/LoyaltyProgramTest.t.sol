@@ -57,7 +57,7 @@ contract LoyaltyProgramTest is Test {
     // EIP712 domain separator
     struct EIP712Domain {
         string name;
-        uint256 version;
+        string version;
         uint256 chainId;
         address verifyingContract;
     }
@@ -106,12 +106,12 @@ contract LoyaltyProgramTest is Test {
     uint256 uniqueNumber = 3; 
 
     LoyaltyCard public cardImplementation;
-    uint256 private constant LOYALTY_PROGRAM_VERSION = 2; 
+    string public constant LOYALTY_PROGRAM_VERSION = "alpha.2"; 
     uint256 private constant SALT = 123456; 
 
     /* Events */
     event Log(string func, uint256 gas);
-    event LoyaltyProgramDeployed(address indexed s_owner, address indexed loyaltyProgramAddress, uint256 indexed LOYALTY_PROGRAM_VERSION);
+    event LoyaltyProgramDeployed(address indexed s_owner, address indexed loyaltyProgramAddress, string LOYALTY_PROGRAM_VERSION);
     event LoyaltyGiftAdded(address indexed loyaltyGift);
     event LoyaltyGiftNoLongerExchangable(address indexed loyaltyGift);
     event LoyaltyGiftNoLongerRedeemable(address indexed loyaltyGift);
@@ -356,7 +356,41 @@ contract LoyaltyProgramTest is Test {
     //                    Test Function requestPoints                        //
     ///////////////////////////////////////////////////////////////////////////
 
-    // £todo 
+    function testHashingAndSigningRequestPoints() public {
+      uint256 uniqueNumber = 1; 
+
+      bytes32 DOMAIN_SEPARATOR_TEMP =_hashDomain(
+            EIP712Domain({
+                name: "test",
+                version: LOYALTY_PROGRAM_VERSION,
+                chainId: 11155420, // NB! 
+                verifyingContract: address(loyaltyProgram)
+            })
+        );
+      uint256 points = 500; 
+       
+      // loyalty program owner creates voucher for 5000 points. 
+      PointsToRequest memory message = PointsToRequest({
+          program: address(loyaltyProgram),
+          points: points, 
+          uniqueNumber: uniqueNumber
+      });
+
+      // vender signs the voucher
+      bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR_TEMP, hashPointsToRequest(message));
+      console2.logBytes32(digest);
+
+      (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
+      bytes memory signature = abi.encodePacked(r, s, v);
+      
+      requestPointsVoucher = RequestPointsVoucher({
+        program: address(loyaltyProgram),
+        points: points,
+        uniqueNumber: uniqueNumber, 
+        signature: signature
+      }); 
+
+    } 
 
     ///////////////////////////////////////////////////////////////////////////
     //                   Test Function ExchangePointsForGift                 //
@@ -455,7 +489,7 @@ contract LoyaltyProgramTest is Test {
     function _hashDomain(EIP712Domain memory domain) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256("EIP712Domain(string name,uint256 version,uint256 chainId,address verifyingContract)"),
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                 keccak256(bytes(domain.name)),
                 domain.version,
                 domain.chainId,

@@ -9,6 +9,7 @@ interface SelectedProgram {
 const initialState: SelectedProgram = {
   selectedProgram: {
     address: '0x0', 
+    version: "alpha.1",
     colourBase: "#f1f5f9", 
     colourAccent: "#0f172a", 
     events:  {

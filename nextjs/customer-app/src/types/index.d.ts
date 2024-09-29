@@ -3,6 +3,7 @@ import { Hex } from "viem";
 export type Program = {
   address?: Hex; 
   name?: string;
+  version?: string; 
   balance?: int;  
   colourBase: string; 
   colourAccent: string; 

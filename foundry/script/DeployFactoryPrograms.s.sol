@@ -9,7 +9,7 @@ import {IEntryPoint} from "lib/account-abstraction/contracts/interfaces/IEntryPo
 import {HelperConfig} from "script/HelperConfig.s.sol";
 
 contract DeployFactoryPrograms is Script {
-    bytes32 SALT = bytes32(hex'7ceda521'); 
+    bytes32 SALT = bytes32(hex'7ceda522'); 
     error DeployFactoryProgrmas__DeployedContractAtAddress(address deploymentAddress); 
 
     function run() external returns (FactoryPrograms, FactoryCards, HelperConfig) {
