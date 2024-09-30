@@ -41,14 +41,14 @@ export default function Page() {
            <ShowProgramAddress /> 
         </SettingLayout>
 
-        <SettingLayout 
+        {/* <SettingLayout 
           selected = {selectedItem == 'progOwner'} 
           onClick={() => selectedItem == 'progOwner' ? setSelectedItem(undefined) : setSelectedItem('progOwner') }
           titleText="Show program owner address"
           sizeFoldout={5}
           >
            <ShowProgramOwner /> 
-        </SettingLayout>
+        </SettingLayout> */}
 
         <SettingLayout 
           selected = {selectedItem == 'creationCards'} 

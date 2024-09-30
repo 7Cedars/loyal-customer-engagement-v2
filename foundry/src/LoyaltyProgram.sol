@@ -24,9 +24,6 @@ import {FactoryCards} from "./FactoryCards.sol";
 import {ILoyaltyGift} from "./interfaces/ILoyaltyGift.sol";
 import {ILoyaltyProgram} from "./interfaces/ILoyaltyProgram.sol";
 
-// FOR TESTING ONLY // 
-import {Test, console2} from "lib/forge-std/src/Test.sol";
-
 contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
@@ -207,9 +204,6 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
 
         // creating digest & using it to recover loyalty program  address.
         bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(pointsToRequest));
-        console2.log("DIGEST IN CONTRACT"); 
-        console2.logBytes32(digest); 
-        
         address signer = digest.recover(programSignature);
 
         // Checks.
@@ -224,12 +218,15 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
             revert LoyaltyProgram__AlreadyExecuted();
         }
 
-        // if get address of loyalty card (note that with on the first transfer, the entryPoint initialises a card).
-        address cardAddress = FactoryCards(CARD_FACTORY).getAddress(ownerCard, payable(address(this)), SALT); 
+        // if get address of loyalty card (note that with on the first transfer, the entryPoint initialises a card). 
+        // NB! This is where the contract reverts when called from the entrypoint. I _almost_ make it! 
+        // should I use createAddress instead? -- and leave out initiators from frontend? 
+        // -- try out tomorrow. 
+        LoyaltyCard loyaltyCard = FactoryCards(CARD_FACTORY).getAddress(ownerCard, payable(address(this)), SALT); 
 
         // set executed to true & execute transfer
         s_executed[programSignature] = true;
-        _update(payable(address(this)), cardAddress, points); // emits a transfer event
+        _update(payable(address(this)), address(loyaltyCard), points); // emits a transfer event
     }
 
     /**

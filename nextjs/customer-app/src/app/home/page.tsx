@@ -69,7 +69,7 @@ export default function Page() {
       
   useEffect(() => {    
     if (prog.address && embeddedWallet) {
-      fetchLoyaltyCard(prog.address, numberToHex(123456,{size: 32}), embeddedWallet)
+      fetchLoyaltyCard(prog.address, 123456n, embeddedWallet)
     }
   }, [, prog.address, embeddedWallet, fetchLoyaltyCard])
 

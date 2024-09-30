@@ -28,8 +28,8 @@ export const chainSettings = (chainId: number) => {
           fetchBlockAmount: 50_000,
           minimumBlocksToFetch: 100,
           genesisBlock: 17820505,  
-          factoryCardsAddress: '0x6F5202Cc0B36287513f3197FDd515FE7d6befBC4' as `0x${string}`, 
-          factoryProgramsAddress: '0x37FD9cA01307708E29812621991eA7DF04e3E539' as `0x${string}`
+          factoryCardsAddress: '0xBCAEa2Ae164bAd93d7C4736099F8eed6A50d3cd5' as `0x${string}`, 
+          factoryProgramsAddress: '0x3f4f6216B1f2beBF15DD11dFb7c87EE540BA371b' as `0x${string}`
         })
     }
     case 421614: {

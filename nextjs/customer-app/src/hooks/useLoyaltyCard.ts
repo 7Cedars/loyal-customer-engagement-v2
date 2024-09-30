@@ -49,7 +49,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
   const fetchLoyaltyCard = useCallback(
     async (
       loyaltyProgram: `0x${string}`, 
-      salt: `0x${string}`,
+      salt: bigint,
       embeddedWallet: ConnectedWallet, 
     ) => {
       if (!publicClient) {
@@ -115,7 +115,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
               address: deployed?.factoryCardsAddress as `0x${string}`,
               abi: factoryCardsAbi,
               functionName: 'getAddress',
-              args: [embeddedWallet.address, loyaltyProgram, pad(salt)]
+              args: [embeddedWallet.address, loyaltyProgram, salt]
             })
             return cardAddress as `0x${string}`
           } catch(error) {
@@ -130,7 +130,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
               const factoryData = encodeFunctionData({
                 abi: factoryCardsAbi,
                 functionName: 'createAccount',
-                args: [embeddedWallet.address, loyaltyProgram, pad(salt)],
+                args: [embeddedWallet.address, loyaltyProgram, salt],
               })
               return {factory: deployed?.factoryCardsAddress as `0x${string}`, factoryData}
             } catch(error) {
@@ -306,10 +306,18 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
 
           console.log("nonce @createUserOp", nonce)
 
-          const callData = encodeFunctionData({
+          const functionData = encodeFunctionData({
             abi: loyaltyProgramAbi,
             functionName: functionName, 
             args: args
+          })
+
+          //dest, value, functionData)
+
+          const callData = encodeFunctionData({
+            abi: loyaltyCardAbi,
+            functionName: 'execute', 
+            args: [prog.address, 0n, functionData]
           })
 
           console.log("callData @createUserOp", callData)
@@ -374,7 +382,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     if (prog && prog.address && embeddedWallet) {
       fetchLoyaltyCard(
         prog.address, 
-        numberToHex(123456, {size: 32}), 
+        123456n, 
         embeddedWallet
       )
     }

@@ -145,7 +145,7 @@ export const ShowCardAddress = () => {
     if (prog.address && embeddedWallet) 
     fetchLoyaltyCard(
       prog.address, 
-      numberToHex(123456, {size: 32}), 
+      123456n, 
       embeddedWallet
     ) 
   }, [prog, embeddedWallet, fetchLoyaltyCard])

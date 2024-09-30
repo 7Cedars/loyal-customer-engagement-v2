@@ -361,15 +361,22 @@ contract LoyaltyProgramTest is Test {
       uint256 burnerWalletKey = vm.envUint("BURNET_WALLET_KEY");
       address burnerWallet = vm.envAddress("BURNER_WALLET");
       console2.log("burnerWalletKey", burnerWalletKey); 
-      address programAddress = 0x0Ad4017904Acf30DD74f3A7C18D8A18fA3931686; 
-      
+      address programAddress = address(loyaltyProgram); //  0x0Ad4017904Acf30DD74f3A7C18D8A18fA3931686; 
+
+      console2.log("DOMAIN SEPRATOR DATA CONTRACT");
+      console2.log("Highstreet Hopes"); 
+      console2.logUint(block.chainid); 
+      console2.logAddress(programAddress); 
+
       bytes32 DOMAIN_SEPARATOR_TEMP =_hashDomain(
             EIP712Domain({
-                name: "test2",
-                chainId: 31337, 
+                name: "Highstreet Hopes",
+                chainId: block.chainid, 
                 verifyingContract: programAddress
             })
         );
+      console2.log("DOMAIN_SEPARATOR_TEMP in TEST"); 
+      console2.logBytes32(DOMAIN_SEPARATOR_TEMP); 
       
       // loyalty program owner creates voucher for 5000 points. 
       PointsToRequest memory message = PointsToRequest({
