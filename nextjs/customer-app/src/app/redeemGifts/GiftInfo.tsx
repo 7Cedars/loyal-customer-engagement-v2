@@ -6,7 +6,8 @@ import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
 import { useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import QRCode from "react-qr-code";
 import { numberToHex } from "viem";
 import { useReadContract, useWriteContract } from "wagmi";
 
@@ -19,6 +20,7 @@ export const GiftInfo = ({
 }: Gift) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
+  const [renderQrCode, setRenderQrCode] = useState<boolean>(false) 
   const { data, isError, isLoading, status, refetch } = useReadContract({
     address: address,
     abi: loyaltyGiftAbi,
@@ -28,9 +30,37 @@ export const GiftInfo = ({
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error: errorCard, isLoading: isLoadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const uniqueNumber = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
 
   console.log({data, isError, isLoading, status, walletsReady, errorCard, isLoadingCard})
 
+  const renderedQrCode: React.JSX.Element = (
+    <section className="grow flex flex-col items-center justify-center">
+        <div className="p-1">
+          <QRCode 
+            value={`prg=${selectedProgram.address}&pts=${points}&un=${uniqueNumber.current}&oc=${embeddedWallet ? embeddedWallet.address : '0x0'}&sig=${signature}`}
+            style={{ 
+              height: "350px", 
+              width: "350px", 
+              objectFit: "cover", 
+              background: 'white', 
+              padding: '16px', 
+            }}
+            bgColor="#ffffff" // "#0f172a" 1e293b
+            fgColor="#000000" // "#e2e8f0"
+            level='M'
+            className="rounded-lg"
+          />
+        </div>
+
+        <div className="h-12 w-full p-1">
+          <Button onClick={() => setRenderQrCode(true)}> 
+            Back
+          </Button>
+        </div> 
+    </section>
+  )
+    
   return (
     <main 
       className="flex flex-col border-b"
@@ -82,7 +112,7 @@ export const GiftInfo = ({
           /> 
         </div>
 
-        <div className="p-2"> 
+        <div className="px-2 h-10 my-2"> 
           {/* This should trigger signing transaction & creation of qr code 
           The function to use to retrieve tokenIds (or rather giftIds) LoyaltyGift is 'tokenOfOwnerByIndex' 
           */}

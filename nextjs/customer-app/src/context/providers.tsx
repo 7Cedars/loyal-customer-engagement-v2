@@ -12,14 +12,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 const queryClient = new QueryClient()
 
 const privyConfig: PrivyClientConfig = {
-  defaultChain: foundry,
-  supportedChains: [foundry, mainnet, sepolia, base, baseGoerli, polygon, polygonMumbai, optimismSepolia, arbitrumSepolia], 
+  defaultChain: optimismSepolia,
+  supportedChains: [optimismSepolia, foundry, mainnet, sepolia, base, baseGoerli, polygon, polygonMumbai, arbitrumSepolia], 
   embeddedWallets: {
     createOnLogin: 'users-without-wallets',
-    requireUserPasswordOnCreate: true,
+    requireUserPasswordOnCreate: false,
     noPromptOnSignature: true,
   },
-  loginMethods: ['email', 'sms', 'wallet'],
+  loginMethods: ['email', 'sms'],
   appearance: {
       theme: 'light',
       accentColor: '#676FFF',
@@ -28,9 +28,7 @@ const privyConfig: PrivyClientConfig = {
 };
 
 export default function Providers({children}: {children: React.ReactNode}) {
-  return (
-    
-      
+  return (  
     <Provider store={store}>
       <PrivyProvider
         appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}

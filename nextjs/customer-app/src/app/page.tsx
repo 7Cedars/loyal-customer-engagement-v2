@@ -1,6 +1,7 @@
 "use client"
 
 import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi";
+import { wagmiConfig } from "@/context/wagmiConfig";
 import { setProgram } from "@/redux/reducers/programReducer";
 import { setQrPoints } from "@/redux/reducers/qrPointsReducer";
 import { Program, QrPoints } from "@/types";
@@ -8,9 +9,10 @@ import {  parseBigInt, parseHex, parseNumber, parseString } from "@/utils/parser
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useReadContracts } from 'wagmi'
+import { readContracts } from "wagmi/actions";
 
 type ButtonProps = {
   disabled?: boolean;
@@ -43,85 +45,87 @@ export default function Home() {
   // Privy hooks
   // see docs: https://github.com/privy-io/wagmi-demo/blob/main/app/page.tsx 
   const {ready, user, authenticated, login, connectWallet, logout, linkWallet} = usePrivy();
-  const {wallets, ready: walletsReady} = useWallets();
   
   const qrData = useRef<QrPoints>({
     program: params.get('prg') ? parseHex(params.get('prg'))  : null,
-    points: params.get('pts') ? parseBigInt(params.get('pts')) : null, // NUMBER?! 
-    uniqueNumber: params.get('un') ? parseBigInt(params.get('un')) : null,  // NUMBER?! 
-    signature: params.get('sig') ? parseHex(params.get('sig')) : null
+    points: params.get('pts') ? parseBigInt(params.get('pts')) : null,
+    uniqueNumber: params.get('un') ? parseBigInt(params.get('un')) : null,
+    signature: params.get('sig') ? parseHex(params.get('sig')) : null, 
+    executed: false 
   })
   console.log({qrData})
 
-  const programContract = {
-    address: qrData.current.program ? qrData.current.program  : '0x', 
-    abi: loyaltyProgramAbi,
-  } as const 
+  const getProgramData = useCallback(
+    async() => {
+      
+      const programContract = {
+        address: qrData.current.program ? qrData.current.program  : '0x', 
+        abi: loyaltyProgramAbi,
+      } as const 
 
-  console.log({programContract})
- 
-  const {data: programData, isFetched} = useReadContracts({
-    contracts: [
-      {
-        ...programContract,
-        functionName: 's_executed',
-        args: [qrData.current.signature]
-      },
-      {
-        ...programContract, 
-        functionName: 'allowCreationCards'
-      },
-      {
-        ...programContract, 
-        functionName: 'name'
-      },
-      {
-        ...programContract, 
-        functionName: 'symbol'
-      },
-      {
-        ...programContract, 
-        functionName: 'imageUri'
-      },
-      {
-      ...programContract, 
-        functionName: 'CARD_FACTORY'
-      },
-      {
-        ...programContract, 
-        functionName: 'entryPoint'
-      }
-    ]
-  })
+      const temp = await readContracts(wagmiConfig, {
+        contracts: [
+          {
+            ...programContract,
+            functionName: 's_executed',
+            args: [qrData.current.signature]
+          },
+          {
+            ...programContract, 
+            functionName: 'allowCreationCards'
+          },
+          {
+            ...programContract, 
+            functionName: 'name'
+          },
+          {
+            ...programContract, 
+            functionName: 'symbol'
+          },
+          {
+            ...programContract, 
+            functionName: 'imageUri'
+          },
+          {
+          ...programContract, 
+            functionName: 'CARD_FACTORY'
+          },
+          {
+            ...programContract, 
+            functionName: 'entryPoint'
+          }
+        ]
+      })
 
-  useEffect(() => {
-    if (qrData.current && qrData.current.program != "0x" && isFetched && programData) {
-      dispatch(setQrPoints(qrData.current)) 
-
-      console.log("programData: ", programData)
-
-      if (qrData.current.program) {
+      if (!temp.find(item => {item.status != "success"}) && qrData.current.program) { // check if all items.status in the array of items are "success". 
         const qrProgram: Program = { 
           address: qrData.current.program, 
-          name: parseString(programData[2].result), 
-          colourBase: parseString(programData[3].result).split(`;`)[0], 
-          colourAccent: parseString(programData[3].result).split(`;`)[1], 
-          uriImage: parseString(programData[4].result), 
-          cardsFactory: parseHex(programData[5].result),
-          entryPoint: parseHex(programData[6].result)
+          name: parseString(temp[2].result), 
+          colourBase: parseString(temp[3].result).split(`;`)[0], 
+          colourAccent: parseString(temp[3].result).split(`;`)[1], 
+          uriImage: parseString(temp[4].result), 
+          cardsFactory: parseHex(temp[5].result),
+          entryPoint: parseHex(temp[6].result)
         }
         setProg(qrProgram)
         dispatch(setProgram(qrProgram))
+        
+        console.log("executed: ", temp[0].result)
+        qrData.current.executed = temp[0].result as boolean
+        dispatch(setQrPoints(qrData.current))
       }
-      if (user) router.push('/home')
-    } 
-  }, [qrData, dispatch, isFetched, programData, user, router])
 
-  console.log({
-    params: params, 
-    qrData: qrData, 
-    data: programData
-  })
+    },[dispatch]
+  )
+
+  useEffect(() => {
+    if (qrData.current.program) getProgramData() 
+  }, [, getProgramData])
+
+  useEffect(() => {
+    if (user && qrData.current.program && !qrData.current.executed) 
+      router.push('/home')
+  }, [, user, qrData.current])
 
   return (
     <main className="flex flex-col w-full h-dvh bg-slate-100 dark:bg-slate-900 place-content-center items-center">
@@ -145,23 +149,17 @@ export default function Home() {
             </div>
             <div className="w-full grid grid-cols-1"> 
             { 
-              isFetched ?
-                prog && programData && !programData[0].result && qrData.current && !user ? 
+                prog && qrData.current && !user ? 
                   <CustomButton onClick={login}>
                     This voucher is worth {qrData.current.points} points. Connect to claim your points.
                   </CustomButton>
                 : 
-                  prog && programData && programData[0].result && qrData.current && !user ? 
+                  prog && qrData.current && !user ?  // NEEDS TO READ s_executed! 
                   <CustomButton onClick={login}>
                     This voucher has expired. Log in to see your loyalty card. 
                   </CustomButton>
                 : 
-                  qrData.current.program != '0x' ? 
-                  <CustomButton disabled>
-                    The qrCode is invalid. Please try again with another Qrcode.
-                  </CustomButton>
-                : 
-                  user ? 
+                user ? 
                   <div className="flex flex-col gap-4 items-center">
                   <CustomButton onClick={logout}> 
                     Disconnect
@@ -176,13 +174,9 @@ export default function Home() {
                   }
                   </div>
                 : 
-                  <CustomButton onClick={login}> 
-                    Connect
-                  </CustomButton> 
-              :
-              <CustomButton onClick={login} disabled> 
-                Loading...
-              </CustomButton> 
+                <CustomButton onClick={login}> 
+                  Connect
+                </CustomButton> 
               }
           </div> 
         </div>

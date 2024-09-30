@@ -214,9 +214,9 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
 
           try {
             const uiConfig = {
-              title: 'Sample title text',
-              description: 'Sample description text',
-              buttonText: 'Sample button text',
+              title: 'Sign transaction',
+              description: 'Please validate your transaction',
+              buttonText: 'Sign',
             };
             const signature = await signMessage(userOpHash, uiConfig);
 

@@ -38,6 +38,7 @@ export type QrPoints = {
   points: bigint | null; 
   uniqueNumber: bigint | null; 
   signature: Hex | null; 
+  executed?: boolean; 
 }
 
 // NB 0 = claim req

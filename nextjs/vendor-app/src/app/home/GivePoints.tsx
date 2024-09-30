@@ -11,12 +11,8 @@ export const GivePoints = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const chainId = useChainId(); 
   const { data: signature, isPending, isError, error, isSuccess, signTypedData, reset } = useSignTypedData()
-  const uniqueNumber = BigInt(1) // useRef<bigint>(BigInt(Math.random() * 10 ** 18))
+  const uniqueNumber = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
 
-  console.log("signature: ", signature)
-  console.log("isError, error:", error)
-
-  // named list of all type definitions
   const domain = {
     name: prog.name, 
     chainId: chainId,
@@ -34,7 +30,7 @@ export const GivePoints = () => {
   const message = {
     program: prog.address,
     points:  BigInt(amountPoints),
-    uniqueNumber: uniqueNumber,
+    uniqueNumber: uniqueNumber.current,
   } as const
 
   useEffect(() => {
@@ -69,7 +65,7 @@ export const GivePoints = () => {
     <section className="grow flex flex-col items-center justify-center">
         <div className="p-1">
           <QRCode 
-            value={`${process.env.NEXT_PUBLIC_C_URI}?prg=${prog.address}&pts=${amountPoints}&un=${uniqueNumber}&sig=${signature}`}
+            value={`${process.env.NEXT_PUBLIC_C_URI}?prg=${prog.address}&pts=${amountPoints}&un=${uniqueNumber.current}&sig=${signature}`}
             style={{ 
               height: "350px", 
               width: "350px", 

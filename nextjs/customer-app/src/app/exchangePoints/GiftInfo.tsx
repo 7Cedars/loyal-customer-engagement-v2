@@ -103,7 +103,7 @@ export const GiftInfo = ({
           /> 
         </div>
 
-        <div className="p-2"> 
+        <div className="px-2 h-10 my-2"> 
          {
           requirements && requirements[0] == undefined ? 
             <Button onClick={() => {

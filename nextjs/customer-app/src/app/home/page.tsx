@@ -11,8 +11,6 @@ import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { loyaltyProgramAbi } from "@/context/abi";
 import { readContracts } from "wagmi/actions";
 import { wagmiConfig } from "@/context/wagmiConfig";
-import { numberToHex } from "viem";
-import { useTransaction } from "wagmi";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -23,18 +21,8 @@ export default function Page() {
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
-  const {data} = useTransaction({blockHash: '0x4ca7ee652d57678f26e887c149ab0735f41de37bcad58c9f6d3ed5824f15b74d', index:0})
-  console.log({data})
 
-
-
-  console.log("use LoyaltyCard:", {
-    error, isLoading, loyaltyCard
-  })
-  console.log({
-    embeddedWallet
-  })
-
+  console.log({qrPoints})
 
   const fetchDataFromProgram = useCallback(  
     async () => {
@@ -45,7 +33,6 @@ export default function Page() {
         } as const
 
         const isDeployed = await loyaltyCard?.isDeployed() 
-        console.log("isDeployed", isDeployed) 
 
         const result = await readContracts(wagmiConfig, {
           contracts: [
@@ -88,7 +75,7 @@ export default function Page() {
         size = {2} 
         /> 
       <div className="grow flex flex-col justify-start items-center">
-        <div className="w-full sm:w-4/5 lg:w-1/2 h-12 p-2 mt-4">
+        <div className="w-full sm:w-4/5 lg:w-1/2 h-16 p-2 mt-4">
           <Button onClick={() => {
             if (loyaltyCard && prog.address && embeddedWallet) 
               sendUserOp(
