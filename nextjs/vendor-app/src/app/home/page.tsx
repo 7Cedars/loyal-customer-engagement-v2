@@ -58,7 +58,7 @@ export default function Page() {
     <Layout> 
       <TitleText 
         title = {prog.name ? prog.name : "Home"} 
-        subtitle={prog.balance == undefined ? `Fetching balance...`:`Balance: ${prog.balance} eth` } 
+        subtitle={prog.balance == undefined ? `Fetching balance...`:`Balance: ${prog.balance.toFixed(6)} eth` } 
         size = {2} 
         /> 
       <div className="grow flex flex-col justify-center items-center">

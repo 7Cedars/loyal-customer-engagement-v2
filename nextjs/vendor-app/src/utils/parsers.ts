@@ -196,18 +196,18 @@ export const parseQrData = (qrText: unknown): QrData => {
         try {
           const data = qrText.split(";")
             return {
-              program: parseEthAddress(data[1]), 
-              owner: parseEthAddress(data[2]), // = owner loyalty card
-              gift: parseEthAddress(data[3]), 
-              giftId: BigInt(data[4]), 
-              uniqueNumber: BigInt(data[5]), 
-              signature: parseSignature(data[6])
+              program: parseEthAddress(data[0]), 
+              owner: parseEthAddress(data[1]), // = owner loyalty card
+              gift: parseEthAddress(data[2]), 
+              giftId: BigInt(data[3]), 
+              uniqueNumber: BigInt(data[4]), 
+              signature: parseSignature(data[5])
               }
         } catch (error) {
           throw new Error(`parseQrData caught error: ${error}`);
         }
       }
-  };
+};
 
 export const parseMetadata = (metadata: unknown): Metadata => {
   if ( !metadata || typeof metadata !== 'object' ) {
@@ -348,3 +348,5 @@ export const parseDeployLogs = (logs: Log[]): Event[] => {
       return false 
     }
   };
+
+  

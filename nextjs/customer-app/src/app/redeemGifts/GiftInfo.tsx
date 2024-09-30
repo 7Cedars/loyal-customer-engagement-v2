@@ -35,6 +35,13 @@ export const GiftInfo = ({
   const uniqueNumber = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
   const chainId = useChainId();  
 
+  // £ CONTINUE HERE: 
+  // get correct gift id to send back to vendor!
+  // probably best to create a callback function. 
+  // read tokenIdByIndexOwner on gift contract, the moment that Qr code is being created. 
+  // maybe combine with creation message.  
+  /////////  
+
   const domain = {
     name: selectedProgram.name, 
     chainId: chainId,
@@ -72,7 +79,7 @@ export const GiftInfo = ({
       </div>
         <div className="p-1">
           <QRCode 
-            value={`prg=${selectedProgram.address}&pts=${points}&un=${uniqueNumber.current}&oc=${embeddedWallet ? embeddedWallet.address : '0x0'}&sig=${signature}`}
+            value={`${selectedProgram.address};${embeddedWallet ? embeddedWallet.address : '0x0'};${address};${giftId};${uniqueNumber.current};${signature}`}
             style={{ 
               height: "350px", 
               width: "350px", 
