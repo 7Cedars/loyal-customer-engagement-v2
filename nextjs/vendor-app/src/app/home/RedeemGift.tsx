@@ -19,9 +19,9 @@ export const RedeemGifts = () => {
   const onNewScanResult: any = (decodedText: any, decodedResult: any) => {
     console.log("decodedText: ", decodedText)
     console.log("decodedResult: ", decodedResult)
-};
+  };
 
-  // £bug: it does NOT resize! £todo:  Why? How to solve 
+  // £bug: it does NOT resize! £todo:  Why? How to solve? 
   return (
     <section className="grow flex flex-col items-center justify-center">
        <div 

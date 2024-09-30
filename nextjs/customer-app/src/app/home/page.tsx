@@ -121,6 +121,7 @@ export default function Page() {
           {/* Top bar, always visible */}
           <section 
             className="flex flex-col w-full justify-between items-center h-12 z-10 border border-b-0 rounded-t-full"
+            style = {{borderColor: prog.colourAccent, borderBottom: prog.colourBase}}
             >
             <div 
               className="flex flex-row justify-between items-center w-full m-1"

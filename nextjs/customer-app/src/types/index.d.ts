@@ -16,6 +16,7 @@ export type Program = {
 
 export type Gift = {
   address: Hex;
+  giftId?: bigint; 
   name: string; 
   symbol?: string; 
   points: number; 

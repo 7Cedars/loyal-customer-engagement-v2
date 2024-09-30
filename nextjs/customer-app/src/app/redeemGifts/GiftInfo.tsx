@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button";
-import { NoteText, SectionText } from "@/components/StandardisedFonts";
+import { NoteText, SectionText, TitleText } from "@/components/StandardisedFonts";
 import { loyaltyGiftAbi } from "@/context/abi";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { useAppSelector } from "@/redux/hooks";
@@ -9,14 +9,15 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import QRCode from "react-qr-code";
 import { numberToHex } from "viem";
-import { useReadContract, useWriteContract } from "wagmi";
+import { useChainId, useReadContract, useSignTypedData, useWriteContract } from "wagmi";
 
 export const GiftInfo = ({
   address,  
+  giftId, 
   name,
   points,
   additionalReq, 
-  metadata, 
+  metadata
 }: Gift) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
@@ -29,13 +30,46 @@ export const GiftInfo = ({
   })
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
+  const { data: signature, isPending, isError: isErrorSignTypedData, error, isSuccess, signTypedData, reset } = useSignTypedData()
   const {loyaltyCard, error: errorCard, isLoading: isLoadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
   const uniqueNumber = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
+  const chainId = useChainId();  
+
+  const domain = {
+    name: selectedProgram.name, 
+    chainId: chainId,
+    verifyingContract: selectedProgram.address
+  } as const
+
+  const types = {
+    GiftToRedeem: [
+      { name: 'program', type: 'address' },
+      { name: 'owner', type: 'address' },
+      { name: 'gift', type: 'address' },
+      { name: 'giftId', type: 'uint256' },
+      { name: 'uniqueNumber', type: 'uint256' }
+    ],
+  } as const
+
+  // £todo: would be better to just build a conditional callback function. 
+  const message = {
+    program: selectedProgram.address ? selectedProgram.address : '0x0',
+    owner: embeddedWallet && embeddedWallet.address ? embeddedWallet.address as `0x${string}` : '0x0', 
+    gift: address as `0x${string}`, 
+    giftId: giftId ? giftId : 0n, 
+    uniqueNumber: uniqueNumber.current,
+  } as const
 
   console.log({data, isError, isLoading, status, walletsReady, errorCard, isLoadingCard})
 
   const renderedQrCode: React.JSX.Element = (
     <section className="grow flex flex-col items-center justify-center">
+      <div className="py-4">
+        <SectionText
+          text = "Show this Qr code to your vendor"
+          size={1} 
+        />
+      </div>
         <div className="p-1">
           <QRCode 
             value={`prg=${selectedProgram.address}&pts=${points}&un=${uniqueNumber.current}&oc=${embeddedWallet ? embeddedWallet.address : '0x0'}&sig=${signature}`}
@@ -52,12 +86,16 @@ export const GiftInfo = ({
             className="rounded-lg"
           />
         </div>
-
-        <div className="h-12 w-full p-1">
-          <Button onClick={() => setRenderQrCode(true)}> 
-            Back
-          </Button>
-        </div> 
+    </section>
+  )
+  
+  const noRenderedQrCode: React.JSX.Element = (
+    <section className="grow flex flex-col items-center justify-center">
+      <TitleText 
+        title = "No QR code available."
+        subtitle="Request to redeem gift to create Qr code to show to vendor."
+        size={1} 
+      />
     </section>
   )
     
@@ -95,11 +133,10 @@ export const GiftInfo = ({
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}
       <div 
-        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 disabled aria-selected:opacity-100 aria-selected:h-24 ease-in-out duration-300 delay-300"
+        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 disabled aria-selected:opacity-100 aria-selected:h-[40rem] ease-in-out duration-300 delay-300"
         aria-selected = {selected}
         style = {selected ? {} : {pointerEvents: "none"}}
         > 
-
         <div className="pb-4 h-12">
           <SectionText
             text = {`Additional requirements: ${
@@ -112,18 +149,26 @@ export const GiftInfo = ({
           /> 
         </div>
 
-        <div className="px-2 h-10 my-2"> 
-          {/* This should trigger signing transaction & creation of qr code 
-          The function to use to retrieve tokenIds (or rather giftIds) LoyaltyGift is 'tokenOfOwnerByIndex' 
-          */}
-          <Button onClick={() => {}}
-            size = {0}
-            aria-disabled = {selected}
-            >
-            Redeem gift
-          </Button>
+        { signature ? renderedQrCode : noRenderedQrCode } 
+        <div className="px-2 h-10 my-4"> 
+          { signature? 
+            <Button onClick={() => reset()}> 
+              Back
+            </Button>
+            :
+            <Button
+              size = {0}
+              aria-disabled = {selected}
+              onClick={() => signTypedData({
+                domain, 
+                types, 
+                primaryType: 'GiftToRedeem',
+                message
+              })} >
+              Create Qr Code to Redeem gift 
+            </Button>
+          }
         </div>
-        
       </div>  
   </main>
   );
