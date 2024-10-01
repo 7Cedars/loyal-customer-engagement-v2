@@ -6,14 +6,13 @@ import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
 import { useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import QRCode from "react-qr-code";
 import { numberToHex } from "viem";
 import { useChainId, useReadContract, useSignTypedData, useWriteContract } from "wagmi";
 
 export const GiftInfo = ({
   address,  
-  giftId, 
   name,
   points,
   additionalReq, 
@@ -21,26 +20,18 @@ export const GiftInfo = ({
 }: Gift) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
-  const [renderQrCode, setRenderQrCode] = useState<boolean>(false) 
-  const { data, isError, isLoading, status, refetch } = useReadContract({
-    address: address,
-    abi: loyaltyGiftAbi,
-    functionName: 'balanceOf',
-    args: [selectedProgram.address]
-  })
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const { data: signature, isPending, isError: isErrorSignTypedData, error, isSuccess, signTypedData, reset } = useSignTypedData()
   const {loyaltyCard, error: errorCard, isLoading: isLoadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const { data: giftId, isError, isLoading, status, refetch, error: tokenOfOwnerByIndexError } = useReadContract({
+    address: address,
+    abi: loyaltyGiftAbi,
+    functionName: 'tokenOfOwnerByIndex',
+    args: [loyaltyCard && loyaltyCard.address ? loyaltyCard.address  : '0x0', 0n]
+  })
   const uniqueNumber = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
   const chainId = useChainId();  
-
-  // £ CONTINUE HERE: 
-  // get correct gift id to send back to vendor!
-  // probably best to create a callback function. 
-  // read tokenIdByIndexOwner on gift contract, the moment that Qr code is being created. 
-  // maybe combine with creation message.  
-  /////////  
 
   const domain = {
     name: selectedProgram.name, 
@@ -58,16 +49,13 @@ export const GiftInfo = ({
     ],
   } as const
 
-  // £todo: would be better to just build a conditional callback function. 
   const message = {
     program: selectedProgram.address ? selectedProgram.address : '0x0',
     owner: embeddedWallet && embeddedWallet.address ? embeddedWallet.address as `0x${string}` : '0x0', 
     gift: address as `0x${string}`, 
-    giftId: giftId ? giftId : 0n, 
+    giftId: giftId as bigint ? giftId as bigint : 0n, 
     uniqueNumber: uniqueNumber.current,
   } as const
-
-  console.log({data, isError, isLoading, status, walletsReady, errorCard, isLoadingCard})
 
   const renderedQrCode: React.JSX.Element = (
     <section className="grow flex flex-col items-center justify-center">

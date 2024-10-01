@@ -236,7 +236,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     const createUserOp = useCallback(
       async (loyaltyProgram:  `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: bigint) => {
         const callGasLimit: bigint = 1659000n
-        const preVerificationGas: bigint = 26196976n
+        const preVerificationGas: bigint = 2619697600n
         const verificationGasLimit: bigint = 7261140n
   
         if (!publicClient) {

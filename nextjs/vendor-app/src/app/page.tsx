@@ -17,18 +17,29 @@ import { readContract } from '@wagmi/core'
 import { wagmiConfig } from "../../wagmi-config" 
 import { loyaltyProgramAbi } from "@/context/abi";
 
-export default function Home() {
-  // FOR DEV ONLY // 
-  // const programsForLocalStorage: Program[] = [{ 
-  //   address: "0x82b6311bDC316636Af8546891A380333a3CE0B8E", 
-  //   name: "Highstreet Hopes",
-  //   colourBase: "#3d5769",
-  //   colourAccent: "#c8cf0c", 
-  //   uriImage: "" 
-  // }]
-  // localStorage.setItem("clp_v_programs", JSON.stringify(programsForLocalStorage)); 
-  // FOR DEV ONLY // 
+type ButtonProps = {
+  disabled?: boolean;
+  children: any;
+  onClick?: () => void;
+};
 
+const CustomButton = ({
+  disabled = false,
+  onClick,
+  children,
+}: ButtonProps) => {
+  return (
+    <button 
+      className={`w-full h-full grid grid-cols-1 disabled:opacity-50 text-center border content-center rounded-lg text-md p-2 h-12 border-gray-950`}  
+      onClick={onClick} 
+      disabled={disabled}
+      >
+      {children}
+    </button>
+  );
+};
+
+export default function Home() {
   const { open } = useWeb3Modal()
   const { status, address } = useAccount()
   const [ mode, SetMode ] = useState<string>("home")  
@@ -103,14 +114,14 @@ export default function Home() {
           </div> 
           
           <div className="mb-2 w-full"> 
-          <Button onClick = {() => {open()}}  >
+          <CustomButton onClick = {() => {open()}}  >
             {
               status == "connected" ? 
               `Connected at: ${address.slice(0,6)}...${address.slice(38,42)}`
               :
               "Connect wallet"
             }
-          </Button>
+          </CustomButton>
           </div>
         </div>
         <div 
@@ -150,22 +161,22 @@ export default function Home() {
                 : 
                 null 
           }
-          <Button 
+          <CustomButton 
             onClick = {() => {SetMode("deploy") }}
             >
             Deploy new program
-          </Button>
+          </CustomButton>
         </div>
       </>
       :
       <>
         <DeployProgram /> 
         <div className="w-full p-2"> 
-          <Button 
+          <CustomButton 
             onClick = {() => {SetMode("home") }}
             >
             Back
-          </Button>
+          </CustomButton>
         </div> 
       </>
     }

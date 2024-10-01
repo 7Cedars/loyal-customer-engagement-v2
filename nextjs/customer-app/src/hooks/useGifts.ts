@@ -4,7 +4,6 @@ import { wagmiConfig } from '../context/wagmiConfig'
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loyaltyGiftAbi, loyaltyProgramAbi } from "@/context/abi";
 import { Hex, Log } from "viem"
-import { whiteListedGifts } from '../context/whitelistedGifts';
 import { publicClient } from '../context/clients'
 
 import { useAppSelector } from "@/redux/hooks";

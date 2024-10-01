@@ -26,15 +26,6 @@ export const GiftAvailable = ({
     args: [selectedProgram.address]
   })
 
-  console.log({
-    data: data,
-    isError: isError, 
-    isLoading: isLoading,
-    status: status
-  })
-
-  console.log("error: ", error)
-
   return (
     <main 
       className="flex flex-col border-b"

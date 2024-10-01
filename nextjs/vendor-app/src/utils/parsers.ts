@@ -185,9 +185,9 @@ export const parseAttributes = (attributes: unknown): Attribute[]  => {
   }
 };
 
-export const parseQrData = (qrText: unknown): QrData => {
+export const parseQrData = (qrText: unknown): QrData | null => {
   if ( !qrText || typeof qrText !== 'string' ) {
-    throw new Error('Incorrect or missing data');
+     throw new Error('Incorrect or missing data.');
   }
 
   if (
@@ -204,8 +204,10 @@ export const parseQrData = (qrText: unknown): QrData => {
               signature: parseSignature(data[5])
               }
         } catch (error) {
-          throw new Error(`parseQrData caught error: ${error}`);
+          return null;
         }
+      } else {
+        return null;
       }
 };
 

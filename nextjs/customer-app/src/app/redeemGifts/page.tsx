@@ -89,9 +89,9 @@ export default function Page() {
         {
         allGifts && allGifts.length > 0 ? 
 
-          allGifts.map(gift => 
+          allGifts.map((gift, i) => 
             <GiftInfo 
-              key = {gift.address} 
+              key = {i} 
               address = {gift.address} 
               name = {gift.name} 
               symbol = {gift.symbol}
