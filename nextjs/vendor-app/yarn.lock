@@ -4440,6 +4440,16 @@ react-redux@^9.1.2:
     "@types/use-sync-external-store" "^0.0.3"
     use-sync-external-store "^1.0.0"
 
+react-spinners@^0.14.1:
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/react-spinners/-/react-spinners-0.14.1.tgz#de7d7d6b3e6d4f29d9620c65495b502c7dd90812"
+  integrity sha512-2Izq+qgQ08HTofCVEdcAQCXFEYfqTDdfeDQJeo/HHQiQJD4imOicNLhkfN2eh1NYEWVOX4D9ok2lhuDB0z3Aag==
+
+react-svg-spinners@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/react-svg-spinners/-/react-svg-spinners-0.3.1.tgz#1f639fd0529ac77dbea3a8379ca388a52d2ef88a"
+  integrity sha512-rjHsCQqWMab55aykR40ySX/BnVWdAe3EcfxvkRpHP868y3bpqLD2XclLHwSvjX3C7QARzU1NRKPkTjgjriOb9g==
+
 react-zxing@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/react-zxing/-/react-zxing-2.0.2.tgz#6f67d20fa41f1af390c7735fcacaeabcfb6d541b"

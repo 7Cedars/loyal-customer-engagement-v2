@@ -5,7 +5,7 @@ import Image from "next/image";
 type NumLineProps = {
   size?: 0 | 1 | 2; 
   onClick: (arg0: number) => void;
-  isLoading?: boolean;
+  loading?: boolean;
 };
 
 const numbers = [1, 5, 25, 150] // this can be flexible input. 
@@ -13,7 +13,7 @@ const numbers = [1, 5, 25, 150] // this can be flexible input.
 export const NumLine = ({
   size = 1, 
   onClick,
-  isLoading = false
+  loading = false
 }: NumLineProps) => {
 
   const [ selectedAmount, setSelectedAmount ] = useState<number>(25) 
@@ -42,7 +42,7 @@ export const NumLine = ({
       }
       </div> 
       <div className="flex w-24"> 
-          { !isLoading ? 
+          { !loading ? 
 
           <Button onClick={ () => handleClick(selectedAmount)}  size = {size} >
               Mint

@@ -18,7 +18,7 @@ export default function Page() {
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {status, gifts, fetchGifts} = useGifts()
-  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const {loyaltyCard, error, loading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
   const fetchDataFromProgram = useCallback(  
     async () => {

@@ -26,7 +26,7 @@ const RedeemGiftComponent = ({
   const { data: dataWriteContract, error: errorWriteConrtact, writeContract } = useWriteContract()
 
   useEffect(() => {
-    if (data && status == "isIdle") fetchGift(data.gift)
+    if (data && status == "idle") fetchGift(data.gift)
   }, [data, fetchGift, status])
 
   return (

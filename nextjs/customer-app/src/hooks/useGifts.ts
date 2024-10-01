@@ -15,7 +15,7 @@ import { setProgram } from "@/redux/reducers/programReducer";
 
 export const useGifts = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-  const [status, setStatus ] = useState<Status>("isIdle")
+  const [status, setStatus ] = useState<Status>("idle")
   const [error, setError] = useState<any | null>(null)
   const [gifts, setGifts] = useState<Gift[] | undefined>() 
   const dispatch = useDispatch() 
@@ -105,7 +105,7 @@ export const useGifts = () => {
 
   const fetchGifts = useCallback(
     async () => {
-      setStatus("isLoading")
+      setStatus("loading")
 
       if (prog.address) {
         const allowedGifts = await readContract(wagmiConfig, {

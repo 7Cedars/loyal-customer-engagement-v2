@@ -15,7 +15,7 @@ type GiftDeployedEvent = {
 }
 
 export const useGifts = () => {
-  const [status, setStatus] = useState<Status>("isIdle")
+  const [status, setStatus] = useState<Status>("idle")
   const [error, setError] = useState<any | null>(null)
   const [fetchedGifts, setFetchedGifts] = useState<GiftsInBlocks | undefined>() // latest fetched gifts
   const [allGifts, setAllGifts] = useState<GiftsInBlocks[]>() // all gifts ever fetched. nested array, sorted by block value. 
@@ -116,7 +116,7 @@ export const useGifts = () => {
 
   const fetchGifts = useCallback(
     async (startBlock: number, endBlock: number) => {
-      setStatus("isLoading")
+      setStatus("loading")
 
       // loading gifts saved in localStorage. 
       // let localStore = localStorage.getItem("clp_v_gifts")

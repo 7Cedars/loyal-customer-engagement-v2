@@ -15,7 +15,7 @@ export const TransferFunds = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {data: balanceData, refetch, fetchStatus} = useBalance({ address: prog.address })
   const decimals = 10 ** 3
-  const { data, isError, isLoading, isSuccess } = useWaitForTransactionReceipt(
+  const { data, isError, loading, isSuccess } = useWaitForTransactionReceipt(
     {  confirmations: 1, hash: hex })
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export const TransferFunds = () => {
         isSuccess ? 
           <Button disabled> Success! </Button>
         :
-        isLoading ? // isPending does not reset. £bug? 
+        loading ? // isPending does not reset. £bug? 
           <Button disabled> Pending... </Button>
         :
         isError ?

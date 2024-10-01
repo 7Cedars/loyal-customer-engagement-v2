@@ -109,4 +109,4 @@ type ImageUriChanged = {
   
 }
 
-export type Status = "isIdle" | "isLoading" | "isError" | "isSuccess" 
+export type Status = "idle" | "pending" | "error" | "success" | "disabled" 

@@ -54,7 +54,7 @@ export default function Page() {
 
   // fetch events for blocks that are newer than those already fetched 
   useEffect(() => {
-    if (settings && settings.fetchBlockAmount && blockNumberIsFetched && status == "isIdle") {
+    if (settings && settings.fetchBlockAmount && blockNumberIsFetched && status == "idle") {
       const currentBlock: number = Number(blockNumber)
       let fromBlock = currentBlock < settings.fetchBlockAmount ? 0 : currentBlock - settings.fetchBlockAmount
   

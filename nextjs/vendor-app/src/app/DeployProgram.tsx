@@ -10,7 +10,7 @@ import { Button } from "../components/ui/Button"
 import { Hex, Log } from "viem"
 import { useWriteContract, useWatchContractEvent, useChainId } from "wagmi"
 import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi"
-import { parseEthAddress, parseDeployLogs, parseString } from "../utils/parsers"
+import { parseDeployLogs, parseString } from "../utils/parsers"
 import { Program, Status } from '@/types'
 import { readContracts } from '@wagmi/core'
 import { wagmiConfig } from '../../wagmi-config'
@@ -19,14 +19,13 @@ import { chainSettings } from '@/context/chainSettings'
 export const DeployProgram = () => {
   const [ name, setName ] = useState<string | undefined>() 
   const [ base, setBase ] = useState<string>("#2f4632") 
-  const [ status, setStatus ] = useState<Status>("isIdle") 
+  const [ status, setStatus ] = useState<Status>("idle") 
   const [ accent, setAccent ] = useState<string>("#a9b9e8")
   const [ uri, setUri ] = useState<string | undefined>() 
   const [ tab, setTab ] = useState<string>("Base") 
   const { writeContract } = useWriteContract()
   const chainId = useChainId() 
   const deployed = chainSettings(chainId) 
-  console.log({deployed})
   const programsFactory: Hex = deployed ? deployed.factoryProgramsAddress : '0x0'
 
   const OPTIONS: EmblaOptionsType = {}
@@ -63,8 +62,6 @@ export const DeployProgram = () => {
       ], 
     })
 
-    console.log("programInfo: ", programInfo)
-
       if (
         programInfo[0].status == "success" && 
         programInfo[1].status == "success" && 
@@ -86,15 +83,15 @@ export const DeployProgram = () => {
         })
         localStorage.setItem("clp_v_programs", JSON.stringify(savedPrograms.current)); 
         console.log("savedPrograms:", savedPrograms.current)
-        setStatus("isSuccess")
+        setStatus("success")
       } else {
-        setStatus("isError")
+        setStatus("error")
         console.log("error data: ", programInfo)
       }
   }
 
   const handleDeploymentError = (error: any) => {
-    setStatus("isError")
+    setStatus("error")
     console.log("Deploy contract error:", error)
   }
 
@@ -250,19 +247,9 @@ export const DeployProgram = () => {
         <div className={`w-full h-fit flex flex-col content-center max-w-lg gap-4 p-2`}> 
           <EmblaCarousel slides={SLIDES} options={OPTIONS} />
         </div>
-        <div className={`w-full h-fit grid grid-cols-1 max-w-lg gap-4 px-2`}>
-          { 
-          status == "isLoading" ? 
-            <Button disabled = {true}> 
-              Loading...  
-            </Button>
-          :
-          status == "isError" ? 
-            <Button disabled = {true}> 
-              Error
-            </Button>
-          :
-            <Button 
+        <div className={`w-full h-10 flex flex-row px-2`}>
+          <Button 
+              statusButton={status}
               onClick = {() =>  writeContract({ 
                   abi: factoryProgramsAbi,
                   address: programsFactory,
@@ -274,16 +261,13 @@ export const DeployProgram = () => {
                   ],
                 }, 
                 {
-                  onSuccess: () => setStatus('isLoading'), 
+                  onSuccess: () => setStatus('pending'), 
                   onError:  (error => handleDeploymentError(error)), 
                 }
                 )
-              }
-                disabled = { name == undefined } 
-              >
+              }>
               Deploy
           </Button>
-        } 
         </div>
       </>
   )

@@ -28,7 +28,9 @@ export const ClearLocalStorage = () => {
       subtext="This will mean you loose all stored programs, gifts and transaction history. It can be difficult to restore."
       />
       <div className="flex h-12 max-w-96 w-full mt-6">
-        <Button onClick={() => handleClearLocalStorage()}>
+        <Button 
+          statusButton ={'idle'}
+          onClick={() => handleClearLocalStorage()}>
           {cleared ? "Local storage cleared" : "Yes, delete Local Storage" } 
         </Button>
       </div>
@@ -41,7 +43,7 @@ export const ChangeProgramImage = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {connector} = useAccount(); 
   const {data: hexTransaction, error, isError, isSuccess, failureReason, writeContract } = useWriteContract()
-  const {isError: isErrorTransaction, error: errorTransaction, isLoading: isLoadingTransaction, isSuccess: isSuccessTransaction } = useWaitForTransactionReceipt(
+  const {isError: isErrorTransaction, error: errorTransaction, isLoading: loadingTransaction, isSuccess: isSuccessTransaction } = useWaitForTransactionReceipt(
     {  confirmations: 1, hash: hex })
   const dispatch = useDispatch() 
 
@@ -122,7 +124,7 @@ export const ChangeProgramImage = () => {
           className="flex h-12 max-w-96 w-full mt-6"
           >
           <Button 
-            disabled = {!uri || uri.length == 0 || isSuccessTransaction || isError || isErrorTransaction || isLoadingTransaction}
+            statusButton = {!uri || uri.length == 0 || isSuccessTransaction || isError || isErrorTransaction || loadingTransaction ? 'disabled' : 'idle'}
             onClick={() => writeContract({
               abi: loyaltyProgramAbi, 
               address: prog.address, 
@@ -133,7 +135,7 @@ export const ChangeProgramImage = () => {
             {
             isError || isErrorTransaction ? `Error` 
             : 
-            isLoadingTransaction ? `Loading...`
+            loadingTransaction ? `Loading...`
             :
             isSuccessTransaction ? `Image successfully updated`
             :
@@ -185,7 +187,7 @@ export const ShowProgramAddress = () => {
 
 export const ShowProgramOwner = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-  const { data, isError, isLoading, status, refetch } = useReadContract({
+  const { data, status, refetch } = useReadContract({
     address: prog.address,
     abi: loyaltyProgramAbi,
     functionName: 'owner'

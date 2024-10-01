@@ -34,7 +34,7 @@ type gasPriceProps = {
 
 export const useLoyaltyCard = () => { // here types can be added: "exchangePoints", etc 
   const [error, setError] = useState<string | null>(null); 
-  const [isLoading, setIsLoading] = useState<boolean>(false); 
+  const [loading, setloading] = useState<boolean>(false); 
   const [loyaltyCard, setLoyaltyCard] = useState<ToSmartAccountReturnType>(); 
   const [userOp, setUserOp] = useState<UserOperation<"v0.7">>(); 
 
@@ -77,7 +77,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
 
       const owner = parseAccount(embeddedWallet.address as `0x${string}`)
 
-      setIsLoading(true);
+      setloading(true);
       setError(null);
 
       const account = await toSmartAccount({
@@ -228,7 +228,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         },
       })
 
-      setIsLoading(false)
+      setloading(false)
       setLoyaltyCard(account)
 
     }, [])
@@ -252,7 +252,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
           return;
         }
 
-        setIsLoading(true);
+        setloading(true);
         setError(null);
         
         const fetchedGasPrice: gasPriceProps = await bundlerClient.getUserOperationGasPrice() 
@@ -388,7 +388,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     }
   }, [prog, embeddedWallet, fetchLoyaltyCard])
 
-    return { fetchLoyaltyCard, loyaltyCard, isLoading, error, createUserOp, userOp, sendUserOp};
+    return { fetchLoyaltyCard, loyaltyCard, loading, error, createUserOp, userOp, sendUserOp};
   
   }
 

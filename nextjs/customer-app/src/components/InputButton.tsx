@@ -7,7 +7,7 @@ type NumLineProps = {
   nameId: string; 
   size?: 0 | 1 | 2; 
   onClick: (arg0: string) => void;
-  isLoading?: boolean;
+  loading?: boolean;
   disabled?: boolean; 
   placeholder?: string; 
   buttonText?: string; 
@@ -23,7 +23,7 @@ export const InputButton = ({
   nameId, 
   size = 1, 
   onClick,
-  isLoading = false, 
+  loading = false, 
   disabled = false, 
   placeholder = "Write something here.",
   buttonText = "Action"
@@ -61,7 +61,7 @@ export const InputButton = ({
       </div> 
 
       <div className="flex min-w-36 w-fit ps-2"> 
-          { !isLoading ? 
+          { !loading ? 
 
           <Button onClick={ () => handleClick(input)} size = {size} >
               {buttonText}

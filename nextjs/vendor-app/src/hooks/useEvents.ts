@@ -18,7 +18,7 @@ export default function useEvents() {
   const {connector, chainId} = useAccount(); 
   const [fetchedEvents, setFetchedEvents] = useState<EventsInBlocks>()
   const [allEvents, setAllEvents] = useState<EventsInBlocks>()
-  const [status, setStatus] = useState<Status>("isIdle") 
+  const [status, setStatus] = useState<Status>("idle") 
   const [error, setError] = useState<any>();
   const dispatch = useDispatch()  
   

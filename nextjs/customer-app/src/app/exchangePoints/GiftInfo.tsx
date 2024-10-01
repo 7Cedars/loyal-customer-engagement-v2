@@ -23,8 +23,8 @@ export const GiftInfo = ({
   const [selected, setSelected] = useState<boolean>(false) 
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {loyaltyCard, error: errorCard, isLoading: isLoadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
-  const { data, isError, error: errorReadContract, isLoading, status, refetch } = useReadContracts({
+  const {loyaltyCard, error: errorCard, loading: loadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const { data, isError, error: errorReadContract, loading, status, refetch } = useReadContracts({
     contracts: [
       {...giftContract, 
         functionName: 'balanceOf',
@@ -43,7 +43,7 @@ export const GiftInfo = ({
 
   console.log({requirements})
 
-  console.log({data, isError, isLoading, status, walletsReady, errorCard, isLoadingCard})
+  console.log({data, isError, loading, status, walletsReady, errorCard, loadingCard})
 
   return (
     <main 

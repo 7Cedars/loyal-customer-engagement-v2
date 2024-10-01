@@ -22,7 +22,7 @@ export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const {loyaltyCard, error, loading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
   console.log({allGifts})
 

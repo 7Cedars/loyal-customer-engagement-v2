@@ -8,7 +8,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { parseBigIntToNumber, parseBoolean, parseEthAddress, parseMetadata, parseString, parseUri } from "@/utils/parsers";
 
 export const useGift = () => {
-  const [status, setStatus ] = useState<Status>("isIdle")
+  const [status, setStatus ] = useState<Status>("idle")
   const [error, setError] = useState<any | null>(null)
   const [gift, setGift] = useState<Gift | undefined>() 
 
@@ -92,7 +92,7 @@ export const useGift = () => {
 
   const fetchGift = useCallback(
     async (requestedGift: `0x${string}`) => {
-      setStatus("isLoading")
+      setStatus("loading")
 
       const giftContractData = await getGiftContractData(requestedGift)
       const giftContractwithMetadata = giftContractData ? await getGiftsMetaData(giftContractData) : undefined

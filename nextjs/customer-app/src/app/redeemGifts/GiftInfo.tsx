@@ -23,8 +23,8 @@ export const GiftInfo = ({
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const { data: signature, isPending, isError: isErrorSignTypedData, error, isSuccess, signTypedData, reset } = useSignTypedData()
-  const {loyaltyCard, error: errorCard, isLoading: isLoadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
-  const { data: giftId, isError, isLoading, status, refetch, error: tokenOfOwnerByIndexError } = useReadContract({
+  const {loyaltyCard, error: errorCard, loading: loadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const { data: giftId, isError, loading, status, refetch, error: tokenOfOwnerByIndexError } = useReadContract({
     address: address,
     abi: loyaltyGiftAbi,
     functionName: 'tokenOfOwnerByIndex',

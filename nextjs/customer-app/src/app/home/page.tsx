@@ -20,7 +20,7 @@ export default function Page() {
   const [hasVoucherExpired, setHasVoucherExpired] = useState<boolean>()  
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {loyaltyCard, error, isLoading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const {loyaltyCard, error, loading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
   console.log({qrPoints})
 

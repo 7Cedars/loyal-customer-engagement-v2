@@ -19,7 +19,7 @@ export const GiftAvailable = ({
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
   const { writeContract, error } = useWriteContract()
-  const { data, isError, error: errorReadContract, isLoading, status, refetch } = useReadContract({
+  const { data, isError, error: errorReadContract, loading, status, refetch } = useReadContract({
     address: address,
     abi: loyaltyGiftAbi,
     functionName: 'balanceOf',

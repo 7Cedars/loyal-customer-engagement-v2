@@ -25,6 +25,8 @@
     "react-qr-code": "^2.0.15",
     "react-qr-reader": "^3.0.0-beta-1",
     "react-redux": "^9.1.2",
+    "react-spinners": "^0.14.1",
+    "react-svg-spinners": "^0.3.1",
     "react-zxing": "^2.0.2",
     "viem": "2.x",
     "wagmi": "^2.12.1"
