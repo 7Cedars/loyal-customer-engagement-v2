@@ -123,9 +123,9 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             if (s_owner != ECDSA.recover(hash, userOp.signature)) {
                 return SIG_VALIDATION_FAILED;
             } 
-            // return _validateTarget(userOp.callData);
+            return _validateTarget(userOp.callData);
             // following is replaced by the _validateTarget function
-            return SIG_VALIDATION_SUCCESS; 
+            // return SIG_VALIDATION_SUCCESS; 
     }
     
     // Fixed the bug below - but it still does not deploy with this bit included. 
@@ -143,7 +143,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             }
             (address targetContract, , bytes memory innerCall) = abi.decode(dataWithoutSelector, (address, uint256, bytes)); 
             // £SECURITY
-            bytes4 selector = bytes4(data); 
+            bytes4 selector = bytes4(data);
             if(targetContract != s_loyaltyProgram && selector != bytes4(0x8b6276c3)) { // = function initialize && targetContract != address(this) I think this is safe enough.. £securrity
                 return SIG_VALIDATION_FAILED; 
             }

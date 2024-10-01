@@ -63,7 +63,10 @@ export default function Page() {
         /> 
       <div className="grow flex flex-col justify-center items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-fit p-2 mt-6">
-          <Button onClick={() => {setTransferMode(!transferMode)}}>
+          <Button onClick={() => {
+            setTransferMode(!transferMode)
+            setMode(undefined)
+            }}>
             Transfer eth
           </Button>
         </div>
@@ -73,6 +76,7 @@ export default function Page() {
           <div 
             className="grow-0 opacity-0 aria-selected:grow aria-selected:opacity-100 transition:all ease-in-out duration-300 delay-300 h-2"
             aria-selected={mode == undefined} 
+            style = {mode == undefined ? {} : {pointerEvents: "none"}}
             >
             <div className="w-full h-full grid grid-cols-1 content-center "> 
               {transferMode ? 
@@ -120,8 +124,9 @@ export default function Page() {
           </div>
 
           {/* Top bar, always visible */}
-          <section 
-            className="flex flex-col w-full justify-between items-center h-14 z-10 border border-b-0 rounded-t-full"
+          <div 
+            className="flex flex-col w-full justify-between items-center h-14 border border-b-0 z-10 aria-selected:z-0 rounded-t-full"
+            aria-selected={mode != undefined} 
             style = {{borderColor: prog.colourAccent, borderBottom: prog.colourBase}}
             >
             <div 
@@ -145,13 +150,13 @@ export default function Page() {
                   onClick={() => mode == undefined? setMode("Give Points") : setMode(undefined)} > 
                 </button> 
             </div>
-          </section>
-
+          </div>
         
           <div 
             className="flex flex-col items-center justify-center grow-0 w-full opacity-0 aria-selected:opacity-100 aria-selected:grow transition:all ease-in-out duration-300 delay-300 h-2 border-x"
             aria-selected={mode != undefined} 
-            style={{borderColor: prog.colourAccent}}
+            // style={{borderColor: prog.colourAccent}}
+            style = {mode != undefined ? {borderColor: prog.colourAccent} : {borderColor: prog.colourAccent, pointerEvents: "none"}}
           > 
             {
               mode == 'Give Points' ?

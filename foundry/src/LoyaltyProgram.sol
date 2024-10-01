@@ -220,13 +220,13 @@ contract LoyaltyProgram is ERC165, ERC20, Ownable, ILoyaltyProgram {
 
         // if get address of loyalty card (note that with on the first transfer, the entryPoint initialises a card). 
         // NB! This is where the contract reverts when called from the entrypoint. I _almost_ make it! 
-        // should I use createAddress instead? -- and leave out initiators from frontend? 
-        // -- try out tomorrow. 
-        LoyaltyCard loyaltyCard = FactoryCards(CARD_FACTORY).getAddress(ownerCard, payable(address(this)), SALT); 
+        // should I use createAccount instead? -- and leave out initiators from frontend? 
+        // -- try out tomorrow. (was get address) 
+        address loyaltyCard = FactoryCards(CARD_FACTORY).getAddress(ownerCard, payable(address(this)), SALT); 
 
         // set executed to true & execute transfer
         s_executed[programSignature] = true;
-        _update(payable(address(this)), address(loyaltyCard), points); // emits a transfer event
+        _update(payable(address(this)), loyaltyCard, points); // emits a transfer event
     }
 
     /**

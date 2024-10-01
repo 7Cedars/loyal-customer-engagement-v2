@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/Button"
 import { NumPad } from "@/components/ui/NumPad"
 import { useAppSelector } from "@/redux/hooks"
+import { getRandomBigInt } from "@/utils/misc";
 import { useEffect, useRef, useState } from "react"
 import QRCode from "react-qr-code";
 import { useChainId, useSignTypedData } from "wagmi";
@@ -11,8 +12,10 @@ export const GivePoints = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const chainId = useChainId(); 
   const { data: signature, isPending, isError, error, isSuccess, signTypedData, reset } = useSignTypedData()
-  const uniqueNumber = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
+  const uniqueNumber = useRef(getRandomBigInt(1157920892373160));
 
+  console.log({uniqueNumber})
+  
   const domain = {
     name: prog.name, 
     chainId: chainId,
