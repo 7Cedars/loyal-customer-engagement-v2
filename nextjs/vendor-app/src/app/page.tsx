@@ -1,6 +1,5 @@
 "use client"; 
 
-import { Button } from "../components/ui/Button";
 import { useAccount, useReadContract } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';

@@ -13,7 +13,9 @@ import {
   ClipboardDocumentCheckIcon,
   ShieldExclamationIcon,
   SparklesIcon,
-  BuildingLibraryIcon
+  BuildingLibraryIcon, 
+  BanknotesIcon,
+  GiftTopIcon
 
 } from "@heroicons/react/24/outline";
 
@@ -111,7 +113,7 @@ export const TransactionInfo = (transaction: TransactionEvent) => {
               />
           <div className="flex flex-col gap-2 items-start">
             <SectionText
-              text = {"Loyalty points exchanged for gift"}
+              text = {"Gift claimed"}
               subtext = {
                 `${toFullDateFormat(transaction.event.blockData.timestamp)}, 
                  ${toEurTimeFormat(transaction.event.blockData.timestamp)}`
@@ -246,7 +248,7 @@ export const TransactionInfo = (transaction: TransactionEvent) => {
     case 'Transfer': {
       return (
         <section className= {layoutItem} style = {{borderColor: prog.colourAccent}}>
-          <PhotoIcon
+          <BanknotesIcon
                 className={layoutIcons}
                 style={{color:prog.colourAccent}} // instead of using aria selected, I can make opacity conditional here. 
               />
@@ -271,13 +273,13 @@ export const TransactionInfo = (transaction: TransactionEvent) => {
     case 'GiftTransferred': {
       return (
         <section className= {layoutItem} style = {{borderColor: prog.colourAccent}}>
-          <PhotoIcon
+          <GiftTopIcon
                 className={layoutIcons}
                 style={{color:prog.colourAccent}} // instead of using aria selected, I can make opacity conditional here. 
               />
           <div className="flex flex-col gap-2 items-start">
             <SectionText
-              text = {"Gift claimed"}
+              text = {"Gift transferred"}
               subtext = {
                 `${toFullDateFormat(transaction.event.blockData.timestamp)}, 
                  ${toEurTimeFormat(transaction.event.blockData.timestamp)}`
