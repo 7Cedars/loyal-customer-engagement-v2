@@ -55,15 +55,11 @@ export default function Home() {
   }, [, mode])
 
   const handleSelectionProgram = async (program: Program) => {
-    console.log("handleSelectionProgram called")
-
     const imageUri = await readContract(wagmiConfig, {
       abi: loyaltyProgramAbi,
       address: program.address,
       functionName: 'imageUri',
     })
-
-    console.log("imageUri: ", imageUri)
     
     dispatch(setProgram({
       address: program.address, 

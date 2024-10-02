@@ -72,7 +72,6 @@ export const TransactionInfo = (transaction: TransactionEvent) => {
             <div className="flex flex-col gap-1 items-start"> 
               <NoteText message = {`Owner: ${transaction.event.args.owner}`} size = {1} />
               <NoteText message = {`Address: ${transaction.event.args.program}`} size = {1} />
-              <NoteText message = {`Version: ${transaction.event.args.version}`} size = {1} />
             </div>
           </div>
         </section>
@@ -240,6 +239,56 @@ export const TransactionInfo = (transaction: TransactionEvent) => {
               } 
               size={1}
             />
+          </div>
+        </section>
+      )
+    }
+    case 'Transfer': {
+      return (
+        <section className= {layoutItem} style = {{borderColor: prog.colourAccent}}>
+          <PhotoIcon
+                className={layoutIcons}
+                style={{color:prog.colourAccent}} // instead of using aria selected, I can make opacity conditional here. 
+              />
+          <div className="flex flex-col gap-2 items-start">
+            <SectionText
+              text = {"Points transferred"}
+              subtext = {
+                `${toFullDateFormat(transaction.event.blockData.timestamp)}, 
+                 ${toEurTimeFormat(transaction.event.blockData.timestamp)}`
+              } 
+              size={1}
+            />
+            <div className="flex flex-col gap-1 items-start"> 
+              <NoteText message = {`From: ${transaction.event.args.from}`} size = {1} />
+              <NoteText message = {`To: ${transaction.event.args.to}`} size = {1} />
+              <NoteText message = {`Points: ${transaction.event.args.value}`} size = {1} />
+            </div>
+          </div>
+        </section>
+      )
+    }
+    case 'GiftTransferred': {
+      return (
+        <section className= {layoutItem} style = {{borderColor: prog.colourAccent}}>
+          <PhotoIcon
+                className={layoutIcons}
+                style={{color:prog.colourAccent}} // instead of using aria selected, I can make opacity conditional here. 
+              />
+          <div className="flex flex-col gap-2 items-start">
+            <SectionText
+              text = {"Gift claimed"}
+              subtext = {
+                `${toFullDateFormat(transaction.event.blockData.timestamp)}, 
+                 ${toEurTimeFormat(transaction.event.blockData.timestamp)}`
+              } 
+              size={1}
+            />
+            <div className="flex flex-col gap-1 items-start"> 
+              <NoteText message = {`Gift address: ${transaction.event.args.gift}`} size = {1} />
+              <NoteText message = {`Gift Id: ${transaction.event.args.giftId}`} size = {1} />
+              <NoteText message = {`Customer: ${transaction.event.args.to}`} size = {1} />
+            </div>
           </div>
         </section>
       )

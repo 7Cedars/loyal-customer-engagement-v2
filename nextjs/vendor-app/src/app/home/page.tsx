@@ -63,7 +63,9 @@ export default function Page() {
         /> 
       <div className="grow flex flex-col justify-center items-center">
         <div className="w-full sm:w-4/5 lg:w-1/2 h-fit p-2 mt-6">
-          <Button onClick={() => {
+          <Button 
+            statusButton="idle"
+            onClick={() => {
             setTransferMode(!transferMode)
             setMode(undefined)
             }}>
@@ -83,7 +85,10 @@ export default function Page() {
                 <div className="w-full h-full flex flex-col">
                   <TransferFunds/>
                   <div className="w-full h-full p-1">
-                    <Button onClick = {() => {setTransferMode(false)}}>
+                    <Button 
+                      statusButton="idle"
+                      onClick = {() => {setTransferMode(false)}}
+                      >
                       Back
                     </Button>
                   </div> 

@@ -66,22 +66,28 @@ export const GiftAvailable = ({
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}
       <div 
-        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 aria-selected:opacity-100 aria-selected:h-48 ease-in-out duration-300 delay-300"
+        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 aria-selected:opacity-100 aria-selected:h-64 sm:aria-selected:h-56 ease-in-out duration-300 delay-300"
         aria-selected = {selected}
         style = {selected ? {} : {pointerEvents: "none"}}
         > 
         {/* {selected ?  */}
         <>
         <section className="pb-2">
-        <SectionText
-            text = {`Available gifts: ${Number(data)}`} 
-            size = {0}
+        <NoteText
+            message = {`Address gift: ${address}`} 
+            size = {1}
+          /> 
+        </section>
+        <section className="pb-2">
+        <NoteText
+            message = {`Available gifts: ${Number(data)}`} 
+            size = {1}
           /> 
         </section>
         <section className="pb-4 h-24">
-          <SectionText
-            text = "Additional requirements" 
-            size = {0}
+          <NoteText
+            message = "Additional requirements" 
+            size = {1}
           /> 
           <NoteText 
             message = {
