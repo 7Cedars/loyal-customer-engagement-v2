@@ -33,6 +33,7 @@ export type Gift = {
   uri: string;
   additionalReq: boolean; 
   metadata?: Metadata; 
+  allowed?: Boolean; 
 };
 
 export type QrData = undefined | {

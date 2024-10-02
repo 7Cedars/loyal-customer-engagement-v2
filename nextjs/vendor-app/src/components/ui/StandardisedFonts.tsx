@@ -90,7 +90,7 @@ export const NoteText = ({
 
   return (
     <div className={`grid grid-cols-1 px-2 gap-1 break-words text-gray-500 font-sm`}>
-      <div className={`${alignText[align]} italic ${appearanceNote[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`${alignText[align]} ${appearanceNote[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
         {message}
       </div>
     </div>

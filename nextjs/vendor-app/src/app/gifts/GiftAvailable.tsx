@@ -4,10 +4,10 @@ import { NumLine } from "@/components/ui/NumLine";
 import { NoteText, SectionText, TitleText } from "@/components/ui/StandardisedFonts";
 import { loyaltyGiftAbi, loyaltyProgramAbi } from "@/context/abi";
 import { useAppSelector } from "@/redux/hooks";
-import { Gift } from "@/types";
+import { Gift, Status } from "@/types";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useReadContract, useWriteContract } from "wagmi";
+import { useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export const GiftAvailable = ({
   address,  
@@ -15,16 +15,22 @@ export const GiftAvailable = ({
   points,
   additionalReq, 
   metadata, 
+  allowed
 }: Gift) => {
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
   const [selected, setSelected] = useState<boolean>(false) 
-  const { writeContract, error } = useWriteContract()
-  const { data, isError, error: errorReadContract, loading, status, refetch } = useReadContract({
+  const { writeContract, error, data: transactionHash, reset } = useWriteContract()
+  const { data: receipt, isError: isErrorReceipt, isSuccess: isSuccessReceipt, error: errorReceipt, status: statusReceipt } = useWaitForTransactionReceipt(
+    {  confirmations: 1, hash: transactionHash }
+  )
+  const { data, isError, error: errorReadContract, status, refetch } = useReadContract({
     address: address,
     abi: loyaltyGiftAbi,
     functionName: 'balanceOf',
     args: [selectedProgram.address]
   })
+
+  console.log({allowed})
 
   return (
     <main 
@@ -55,10 +61,6 @@ export const GiftAvailable = ({
           message = {metadata ? metadata.description : "No description available"} 
           size = {1}
           />  
-          {/* <NoteText 
-          message = {additionalReq ? "See extended description for additional requirements" : "No additional requirements"} 
-          size = {1}
-          />   */}
         </div>
       </button>
 
@@ -102,28 +104,32 @@ export const GiftAvailable = ({
             size={0}
           />
         </section>
-            
-        {/* <SectionText
-          text = "Gift actions" 
-          size = {0}
-        />  */}
-          {/* <div className="p-2"> 
-            <NumLine onClick={(amount) =>  writeContract({ 
+
+        <div className="px-2 h-10"> 
+          {
+            allowed ? 
+              <Button 
+                statusButton={transactionHash == undefined ? 'idle' : statusReceipt}
+                onClick={() => writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,
-                functionName: 'mintGifts',
+                functionName: 'setAllowedGift',
                 args: [
                   address,
-                  amount
+                  false,
+                  false
                 ]
-              })
-            } 
-            size = {0} 
-            aria-disabled = {selected}/>
-          </div> */}
-
-          <div className="px-2 h-10"> 
-            <Button onClick={() => writeContract({ 
+                })
+              }
+              size = {0}
+              aria-disabled = {selected}
+              >
+                Deselect gift
+              </Button>
+            :
+              <Button 
+                statusButton={transactionHash == undefined ? 'idle' : statusReceipt}
+                onClick={() => writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,
                 functionName: 'setAllowedGift',
@@ -132,39 +138,19 @@ export const GiftAvailable = ({
                   true,
                   true
                 ]
-              })
-            }
-            size = {0}
-            aria-disabled = {selected}
-            >
-              Select gift
-            </Button>
-          </div>
+                })
+              }
+              size = {0}
+              aria-disabled = {selected}
+              >
+                Select gift
+              </Button>
 
-          {/* <div className="p-2">
-            <InputButton 
-            nameId ={"directTransfer"}
-            onClick = {(inputAddress) =>  writeContract({ 
-              abi: loyaltyGiftAbi,
-              address: inputAddress as `0x${string}`,
-              functionName: 'transferFrom',
-              args: [
-                selectedProgram.address,
-                inputAddress as `0x${string}`, 
-                0 // TO DO: fetch onwed tokenId, then transfer. 
-              ]
-            })}
-            buttonText="Direct transfer"
-            placeholder="Customer card address"
-            size = {0}
-            aria-disabled = {selected}
-            />
-          </div> */}
-        </>
-        {/* :
-        null
-        } */}
-      </div> 
+          }
+          
+        </div>
+      </>
+    </div>
   </main>
   );
 };

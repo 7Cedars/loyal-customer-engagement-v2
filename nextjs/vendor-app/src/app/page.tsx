@@ -125,7 +125,7 @@ export default function Home() {
           </div>
         </div>
         <div 
-          className={`w-full grow aria-disabled:grow-0 h-fit aria-disabled:h-2 aria-disabled:opacity-0 opacity-100 transition:all ease-in-out duration-300 delay-700 grid grid-cols-1 max-w-lg gap-4 px-2`}
+          className={`w-full grow aria-disabled:grow-0 h-fit aria-disabled:opacity-0 opacity-100 transition:all ease-in-out duration-300 delay-700 grid grid-cols-1 max-w-lg gap-4 px-2`}
           aria-disabled={status != "connected"}
           >
           { 
@@ -134,7 +134,7 @@ export default function Home() {
                 
                 <div 
                   key = {i} 
-                  className={`relative w-full h-full flex flex-row disabled:opacity-50 text-md text-center border content-center rounded-lg p-2 mt-0 h-12`} 
+                  className={`relative w-full h-full flex flex-row text-md text-center border content-center rounded-lg p-2 mt-0 h-12`} 
                   style = {{
                     color: program.colourAccent, 
                     borderColor: program.colourAccent, 

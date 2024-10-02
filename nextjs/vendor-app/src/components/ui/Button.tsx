@@ -42,7 +42,7 @@ export const Button = ({
           <>
           {/* adapted from https://github.com/n3r4zzurr0/svg-spinners/blob/main/svg-smil/180-ring-with-bg.svg?short_path=0bedbc1 */}
           <div> 
-          <TwoSeventyRingWithBg />
+            <TwoSeventyRingWithBg color={selectedProgram.colourAccent}/>
             </div>
             <div>
               Loading...

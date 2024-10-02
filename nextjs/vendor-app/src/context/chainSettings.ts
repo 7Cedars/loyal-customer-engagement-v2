@@ -25,7 +25,7 @@ export const chainSettings = (chainId: number) => {
     }
     case 11155420: {
       return ({ // opt sepolia
-          fetchBlockAmount: 50_000,
+          fetchBlockAmount: 100_000,
           minimumBlocksToFetch: 100,
           genesisBlock: 17820505,  
           factoryCardsAddress: '0xf85e0De9A0A1d55B47D1f8Bbe96452fe97A29552' as `0x${string}`, 

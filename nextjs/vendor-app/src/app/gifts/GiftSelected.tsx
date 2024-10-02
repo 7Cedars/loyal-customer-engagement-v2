@@ -11,6 +11,7 @@ import { useAccount, useReadContract, useReadContracts, useWaitForTransactionRec
 import { wagmiConfig } from "../../../wagmi-config";
 import { readContracts } from '@wagmi/core'
 import { parseRequirementReply } from "@/utils/parsers";
+import { transactionReceiptStatus } from "permissionless";
 
 export const GiftSelected = ({
   address,  
@@ -18,16 +19,18 @@ export const GiftSelected = ({
   points,
   additionalReq, 
   metadata, 
+  allowed
 }: Gift) => {
-  const giftContract = { address: address, abi: loyaltyGiftAbi } as const
   const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const giftContract = { address: address, abi: loyaltyGiftAbi } as const
+  const programContract = { address: selectedProgram.address, abi: loyaltyProgramAbi } as const
   const [selected, setSelected] = useState<boolean>(false) 
   const {connector} = useAccount(); 
-  const { writeContract, error, data: transactionHash } = useWriteContract()
-  const { data: receipt, isError: isErrorReceipt, loading: loadingReceipt, isSuccess: isSuccessReceipt, error: errorReceipt } = useWaitForTransactionReceipt(
+  const { writeContract, error, data: transactionHash, variables, reset } = useWriteContract()
+  const { data: receipt, isError: isErrorReceipt, isSuccess: isSuccessReceipt, error: errorReceipt, status: statusReceipt } = useWaitForTransactionReceipt(
     {  confirmations: 1, hash: transactionHash }
   )
-  const { data, isError, error: errorReadContract, loading, status, refetch } = useReadContracts({
+  const { data, isError, error: errorReadContract, status, refetch } = useReadContracts({
     contracts: [
       {...giftContract, 
         functionName: 'balanceOf',
@@ -40,37 +43,31 @@ export const GiftSelected = ({
       {...giftContract, 
         functionName: 'requirementsRedeemMet',
         args: [selectedProgram.address]
-      }
+      },
+      {...programContract, 
+        functionName: 'allowedGifts',
+        args: [address]
+      },
+      {...giftContract, 
+        functionName: 'tokenOfOwnerByIndex',
+        args: [selectedProgram.address, 0]
+      },
     ]
   })
 
+  console.log({variables})
+ 
   const requirements = data?.map(item => {
     return parseRequirementReply(item.error)
   }) 
 
-  const fetchOwnedTokenId = useCallback(
-    async (ownerAddress: `0x${string}`, giftAddress: `0x${string}`) => {
-      try {      
-        const result = await readContracts(wagmiConfig, {
-          contracts: [
-            {
-              ...giftContract,
-              functionName: 'tokenOfOwnerByIndex',
-              args: [ownerAddress, 0]
-            },
-          ]
-        })
-        console.log(result)
-          // if (result && result[0].status == 'success') {     
-          //   setAllowedGifts(result[0].result as `0x${string}`[]) 
-          // } 
-      } catch(error) {
-        console.log(error)
-      }
-    }, []
-  )
+  console.log(data ? data[4]?.result : "no data")
 
-  console.log({ data, isError, loading, status, transactionHash, error, receipt, isErrorReceipt, isSuccessReceipt, errorReceipt, connector })
+  useEffect(() => {
+    if (statusReceipt == "success") {
+      refetch() 
+    }
+  }, [statusReceipt, refetch])
 
   return (
     <main 
@@ -94,38 +91,40 @@ export const GiftSelected = ({
         <div className="flex flex-col">
           <SectionText
           text={name}
-          subtext={`${points} points ${additionalReq ? `+ ${additionalReq}` : ""}`}
+          subtext={`${points == 0 ? "" : `${points} points`} ${additionalReq ? `+ ${additionalReq}` : ""}`}
           size = {1} 
           /> 
           <NoteText 
           message = {metadata ? metadata.description : "No description available"} 
           size = {1}
           />  
-          {/* <NoteText 
-          message = {additionalReq ? "See extended description for additional requirements" : "No additional requirements"} 
-          size = {1}
-          />   */}
         </div>
       </button>
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}
       <div 
-        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 disabled aria-selected:opacity-100 aria-selected:h-64 ease-in-out duration-300 delay-300"
+        className="z-1 w-full flex flex-col px-2 h-1 opacity-0 disabled aria-selected:opacity-100 aria-selected:h-80 ease-in-out duration-300 delay-300"
         aria-selected = {selected}
         style = {selected ? {} : {pointerEvents: "none"}}
         > 
         {/* {selected ?  */}
         <>
         <section className="pb-2">
-        <SectionText
-            text = {`Available gifts: ${ data ? Number(data[0].result): 0}`} 
-            size = {0}
+        <NoteText
+            message = {`Address gift: ${address}`} 
+            size = {1}
+          /> 
+        </section>
+        <section className="pb-2">
+        <NoteText
+            message = {`Available gifts: ${ data ? Number(data[0].result): 0}`} 
+            size = {1}
           /> 
         </section>
         <section className="pb-4 h-24">
-          <SectionText
-            text = "Additional requirements" 
-            size = {0}
+          <NoteText
+            message = "Additional requirements" 
+            size = {1}
           /> 
           <NoteText 
             message = {
@@ -149,8 +148,10 @@ export const GiftSelected = ({
           />
         </section>
             
-          <div className="px-2 h-10 my-2"> 
-            <NumLine onClick={(amount) =>  writeContract({ 
+          <div className="px-2 min-h-10 my-2"> 
+            <NumLine 
+            statusButton={variables?.functionName == 'mintGifts' ? statusReceipt : 'idle'}
+            onClick={(amount) =>  writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,
                 functionName: 'mintGifts',
@@ -166,9 +167,12 @@ export const GiftSelected = ({
 
           {
           requirements && requirements[1] != "Not implemented" ? 
+
           <>
             <div className="px-2 my-2 min-h-10 h-fit flex flex-row gap-2"> 
-              <Button onClick={() => writeContract({ 
+              <Button 
+              statusButton={ variables?.functionName == 'setAllowedGift' ? statusReceipt : 'idle'} 
+              onClick={() => writeContract({ 
                 abi: loyaltyProgramAbi,
                 address: selectedProgram.address,
                 functionName: 'setAllowedGift',
@@ -182,47 +186,34 @@ export const GiftSelected = ({
               size = {0}
               aria-disabled = {selected}
               >
-              Disallow claim    
-              </Button>
-    
-              <Button onClick={() => writeContract({ 
-                  abi: loyaltyProgramAbi,
-                  address: selectedProgram.address,
-                  functionName: 'setAllowedGift',
-                  args: [
-                    address,
-                    false,
-                    false
-                  ]
-                })
-              }
-              size = {0}
-              aria-disabled = {selected}
-              >
-                Disallow claim and redeem   
+              Disallow claiming gift   
               </Button>
             </div> 
           </>
           : 
-          <div className="px-2 my-2 min-h-10 h-fit flex">
-            <InputButton 
-            nameId ={"directTransfer"}
-            onClick = {(inputAddress) =>  writeContract({ 
-              abi: loyaltyProgramAbi,
-              address: selectedProgram.address,
-              functionName: 'transferGift',
-              args: [
-                inputAddress as `0x${string}`,
-                address,  
-                0n // TO DO: fetch onwed tokenId, then transfer. 
-              ]
-            })}
-            buttonText="Direct transfer"
-            placeholder="Customer card address"
-            size = {0}
-            aria-disabled = {selected}
-            />
-          </div>
+          data ? 
+            <div className="px-2 my-2 min-h-10 h-fit flex">
+              <InputButton 
+              nameId ={"directTransfer"}
+              statusNumline={variables?.functionName == 'transferGift' ? statusReceipt : 'idle'}
+              onClick = {(inputAddress) =>  writeContract({ 
+                abi: loyaltyProgramAbi,
+                address: selectedProgram.address,
+                functionName: 'transferGift',
+                args: [
+                  inputAddress as `0x${string}`,
+                  address,
+                  data[4].result 
+                ]
+              })}
+              buttonText="Direct transfer"
+              placeholder="Customer address"
+              size = {0}
+              aria-disabled = {data[4].result == undefined}
+              />
+            </div>
+          : 
+            null
           } 
           </> 
         </div>

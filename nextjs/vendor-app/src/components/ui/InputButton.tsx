@@ -1,7 +1,7 @@
 import { ChangeEvent, useState } from "react";
 import { Button } from "./Button";
-import Image from "next/image";
 import { useAppSelector } from "@/redux/hooks";
+import { Status } from "@/types";
 
 type NumLineProps = {
   nameId: string; 
@@ -11,6 +11,7 @@ type NumLineProps = {
   disabled?: boolean; 
   placeholder?: string; 
   buttonText?: string; 
+  statusNumline?: Status; 
 };
 
 const fontSize = [
@@ -26,7 +27,8 @@ export const InputButton = ({
   loading = false, 
   disabled = false, 
   placeholder = "Write something here.",
-  buttonText = "Action"
+  buttonText = "Action",
+  statusNumline = "idle"
 }: NumLineProps) => {
 
   const [ input, setInput ] = useState<string>("") 
@@ -61,24 +63,11 @@ export const InputButton = ({
       </div> 
 
       <div className="flex min-w-36 w-fit ps-2"> 
-          { !loading ? 
-
-          <Button onClick={ () => handleClick(input)} size = {size} >
+          <Button 
+            statusButton={statusNumline}
+            onClick={ () => handleClick(input)} size = {size} >
               {buttonText}
           </Button>
-          : 
-          <Button onClick={() => {}} size = {size}>
-              <div className="flex justify-center items-center">
-                <Image
-                  className="rounded-lg opacity-25 flex-none mx-3 animate-spin"
-                  width={30}
-                  height={30}
-                  src={"/images/loading2.svg"}
-                  alt="Loading icon"
-                />
-              </div>
-            </Button>
-        }
         </div>
     </div>
   );

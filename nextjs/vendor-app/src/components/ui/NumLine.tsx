@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Button } from "./Button";
 import Image from "next/image";
+import { Status } from "@/types";
 
 type NumLineProps = {
   size?: 0 | 1 | 2; 
   onClick: (arg0: number) => void;
-  loading?: boolean;
+  statusButton?: Status;
 };
 
 const numbers = [1, 5, 25, 150] // this can be flexible input. 
@@ -13,7 +14,7 @@ const numbers = [1, 5, 25, 150] // this can be flexible input.
 export const NumLine = ({
   size = 1, 
   onClick,
-  loading = false
+  statusButton = 'idle'
 }: NumLineProps) => {
 
   const [ selectedAmount, setSelectedAmount ] = useState<number>(25) 
@@ -31,6 +32,7 @@ export const NumLine = ({
         numbers.map(number => 
           <div key = {number} className="flex grow pe-2"> 
             <Button 
+              statusButton='idle'
               onClick={() => setSelectedAmount(number)}
               selected = {selectedAmount == number}
               size = {size}
@@ -41,25 +43,13 @@ export const NumLine = ({
         )
       }
       </div> 
-      <div className="flex w-24"> 
-          { !loading ? 
-
-          <Button onClick={ () => handleClick(selectedAmount)}  size = {size} >
+      <div className="flex w-32"> 
+          <Button 
+            statusButton={statusButton}
+            onClick={ () => handleClick(selectedAmount)}  size = {size} 
+            >
               Mint
           </Button>
-          : 
-          <Button onClick={() => {}} >
-              <div className="flex justify-center items-center">
-                <Image
-                  className="rounded-lg opacity-25 flex-none mx-3 animate-spin"
-                  width={30}
-                  height={30}
-                  src={"/images/loading2.svg"}
-                  alt="Loading icon"
-                />
-              </div>
-            </Button>
-        }
         </div>
     </div>
   );

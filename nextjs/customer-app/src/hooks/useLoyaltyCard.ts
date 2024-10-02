@@ -34,7 +34,7 @@ type gasPriceProps = {
 
 export const useLoyaltyCard = () => { // here types can be added: "exchangePoints", etc 
   const [error, setError] = useState<string | null>(null); 
-  const [loading, setloading] = useState<boolean>(false); 
+  const [loading, setLoading] = useState<boolean>(false); 
   const [loyaltyCard, setLoyaltyCard] = useState<ToSmartAccountReturnType>(); 
   const [userOp, setUserOp] = useState<UserOperation<"v0.7">>(); 
 
@@ -77,7 +77,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
 
       const owner = parseAccount(embeddedWallet.address as `0x${string}`)
 
-      setloading(true);
+      setLoading(true);
       setError(null);
 
       const account = await toSmartAccount({
@@ -228,7 +228,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         },
       })
 
-      setloading(false)
+      setLoading(false)
       setLoyaltyCard(account)
 
     }, [])
@@ -236,9 +236,11 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     const createUserOp = useCallback(
       async (loyaltyProgram:  `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: bigint) => {
         const callGasLimit: bigint = 1659000n
+        // £todo. NB! Re gas costs: see https://docs.optimism.io/builders/app-developers/transactions/parameters 
+        // ALSO! this needs to be set in chain config! -- calculation differs per chain.. 
+        // Because gas fees constantly change..
         const preVerificationGas: bigint = 2619697600n
         const verificationGasLimit: bigint = 7261140n
-  
         if (!publicClient) {
           setError("No publicClient available");
           return;
@@ -252,7 +254,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
           return;
         }
 
-        setloading(true);
+        setLoading(true);
         setError(null);
         
         const fetchedGasPrice: gasPriceProps = await bundlerClient.getUserOperationGasPrice() 

@@ -15,6 +15,9 @@ import { useBlockNumber, useChainId, useReadContract } from "wagmi";
 import { useAppSelector } from "@/redux/hooks";
 import { loyaltyProgramAbi } from "@/context/abi";
 import { wagmiConfig } from "../../../wagmi-config";
+import { Button } from "@/components/ui/Button";
+
+
 
 export default function Page() {
   const [mode, setMode] = useState<string>("Available")
@@ -26,7 +29,26 @@ export default function Page() {
   const settings = chainSettings(chainId)
 
   console.log({allowedGifts})
-  console.log({status, allGifts})
+  console.log({status, allGifts, error})
+
+  const renderFetchButton = (allGifts: GiftsInBlocks[], i: number) => {
+    const nextBlock: number = i + 1
+    if (i + 1 <= allGifts.length - 1 && allGifts[i].startBlock - allGifts[nextBlock].endBlock > 2) {
+      const fromBlock = allGifts[nextBlock].endBlock + 1
+      const toBlock = allGifts[i].startBlock - 1
+
+      return (
+        <div>
+          <Button 
+            statusButton='idle'
+            onClick={() => fetchGifts(fromBlock, toBlock)} 
+          > 
+          Search for gifts in blocks {fromBlock} to {toBlock} 
+          </Button>
+        </div>
+      )
+    }
+  }
 
   const fetchAllowedGifts = useCallback(
     async () => {
@@ -61,8 +83,6 @@ export default function Page() {
       if (allGifts && allGifts[0].endBlock > fromBlock) { 
         fromBlock = allGifts[0].endBlock + 1
       }
-      // only fetch blocks if these are more than a minimum amount of blocks. 
-      // avoids loop + unnecessary api calls. 
       if (currentBlock - fromBlock > settings.minimumBlocksToFetch) {
         fetchGifts(fromBlock, currentBlock) 
       }
@@ -89,20 +109,28 @@ export default function Page() {
             className="flex flex-col h-full justify-start p-2 overflow-auto pb-20"
             >
 
-            {allGifts?.map((gifts: GiftsInBlocks) => 
-              gifts.gifts.map(gift => 
-                <GiftAvailable 
-                key = {gift.address} 
-                address = {gift.address} 
-                name = {gift.name} 
-                symbol = {gift.symbol}
-                uri = {gift.uri} 
-                points = {gift.points}
-                additionalReq ={gift.additionalReq} 
-                metadata = {gift.metadata}
-              />
-                ))
-              }        
+            {allGifts?.map((gifts: GiftsInBlocks, i) => {
+              return (
+                <>
+                {
+                gifts.gifts.map((gift, j) => 
+                  <GiftAvailable 
+                  key = {j} 
+                  address = {gift.address} 
+                  name = {gift.name} 
+                  symbol = {gift.symbol}
+                  uri = {gift.uri} 
+                  points = {gift.points}
+                  additionalReq ={gift.additionalReq} 
+                  metadata = {gift.metadata}
+                  allowed = {allowedGifts && allowedGifts.includes(gift.address) ? true : false} 
+                />
+                )}
+                { renderFetchButton(allGifts, i) }
+                </>
+              )
+            })
+          }  
           </section>
         </>
         : mode != "Available" && allowedGifts && allowedGifts.length > 0 ?
@@ -111,10 +139,10 @@ export default function Page() {
             className="flex flex-col h-full justify-start p-2 overflow-auto pb-20"
             >
             {allGifts?.map((gifts: GiftsInBlocks) => 
-              gifts.gifts.map(gift => 
+              gifts.gifts.map((gift, i) => 
                 allowedGifts.includes(gift.address) ? 
                 <GiftSelected 
-                  key = {gift.address} 
+                  key = {i} 
                   address = {gift.address} 
                   name = {gift.name} 
                   symbol = {gift.symbol}
@@ -135,7 +163,7 @@ export default function Page() {
             className="flex flex-col h-full justify-start p-2 overflow-auto pb-20"
             >
           <NoteText 
-            message ={"No selected gifts found"}
+            message ={"No gifts found"}
             size = {1}
             align = {1}
           />

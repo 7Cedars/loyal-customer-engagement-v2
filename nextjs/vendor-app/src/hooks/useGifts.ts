@@ -6,6 +6,8 @@ import { loyaltyGiftAbi } from "@/context/abi";
 import { Log, decodeEventLog } from "viem"
 import { publicClient } from "@/context/clients";
 import { parseBigIntToNumber, parseBoolean, parseEthAddress, parseMetadata, parseString, parseUri } from "@/utils/parsers";
+import { chainSettings } from "@/context/chainSettings";
+import { useChainId } from "wagmi";
 
 type GiftDeployedEvent = {
   args: {
@@ -19,16 +21,12 @@ export const useGifts = () => {
   const [error, setError] = useState<any | null>(null)
   const [fetchedGifts, setFetchedGifts] = useState<GiftsInBlocks | undefined>() // latest fetched gifts
   const [allGifts, setAllGifts] = useState<GiftsInBlocks[]>() // all gifts ever fetched. nested array, sorted by block value. 
+  const chainId = useChainId() 
+  const settings = chainSettings(chainId)
 
-  // at every refresh, the latest data from local store is loaded.  
+  // The status is reset at refresh of page. 
   useEffect(() => {
-    let localStore = localStorage.getItem("clp_v_gifts")
-    const saved: GiftsInBlocks[] = localStore ? JSON.parse(localStore) : [{
-      startBlock: 0, 
-      endBlock: 1,
-      gifts: []
-    }]
-    setAllGifts(saved)
+    setStatus('idle')
   }, [])
 
   const getGiftsContractData = useCallback( 
@@ -84,7 +82,7 @@ export const useGifts = () => {
           } 
           return giftContractData
         } catch (error) {
-          setStatus("isError") 
+          setStatus("error") 
           setError(error)
         }
       } 
@@ -108,7 +106,7 @@ export const useGifts = () => {
         } 
         return loyaltyGiftsMetadata
       } catch (error) {
-        setStatus("isError")
+        setStatus("error")
         setError(error)
       }
     }
@@ -116,11 +114,18 @@ export const useGifts = () => {
 
   const fetchGifts = useCallback(
     async (startBlock: number, endBlock: number) => {
-      setStatus("loading")
+      setStatus("pending")
 
       // loading gifts saved in localStorage. 
-      // let localStore = localStorage.getItem("clp_v_gifts")
-      const saved: GiftsInBlocks[] = allGifts ? allGifts : []
+      let localStore = localStorage.getItem("clp_v_gifts")
+      const saved: GiftsInBlocks[] = localStore ? JSON.parse(localStore) : [{
+        startBlock: 0, 
+        endBlock: settings?.genesisBlock,
+        gifts: []
+      }]
+      setAllGifts(saved)
+
+      // const saved: GiftsInBlocks[] = allGifts ? allGifts : []
       // setAllGifts(saved)
 
       // check if blocks have already been queried. 
@@ -128,7 +133,7 @@ export const useGifts = () => {
         return block.startBlock <= endBlock && startBlock <= block.endBlock 
       })
       if (alreadyChecked) {
-        setStatus("isError")
+        setStatus("error")
         setError("requested blocks already queried") 
         return;  
       }
@@ -171,7 +176,7 @@ export const useGifts = () => {
       setFetchedGifts(giftsInBlocks)
       setAllGifts(gifts)
       localStorage.setItem("clp_v_gifts", JSON.stringify(gifts));
-      setStatus("isSuccess")
+      setStatus("success")
 
     }, [getGiftsContractData]
   ) 

@@ -6,7 +6,7 @@ import {LoyaltyProgram} from "../LoyaltyProgram.sol";
 import {LoyaltyCard} from "../LoyaltyCard.sol";
 
 contract GoldToken is LoyaltyGift {
-  uint256 public constant GIFT_COST = 2500; 
+  uint256 public constant GIFT_COST = 0; 
   bool public constant HAS_ADDITIONAL_REQUIREMENTS = false; 
   // address[] wrappedgifts = []; // no wrapping possible. -- TBI. 
   

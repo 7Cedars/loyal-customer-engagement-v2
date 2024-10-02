@@ -64,7 +64,9 @@ const RedeemGiftComponent = ({
           </div>
 
             <div className='h-12 w-full flex'>  
-              <Button onClick={() => writeContract({ 
+              <Button 
+              statusButton='idle'
+              onClick={() => writeContract({ 
                   abi: loyaltyProgramAbi,
                   address: program.address,
                   functionName: 'redeemGift',

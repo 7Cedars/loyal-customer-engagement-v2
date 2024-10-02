@@ -15,9 +15,9 @@ export const TransferFunds = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {data: balanceData, refetch, fetchStatus} = useBalance({ address: prog.address })
   const decimals = 10 ** 3
-  const { data, isError, loading, isSuccess } = useWaitForTransactionReceipt(
+  const { data, isError, status: statusTransaction, isSuccess } = useWaitForTransactionReceipt(
     {  confirmations: 1, hash: hex })
-
+    
   useEffect(() => {
     setHex(undefined)
     if (dataTransaction) setHex(dataTransaction) 
@@ -47,24 +47,15 @@ export const TransferFunds = () => {
       <div className="grow">
         <NumPad onChange={(amount) =>{setTransferAmount(amount / decimals)}}/>
       </div>
-      <div className="w-full h-12 p-1">
-        {
-        isSuccess ? 
-          <Button disabled> Success! </Button>
-        :
-        loading ? // isPending does not reset. £bug? 
-          <Button disabled> Pending... </Button>
-        :
-        isError ?
-          <Button disabled> ERROR </Button> // £todo improve error handling
-        :
-        <Button onClick={()=> sendTransaction({
+      <div className="w-full h-12 p-1"> 
+        <Button 
+        statusButton={status == "success" ? statusTransaction : 'idle'}
+        onClick={()=> sendTransaction({
           to: prog.address,
           value: parseEther(String(transferAmount)),
           })}>
           Transfer
         </Button>
-        }
       </div>
     </section> 
   );

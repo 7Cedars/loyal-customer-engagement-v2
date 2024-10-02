@@ -11,7 +11,7 @@ export const GivePoints = () => {
   const [amountPoints, setAmountPoints] = useState<number>(0)
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const chainId = useChainId(); 
-  const { data: signature, isPending, isError, error, isSuccess, signTypedData, reset } = useSignTypedData()
+  const { data: signature, status, isPending, isError, error, isSuccess, signTypedData, reset } = useSignTypedData()
   const uniqueNumber = useRef(getRandomBigInt(1157920892373160));
 
   console.log({uniqueNumber})
@@ -52,7 +52,9 @@ export const GivePoints = () => {
         <NumPad onChange={(amount) =>{setAmountPoints(amount)}}/>
       </div>
       <div className="w-full h-12 p-1">
-        <Button onClick={() => signTypedData({
+        <Button 
+          statusButton = {status}
+          onClick={() => signTypedData({
                 domain, 
                 types, 
                 primaryType: 'PointsToRequest',
@@ -84,7 +86,9 @@ export const GivePoints = () => {
         </div>
 
         <div className="h-12 w-full p-1">
-          <Button onClick={() => setMode('points')}> 
+          <Button 
+            statusButton="idle"
+            onClick={() => setMode('points')}> 
             Back
           </Button>
         </div> 
