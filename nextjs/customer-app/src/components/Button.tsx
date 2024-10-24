@@ -1,7 +1,8 @@
 import { useAppSelector } from "@/redux/hooks";
+import { TwoSeventyRingWithBg } from "react-svg-spinners";
 
 type ButtonProps = {
-  disabled?: boolean;
+  statusButton: 'pending' | 'success' | 'error' | 'disabled' | 'idle';
   selected?: boolean;
   size?: 0 | 1 | 2;   
   children: any;
@@ -15,7 +16,7 @@ const fontSize = [
 ]
 
 export const Button = ({
-  disabled = false, 
+  statusButton = 'idle', 
   selected = false, 
   size = 1, 
   onClick,
@@ -33,9 +34,36 @@ export const Button = ({
         {color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}
       } // can add background, but should not be necessary.  
       onClick={onClick} 
-      disabled={disabled}
+      disabled={statusButton != 'idle'}
       >
-      {children}
+        <div className="flex flex-row justify-center items-center gap-1 w-full h-full">
+        {
+          statusButton == 'pending' ?  
+          <>
+          {/* adapted from https://github.com/n3r4zzurr0/svg-spinners/blob/main/svg-smil/180-ring-with-bg.svg?short_path=0bedbc1 */}
+          <div> 
+            <TwoSeventyRingWithBg color={selectedProgram.colourAccent}/>
+            </div>
+            <div>
+              Loading...
+              </div>
+            </>
+          : 
+          statusButton == 'success' ? 
+            <>
+            Success! 
+            </>
+          :
+          statusButton == 'error' ? 
+            <>
+            Error 
+            </>
+          :
+          <>
+          {children}
+          </>
+        }
+      </div>
     </button>
   );
 };

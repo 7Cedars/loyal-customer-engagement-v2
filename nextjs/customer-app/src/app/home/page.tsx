@@ -91,7 +91,8 @@ export default function Page() {
                 ], 
                 123456n
               )
-          }}> 
+          }}
+          statusButton="idle"> 
             {hasVoucherExpired ?  `Voucher already claimed` : `Claim ${qrPoints.points} points from voucher`} 
           </Button>
         </div>
@@ -145,7 +146,7 @@ export default function Page() {
             aria-selected={mode != undefined} 
             style={{borderColor: prog.colourAccent}}
           > 
-            <QrScanner /> 
+            < QrScanner /> 
           </div> 
         </section>
       </div>

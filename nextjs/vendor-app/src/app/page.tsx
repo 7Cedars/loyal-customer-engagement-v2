@@ -1,7 +1,7 @@
 "use client"; 
 
 import { useAccount, useReadContract } from 'wagmi';
-import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { useAppKit } from '@reown/appkit/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Program } from "../types";
 import Image from "next/image";
@@ -39,8 +39,8 @@ const CustomButton = ({
 };
 
 export default function Home() {
-  const { open } = useWeb3Modal()
   const { status, address } = useAccount()
+  const { open, close } = useAppKit()
   const [ mode, SetMode ] = useState<string>("home")  
   const router = useRouter()
   const [savedPrograms, setSavedPrograms] = useState<Program[]>([]); 

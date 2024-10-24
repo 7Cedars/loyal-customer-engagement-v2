@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Web3ModalProvider from '../context'
-import { ReduxProvider } from "../context/reduxProvider" 
+import { Providers } from "../context/Providers" 
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,11 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-      <ReduxProvider>
-        <Web3ModalProvider > {/* initialState={initialState} */}
+      <Providers>
             {children}
-          </Web3ModalProvider>
-        </ReduxProvider>
+      </Providers>
       </body>
     </html>
   )
