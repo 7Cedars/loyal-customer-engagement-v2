@@ -5,7 +5,8 @@ import { foundry, optimismSepolia } from "viem/chains";
  
 export const publicClient = createPublicClient({
   // transport: http("http://localhost:8545"),
-  transport: http(process.env.NEXT_PUBLIC_ALCHEMY_OPT_SEPOLIA_HTTPS), 
+  // transport: http(process.env.NEXT_PUBLIC_ALCHEMY_OPT_SEPOLIA_HTTPS), 
+  transport: webSocket(process.env.NEXT_PUBLIC_ALCHEMY_OPT_SEPOLIA_WSS), // process.env.NEXT_PUBLIC_ALCHEMY_OPT_SEPOLIA_WSS
 });
  
 export const bundlerClient = createBundlerClient({

@@ -15,6 +15,7 @@ import { Hex } from "viem";
 import { readContract } from '@wagmi/core'
 import { wagmiConfig } from "../../wagmi-config" 
 import { loyaltyProgramAbi } from "@/context/abi";
+import { useDisconnect } from 'wagmi'
 
 type ButtonProps = {
   disabled?: boolean;
@@ -40,11 +41,14 @@ const CustomButton = ({
 
 export default function Home() {
   const { status, address, connector } = useAccount()
-  const { open, close } = useAppKit()
+  const { disconnect } = useDisconnect() 
+  const { open } = useAppKit()
   const [ mode, SetMode ] = useState<string>("home")  
   const router = useRouter()
   const [savedPrograms, setSavedPrograms] = useState<Program[]>([]); 
   const dispatch = useDispatch() 
+
+  console.log({connector, status, address})
 
   useEffect(()=>{
     let localStore = localStorage.getItem("clp_v_programs")
@@ -55,9 +59,9 @@ export default function Home() {
 
   useEffect(()=>{
     if (connector == undefined) {
-      close() 
+      disconnect() 
     }
-  }, [, connector, close])
+  }, [, connector, disconnect])
 
   const handleSelectionProgram = async (program: Program) => {
     const imageUri = await readContract(wagmiConfig, {

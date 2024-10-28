@@ -15,7 +15,7 @@ export const TransferFunds = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {data: balanceData, refetch, fetchStatus} = useBalance({ address: prog.address })
   const decimals = 10 ** 3
-  const { data, isError, status: statusTransaction, isSuccess } = useWaitForTransactionReceipt(
+  const { data, error, status: statusTransaction, success } = useWaitForTransactionReceipt(
     {  confirmations: 1, hash: hex })
     
   useEffect(() => {
@@ -28,11 +28,11 @@ export const TransferFunds = () => {
   }, [transferAmount])
 
   useEffect(() => {
-    if(isSuccess && balanceData) {
+    if(success && balanceData) {
       refetch()
       dispatch(setBalanceProgram(Number(balanceData?.value) / 10 ** balanceData?.decimals))  
     } 
-  }, [isSuccess, balanceData, dispatch, refetch])
+  }, [success, balanceData, dispatch, refetch])
 
   console.log("fetchStatus:", fetchStatus)
 

@@ -37,7 +37,7 @@ export default function useEvents() {
 
       return eventsUpdated
       } catch (error) {
-        setStatus("isError") 
+        setStatus("error") 
         setError(error)
       }
     }
@@ -53,7 +53,7 @@ export default function useEvents() {
       // check if blocks have already been queried. 
       const alreadyChecked = prog.events.startBlock <= endBlock && startBlock <= prog.events.endBlock 
       if (alreadyChecked) {
-        setStatus("isError")
+        setStatus("error")
         setError("requested blocks already queried") 
         return;  
       }
@@ -62,7 +62,7 @@ export default function useEvents() {
         "BigInt(startBlock): ", BigInt(startBlock)
       )
       console.log(
-        "BigInt(endBlock): ",BigInt(endBlock)
+        "BigInt(endBlock): ", BigInt(endBlock)
       )
       
       // if checks pass: 
@@ -122,15 +122,18 @@ export default function useEvents() {
         genesisReached, 
         events: eventsParsed ? eventsParsed as Event[] : [] 
       }
+      console.log({eventsInBlocks})
+
+      prog.events.startBlock == 0 ? prog.events.startBlock = eventsInBlocks.startBlock : null
+
       const allEventsTemp = {
         startBlock: eventsInBlocks.startBlock < prog.events.startBlock ? eventsInBlocks.startBlock : prog.events.startBlock,
         endBlock: eventsInBlocks.endBlock > prog.events.endBlock ? eventsInBlocks.endBlock : prog.events.endBlock,
         genesisReached, 
         events: [...prog.events.events, ...eventsInBlocks.events]
       }
-      console.log(
-        "allEventsTemp:", allEventsTemp
-      )
+      console.log({allEventsTemp})
+
       // sort queries by block number.  // I might still need to sort events. See later. 
       allEventsTemp.events.sort((a, b) => {
         return a.blockData.timestamp > b.blockData.timestamp ? -1 : 1 // the latest block, with the largest block number, should end up first in line. 
@@ -143,7 +146,7 @@ export default function useEvents() {
         ...prog, 
         events: allEventsTemp
       }))
-      setStatus("isSuccess")
+      setStatus("success")
     }, [prog, dispatch]
   ) 
 

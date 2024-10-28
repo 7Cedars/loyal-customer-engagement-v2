@@ -7,7 +7,7 @@ type NumLineProps = {
   nameId: string; 
   size?: 0 | 1 | 2; 
   onClick: (arg0: string) => void;
-  loading?: boolean;
+  pending?: boolean;
   disabled?: boolean; 
   placeholder?: string; 
   buttonText?: string; 
@@ -24,7 +24,7 @@ export const InputButton = ({
   nameId, 
   size = 1, 
   onClick,
-  loading = false, 
+  pending = false, 
   disabled = false, 
   placeholder = "Write something here.",
   buttonText = "Action",

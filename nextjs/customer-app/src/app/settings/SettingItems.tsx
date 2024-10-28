@@ -39,7 +39,7 @@ export const ClearLocalStorage = () => {
 export const LoyaltyCardTests = () => {
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {loyaltyCard, error, loading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const {loyaltyCard, error, pending, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   
   console.log("@LoyaltyCardTest:", {loyaltyCard})
@@ -137,7 +137,7 @@ export const ShowCardAddress = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {loyaltyCard, error, loading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const {loyaltyCard, error, pending, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
   useEffect(() => {
     if (prog.address && embeddedWallet) 
@@ -148,7 +148,7 @@ export const ShowCardAddress = () => {
     ) 
   }, [prog, embeddedWallet, fetchLoyaltyCard])
 
-  console.log({error, loading})
+  console.log({error, pending})
 
   return (
     <section className="my-2"> 

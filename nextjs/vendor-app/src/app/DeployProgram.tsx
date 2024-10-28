@@ -15,29 +15,40 @@ import { Program, Status } from '@/types'
 import { readContracts } from '@wagmi/core'
 import { wagmiConfig } from '../../wagmi-config'
 import { chainSettings } from '@/context/chainSettings'
+import { publicClient } from '@/context/clients'
+import useWatchEvent from '@/hooks/useWatchEvent'
 
 export const DeployProgram = () => {
   const [ name, setName ] = useState<string | undefined>() 
   const [ base, setBase ] = useState<string>("#2f4632") 
-  const [ status, setStatus ] = useState<Status>("idle") 
   const [ accent, setAccent ] = useState<string>("#a9b9e8")
   const [ uri, setUri ] = useState<string | undefined>() 
   const [ tab, setTab ] = useState<string>("Base") 
   const { writeContract } = useWriteContract()
+  const { watchEvent, error, eventLog, status: watchStatus} = useWatchEvent() 
   const chainId = useChainId() 
   const deployed = chainSettings(chainId) 
   const programsFactory: Hex = deployed ? deployed.factoryProgramsAddress : '0x0'
 
+  console.log({eventLog, watchStatus})
+
   const OPTIONS: EmblaOptionsType = {}
   const savedPrograms = useRef<Program[]>([]) ; 
+
+  useEffect(()=>{
+    if ( eventLog && watchStatus == "success") {
+      handlePostDeployment([eventLog])
+    }
+  }, [eventLog, watchStatus])
 
   useEffect(()=>{
     let localStore = localStorage.getItem("clp_v_programs")
     savedPrograms.current = localStore ? JSON.parse(localStore) : []
   }, [])
 
-  const handlePostDeployment = async (logs: Log[]) => {
-    const deployEvents = parseDeployLogs(logs)
+
+  const handlePostDeployment = async (log: Log[]) => {
+    const deployEvents = parseDeployLogs(log)
     console.log("deployEvents: ", deployEvents)
 
     const deployedProgram = {
@@ -83,27 +94,10 @@ export const DeployProgram = () => {
         })
         localStorage.setItem("clp_v_programs", JSON.stringify(savedPrograms.current)); 
         console.log("savedPrograms:", savedPrograms.current)
-        setStatus("success")
       } else {
-        setStatus("error")
         console.log("error data: ", programInfo)
       }
   }
-
-  const handleDeploymentError = (error: any) => {
-    setStatus("error")
-    console.log("Deploy contract error:", error)
-  }
-
-  useWatchContractEvent({
-    address: programsFactory,
-    abi: factoryProgramsAbi,
-    batch: false, 
-    eventName: 'ProgramDeployed',
-    onLogs(logs) {
-      handlePostDeployment(logs) 
-    },
-  })
 
   const parseImage = async (src: string) => { // I have this now also in parsers. replace at a later stage.     
     const res = await fetch(src);
@@ -249,7 +243,7 @@ export const DeployProgram = () => {
         </div>
         <div className={`w-full h-10 flex flex-row px-2`}>
           <Button 
-              statusButton={status}
+              statusButton={watchStatus}
               onClick = {() =>  writeContract({ 
                   abi: factoryProgramsAbi,
                   address: programsFactory,
@@ -261,8 +255,8 @@ export const DeployProgram = () => {
                   ],
                 }, 
                 {
-                  onSuccess: () => setStatus('pending'), 
-                  onError:  (error => handleDeploymentError(error)), 
+                  onSuccess: () => watchEvent("ProgramDeployed"), 
+                  onError:  (error => console.log(error))
                 }
                 )
               }>

@@ -23,11 +23,11 @@ export default function Page() {
   const [hasVoucherExpired, setHasVoucherExpired] = useState<boolean>()  
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {loyaltyCard, error, loading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const {loyaltyCard, error, pending, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
   const dispatch = useDispatch();
   const {cardExists} = useAppSelector(state => state.loyaltyCard) 
 
-  console.log("@home page: ", {loading})
+  console.log("@home page: ", {pending})
   console.log("@home page: ", {error})
   console.log("@home page: ", {loyaltyCard})
 

@@ -11,7 +11,7 @@ export const GivePoints = () => {
   const [amountPoints, setAmountPoints] = useState<number>(0)
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const chainId = useChainId(); 
-  const { data: signature, status, isPending, isError, error, isSuccess, signTypedData, reset } = useSignTypedData()
+  const { data: signature, status, isPending, error, error, success, signTypedData, reset } = useSignTypedData()
   const uniqueNumber = useRef(getRandomBigInt(1157920892373160));
 
   console.log({error})
@@ -37,8 +37,8 @@ export const GivePoints = () => {
   } as const
 
   useEffect(() => {
-    if (isSuccess) setMode('qr')
-  }, [isSuccess])
+    if (success) setMode('qr')
+  }, [success])
 
   const selectPoints: React.JSX.Element = (
     <section className="grow flex flex-col items-center justify-center"> 

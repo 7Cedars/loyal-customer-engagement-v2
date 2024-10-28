@@ -61,7 +61,7 @@ export const useGift = () => {
           return giftContractData
           }
       } catch (error) {
-        setStatus("isError") 
+        setStatus("error") 
         setError(error)
       }
     } 
@@ -84,7 +84,7 @@ export const useGift = () => {
               return loyaltyGiftsMetadata
           }
       } catch (error) {
-        setStatus("isError") 
+        setStatus("error") 
         setError(error)
       }
     }
@@ -98,7 +98,7 @@ export const useGift = () => {
       const giftContractwithMetadata = giftContractData ? await getGiftsMetaData(giftContractData) : undefined
   
       setGift(giftContractwithMetadata)   
-      setStatus("isSuccess")
+      setStatus("success")
 
     }, [getGiftContractData])
 

@@ -42,8 +42,8 @@ export const ChangeProgramImage = () => {
   const [hex, setHex] = useState<`0x${string}`>()  
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {connector} = useAccount(); 
-  const {data: hexTransaction, error, isError, isSuccess, failureReason, writeContract } = useWriteContract()
-  const {isError: isErrorTransaction, error: errorTransaction, isLoading: loadingTransaction, isSuccess: isSuccessTransaction } = useWaitForTransactionReceipt(
+  const {data: hexTransaction, error, error, success, failureReason, writeContract } = useWriteContract()
+  const {error: errorTransaction, error: errorTransaction, isLoading: pendingTransaction, success: successTransaction } = useWaitForTransactionReceipt(
     {  confirmations: 1, hash: hex })
   const dispatch = useDispatch() 
 
@@ -57,13 +57,13 @@ export const ChangeProgramImage = () => {
   }, [hexTransaction])
 
   useEffect(() => {
-    if (isSuccessTransaction) {
+    if (successTransaction) {
       dispatch(setProgram({
         ...prog, uriImage: uri
       })) 
 
     } 
-  }, [isSuccessTransaction])
+  }, [successTransaction])
 
   const parseImage = async (src: string) => { // I have this now also in parsers. replace at a later stage.     
     const res = await fetch(src);
@@ -124,7 +124,7 @@ export const ChangeProgramImage = () => {
           className="flex h-12 max-w-96 w-full mt-6"
           >
           <Button 
-            statusButton = {!uri || uri.length == 0 || isSuccessTransaction || isError || isErrorTransaction || loadingTransaction ? 'disabled' : 'idle'}
+            statusButton = {!uri || uri.length == 0 || successTransaction || error || errorTransaction || pendingTransaction ? 'disabled' : 'idle'}
             onClick={() => writeContract({
               abi: loyaltyProgramAbi, 
               address: prog.address, 
@@ -133,11 +133,11 @@ export const ChangeProgramImage = () => {
             })
           }>
             {
-            isError || isErrorTransaction ? `Error` 
+            error || errorTransaction ? `Error` 
             : 
-            loadingTransaction ? `Loading...`
+            pendingTransaction ? `Loading...`
             :
-            isSuccessTransaction ? `Image successfully updated`
+            successTransaction ? `Image successfully updated`
             :
             "Update image"}
           </Button>

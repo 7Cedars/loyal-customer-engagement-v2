@@ -73,7 +73,7 @@ export const useGifts = () => {
         } 
         return giftContractData
       } catch (error) {
-        setStatus("isError") 
+        setStatus("error") 
         setError(error)
       }
     } 
@@ -97,7 +97,7 @@ export const useGifts = () => {
         } 
         return loyaltyGiftsMetadata
       } catch (error) {
-        setStatus("isError") 
+        setStatus("error") 
         setError(error)
       }
     }
@@ -119,7 +119,7 @@ export const useGifts = () => {
         if (JSON.stringify(savedGifts)==JSON.stringify(allowedGifts)) {
           console.log("gifts already saved.")
           setGifts(prog.gifts)
-          setStatus("isSuccess")
+          setStatus("success")
         } else {
           const giftContractData = await getGiftsContractData(allowedGifts as `0x${string}`[])
           const giftContractwithMetadata = giftContractData ? await getGiftsMetaData(giftContractData) : []
@@ -129,7 +129,7 @@ export const useGifts = () => {
             ...prog, 
             gifts: giftContractwithMetadata
           }))
-          setStatus("isSuccess")
+          setStatus("success")
         }   
       }
     }, [getGiftsContractData, dispatch, prog])

@@ -27,10 +27,10 @@ export const GiftSelected = ({
   const [selected, setSelected] = useState<boolean>(false) 
   const {connector} = useAccount(); 
   const { writeContract, error, data: transactionHash, variables, reset } = useWriteContract()
-  const { data: receipt, isError: isErrorReceipt, isSuccess: isSuccessReceipt, error: errorReceipt, status: statusReceipt } = useWaitForTransactionReceipt(
+  const { data: receipt, error: errorReceipt, success: successReceipt, error: errorReceipt, status: statusReceipt } = useWaitForTransactionReceipt(
     {  confirmations: 1, hash: transactionHash }
   )
-  const { data, isError, error: errorReadContract, status, refetch } = useReadContracts({
+  const { data, error, error: errorReadContract, status, refetch } = useReadContracts({
     contracts: [
       {...giftContract, 
         functionName: 'balanceOf',

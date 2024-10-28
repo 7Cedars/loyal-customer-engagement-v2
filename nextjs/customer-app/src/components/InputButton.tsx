@@ -7,7 +7,7 @@ type NumLineProps = {
   nameId: string; 
   size?: 0 | 1 | 2; 
   onClick: (arg0: string) => void;
-  loading?: boolean;
+  pending?: boolean;
   disabled?: boolean; 
   placeholder?: string; 
   buttonText?: string; 
@@ -23,7 +23,7 @@ export const InputButton = ({
   nameId, 
   size = 1, 
   onClick,
-  loading = false, 
+  pending = false, 
   disabled = false, 
   placeholder = "Write something here.",
   buttonText = "Action"
@@ -61,7 +61,7 @@ export const InputButton = ({
       </div> 
 
       <div className="flex min-w-36 w-fit ps-2"> 
-          { !loading ? 
+          { !pending ? 
 
           <Button onClick={ () => handleClick(input)} size = {size} >
               {buttonText}
@@ -73,7 +73,7 @@ export const InputButton = ({
                   className="rounded-lg opacity-25 flex-none mx-3 animate-spin"
                   width={30}
                   height={30}
-                  src={"/images/loading2.svg"}
+                  src={"/images/pending2.svg"}
                   alt="Loading icon"
                 />
               </div>
