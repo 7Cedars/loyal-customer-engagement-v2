@@ -29,9 +29,9 @@ export default function useWatchEvent() {
             onLogs: logs => {
                 unwatch() 
                 setEventLog(logs[0])
+                setStatus("success")
                 }
           })
-          setStatus("success")
       } catch (error) {
         setStatus("error")
         setError(error);

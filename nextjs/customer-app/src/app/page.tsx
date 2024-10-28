@@ -121,7 +121,12 @@ export default function Home() {
         }
         setProg(qrProgram)
         dispatch(setVendor(qrProgram))
-        dispatch(setVoucher(qrData.current))
+        dispatch(setVoucher({
+          program: qrData.current.program as `0x${string}`,
+          points: Number(qrData.current.points),
+          uniqueNumber: Number(qrData.current.uniqueNumber),
+          signature: qrData.current.signature as `0x${string}`
+        }))
 
         const allPrograms = savedPrograms ? [qrProgram, ...savedPrograms] : [qrProgram]  
         localStorage.setItem("clp_c_programs", JSON.stringify(allPrograms)); 

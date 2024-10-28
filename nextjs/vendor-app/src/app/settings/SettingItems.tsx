@@ -42,8 +42,8 @@ export const ChangeProgramImage = () => {
   const [hex, setHex] = useState<`0x${string}`>()  
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const {connector} = useAccount(); 
-  const {data: hexTransaction, error, error, success, failureReason, writeContract } = useWriteContract()
-  const {error: errorTransaction, error: errorTransaction, isLoading: pendingTransaction, success: successTransaction } = useWaitForTransactionReceipt(
+  const {data: hexTransaction, error, isSuccess, failureReason, writeContract } = useWriteContract()
+  const {error: errorTransaction, isLoading: pendingTransaction, isSuccess: successTransaction } = useWaitForTransactionReceipt(
     {  confirmations: 1, hash: hex })
   const dispatch = useDispatch() 
 

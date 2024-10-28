@@ -14,6 +14,7 @@ import { wagmiConfig } from "@/context/wagmiConfig";
 import { useDispatch } from "react-redux";
 import { setCardExists } from "@/redux/reducers/cardReducer";
 import { LoyaltyCard } from "@/types";
+import useWatchEvent from "@/hooks/useWatchEvent";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -26,10 +27,9 @@ export default function Page() {
   const {loyaltyCard, error, pending, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
   const dispatch = useDispatch();
   const {cardExists} = useAppSelector(state => state.loyaltyCard) 
+  const { watchEvent, eventLog, status: statusTransfer } = useWatchEvent() 
 
-  console.log("@home page: ", {pending})
-  console.log("@home page: ", {error})
-  console.log("@home page: ", {loyaltyCard})
+  console.log("@home page: ", {embeddedWallet})
 
   useEffect(() => {
     if (prog.address && embeddedWallet) {
@@ -104,8 +104,9 @@ export default function Page() {
                   ], 
                   123456n
                 )
+                watchEvent('Transfer')
             }}
-            statusButton={hasVoucherExpired ? "disabled" : "idle"}
+            statusButton={hasVoucherExpired ? "disabled" : statusTransfer}
             >
               {
               hasVoucherExpired ?  
