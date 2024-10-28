@@ -17,7 +17,7 @@ import { LoyaltyCard } from "@/types";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
-  const {qrPoints} = useAppSelector(state => state.qrPoints)
+  const {voucher} = useAppSelector(state => state.voucher)
   const [mode, setMode]  = useState<"qrscan" | undefined>()
   const [pointsOnCard, setPointsOnCard] = useState<number>()
   const [hasVoucherExpired, setHasVoucherExpired] = useState<boolean>()  
@@ -58,14 +58,14 @@ export default function Page() {
             {
               ...loyaltyProgramContract,
               functionName: 's_executed',
-              args: [qrPoints.signature]
+              args: [voucher.signature]
             }
           ],
         })
         setPointsOnCard(result[0].result as unknown as number) // this should dispatch to store. 
         setHasVoucherExpired(result[1].result as unknown as boolean)
       }}, 
-    [loyaltyCard, prog.address, qrPoints.signature, embeddedWallet, dispatch]
+    [loyaltyCard, prog.address, voucher.signature, embeddedWallet, dispatch]
   )
     
   // updating balance points of card + if card is deployed. 
@@ -74,7 +74,7 @@ export default function Page() {
       fetchDataFromProgram() 
     }
   }, [prog, fetchDataFromProgram])
-  console.log("qrPoints.points:", qrPoints.points)
+  console.log("voucher.points:", voucher.points)
   
   return (
     <Layout> 
@@ -85,7 +85,7 @@ export default function Page() {
         />  
         <div className="grow flex flex-col justify-start items-center">
       {
-        qrPoints.points != 0 ? 
+        voucher.points != 0 ? 
           <div className="w-full sm:w-4/5 lg:w-1/2 h-16 p-2 mt-4">
             <Button onClick={() => {
               if (loyaltyCard && prog.address && embeddedWallet) 
@@ -96,11 +96,11 @@ export default function Page() {
                   loyaltyCard as LoyaltyCard, 
                   'requestPoints', 
                   [
-                    qrPoints.program, 
-                    qrPoints.points, 
-                    qrPoints.uniqueNumber, 
+                    voucher.program, 
+                    voucher.points, 
+                    voucher.uniqueNumber, 
                     embeddedWallet?.address as `0x${string}`,  
-                    qrPoints.signature
+                    voucher.signature
                   ], 
                   123456n
                 )
@@ -112,9 +112,9 @@ export default function Page() {
                 `Voucher already claimed` 
               : 
               cardExists ? 
-                `Claim ${qrPoints.points} points from voucher`
+                `Claim ${voucher.points} points from voucher`
               :
-                `Request card and claim ${qrPoints.points} points`
+                `Request card and claim ${voucher.points} points`
               } 
             </Button>
           </div>

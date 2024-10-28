@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { QrPoints } from '../../types'
 
 type voucherProps = {
   program: `0x${string}`;  
@@ -8,12 +7,12 @@ type voucherProps = {
   signature: `0x${string}`; 
 }
 
-interface QrPointsData {
-  qrPoints: voucherProps 
+interface VoucherData {
+  voucher: voucherProps 
 }
 
-const initialState: QrPointsData = {
-  qrPoints: {
+const initialState: VoucherData = {
+  voucher: {
     program: "0x0",  
     points: 0,  
     uniqueNumber: 0, 
@@ -21,16 +20,16 @@ const initialState: QrPointsData = {
   }
 } 
   
-export const qrPointsSlice = createSlice({
-  name: 'qrPoints',
+export const voucherSlice = createSlice({
+  name: 'voucher',
   initialState: initialState,
   reducers: {
-    setQrPoints: (state, action: PayloadAction<voucherProps>) => {
-      state.qrPoints = action.payload
+    setVoucher: (state, action: PayloadAction<voucherProps>) => {
+      state.voucher = action.payload
     }, 
-    resetQrPoints: (state, action: PayloadAction<boolean>) => {
+    resetVoucher: (state, action: PayloadAction<boolean>) => {
       if (action.payload === true) {
-        state.qrPoints = {
+        state.voucher = {
           program: "0x0",  
           points: 0,  
           uniqueNumber: 0, 
@@ -41,6 +40,6 @@ export const qrPointsSlice = createSlice({
   }
 })
 
-export const { setQrPoints, resetQrPoints } = qrPointsSlice.actions
-export default qrPointsSlice.reducer
+export const { setVoucher, resetVoucher } = voucherSlice.actions
+export default voucherSlice.reducer
 

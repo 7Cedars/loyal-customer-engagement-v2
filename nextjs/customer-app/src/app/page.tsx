@@ -3,7 +3,7 @@
 import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi";
 import { wagmiConfig } from "@/context/wagmiConfig";
 import { resetVendor, setVendor } from "@/redux/reducers/vendorReducer";
-import { setQrPoints } from "@/redux/reducers/qrPointsReducer";
+import { setVoucher } from "@/redux/reducers/voucherReducer";
 import { Program, QrPoints } from "@/types";
 import {  parseBigInt, parseHex, parseNumber, parseString } from "@/utils/parsers";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
@@ -121,7 +121,7 @@ export default function Home() {
         }
         setProg(qrProgram)
         dispatch(setVendor(qrProgram))
-        dispatch(setQrPoints(qrData.current))
+        dispatch(setVoucher(qrData.current))
 
         const allPrograms = savedPrograms ? [qrProgram, ...savedPrograms] : [qrProgram]  
         localStorage.setItem("clp_c_programs", JSON.stringify(allPrograms)); 

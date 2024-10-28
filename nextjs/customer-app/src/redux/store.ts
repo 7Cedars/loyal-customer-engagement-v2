@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import programReducer from './reducers/vendorReducer'
-import qrPointsReducer from './reducers/qrPointsReducer'
+import voucherReducer from './reducers/voucherReducer'
 import cardReducer from './reducers/cardReducer'
 
 export const store = configureStore({
   reducer: {
     selectedProgram: programReducer,
-    qrPoints: qrPointsReducer, 
+    voucher: voucherReducer, 
     loyaltyCard: cardReducer
   }
 })
