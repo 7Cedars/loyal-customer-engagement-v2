@@ -31,7 +31,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
         >
         About
       </Link>
-      
+
       <Link 
         href='/home' 
         aria-selected={path == `/home`}
@@ -58,7 +58,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
         >
         Transactions
       </Link>
-      
+
       <Link 
         href='/settings' 
         aria-selected={path == `/settings`}

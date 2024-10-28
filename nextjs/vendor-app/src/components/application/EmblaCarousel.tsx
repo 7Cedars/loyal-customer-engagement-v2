@@ -64,10 +64,16 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
         </div>
         <div className="w-full flex flex-row p-2"> 
           <div className='w-full grid grid-cols-2 gap-2'> 
-            <Button onClick = {onPrevButtonClick} >
+            <Button 
+              onClick = {onPrevButtonClick} 
+              statusButton='idle'
+              >
               Previous
             </Button>
-            <Button onClick = {onNextButtonClick} >
+            <Button 
+              onClick = {onNextButtonClick}
+              statusButton='idle' 
+            >
               Next
             </Button>
           </div> 

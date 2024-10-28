@@ -74,6 +74,7 @@ export default function Page() {
       fetchDataFromProgram() 
     }
   }, [prog, fetchDataFromProgram])
+  console.log("qrPoints.points:", qrPoints.points)
   
   return (
     <Layout> 
@@ -81,40 +82,45 @@ export default function Page() {
         title = {prog.name ? prog.name : "Home"} 
         subtitle= {cardExists ?  `${pointsOnCard} points` : `You do not have a loyalty card yet`} 
         size = {2} 
-        /> 
-      <div className="grow flex flex-col justify-start items-center">
-        <div className="w-full sm:w-4/5 lg:w-1/2 h-16 p-2 mt-4">
-          <Button onClick={() => {
-            if (loyaltyCard && prog.address && embeddedWallet) 
-              console.log("prog.address:", prog.address)
-              console.log("embeddedWallet.address:", embeddedWallet?.address)
-              sendUserOp(
-                prog.address as `0x${string}`, 
-                loyaltyCard as LoyaltyCard, 
-                'requestPoints', 
-                [
-                  qrPoints.program, 
-                  qrPoints.points, 
-                  qrPoints.uniqueNumber, 
-                  embeddedWallet?.address as `0x${string}`,  
-                  qrPoints.signature
-                ], 
-                123456n
-              )
-          }}
-          statusButton={hasVoucherExpired ? "disabled" : "idle"}
-          >
-            {
-            hasVoucherExpired ?  
-              `Voucher already claimed` 
-            : 
-            cardExists ? 
-              `Claim ${qrPoints.points} points from voucher`
-            :
-              `Request card and claim ${qrPoints.points} points`
-            } 
-          </Button>
-        </div>
+        />  
+        <div className="grow flex flex-col justify-start items-center">
+      {
+        qrPoints.points != 0 ? 
+          <div className="w-full sm:w-4/5 lg:w-1/2 h-16 p-2 mt-4">
+            <Button onClick={() => {
+              if (loyaltyCard && prog.address && embeddedWallet) 
+                
+                console.log("embeddedWallet.address:", embeddedWallet?.address)
+                sendUserOp(
+                  prog.address as `0x${string}`, 
+                  loyaltyCard as LoyaltyCard, 
+                  'requestPoints', 
+                  [
+                    qrPoints.program, 
+                    qrPoints.points, 
+                    qrPoints.uniqueNumber, 
+                    embeddedWallet?.address as `0x${string}`,  
+                    qrPoints.signature
+                  ], 
+                  123456n
+                )
+            }}
+            statusButton={hasVoucherExpired ? "disabled" : "idle"}
+            >
+              {
+              hasVoucherExpired ?  
+                `Voucher already claimed` 
+              : 
+              cardExists ? 
+                `Claim ${qrPoints.points} points from voucher`
+              :
+                `Request card and claim ${qrPoints.points} points`
+              } 
+            </Button>
+          </div>
+          :
+          null  
+        }
         <section 
           className="h-full w-full flex flex-col justify-start items-center mb-16 md:mb-0">
           
