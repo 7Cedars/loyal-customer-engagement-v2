@@ -1,7 +1,7 @@
 "use client"; 
 
 import { useAccount, useReadContract } from 'wagmi';
-import { useAppKit } from '@reown/appkit/react';
+import { useAppKit, useWalletInfo } from '@reown/appkit/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Program } from "../types";
 import Image from "next/image";
@@ -39,7 +39,7 @@ const CustomButton = ({
 };
 
 export default function Home() {
-  const { status, address } = useAccount()
+  const { status, address, connector } = useAccount()
   const { open, close } = useAppKit()
   const [ mode, SetMode ] = useState<string>("home")  
   const router = useRouter()
@@ -51,7 +51,13 @@ export default function Home() {
     const saved: Program[] = localStore ? JSON.parse(localStore) : []
     setSavedPrograms(saved)
     dispatch(resetProgram(true)) 
-  }, [, mode])
+  }, [, mode, dispatch])
+
+  useEffect(()=>{
+    if (connector == undefined) {
+      close() 
+    }
+  }, [, connector, close])
 
   const handleSelectionProgram = async (program: Program) => {
     const imageUri = await readContract(wagmiConfig, {

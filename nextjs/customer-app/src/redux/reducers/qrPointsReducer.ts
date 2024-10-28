@@ -8,8 +8,8 @@ interface QrPointsData {
 const initialState: QrPointsData = {
   qrPoints: {
     program: "0x0",  
-    points: 0,  
-    uniqueNumber: 0, 
+    points: 0n,  
+    uniqueNumber: 0n, 
     signature: "0x0" 
   }
 } 
@@ -25,8 +25,8 @@ export const qrPointsSlice = createSlice({
       if (action.payload === true) {
         state.qrPoints = {
           program: "0x0",  
-          points: 0,  
-          uniqueNumber: 0, 
+          points: 0n,  
+          uniqueNumber: 0n, 
           signature: "0x0" 
         } 
       }

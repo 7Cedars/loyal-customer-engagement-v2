@@ -8,7 +8,6 @@ import { useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
 import QRCode from "react-qr-code";
-import { numberToHex } from "viem";
 import { useChainId, useReadContract, useSignTypedData, useWriteContract } from "wagmi";
 
 export const GiftInfo = ({
@@ -24,7 +23,7 @@ export const GiftInfo = ({
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const { data: signature, isPending, isError: isErrorSignTypedData, error, isSuccess, signTypedData, reset } = useSignTypedData()
   const {loyaltyCard, error: errorCard, loading: loadingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
-  const { data: giftId, isError, loading, status, refetch, error: tokenOfOwnerByIndexError } = useReadContract({
+  const { data: giftId, isError, status, refetch, error: tokenOfOwnerByIndexError } = useReadContract({
     address: address,
     abi: loyaltyGiftAbi,
     functionName: 'tokenOfOwnerByIndex',
@@ -147,13 +146,17 @@ export const GiftInfo = ({
         { signature ? renderedQrCode : noRenderedQrCode } 
         <div className="px-2 h-10 my-4"> 
           { signature? 
-            <Button onClick={() => reset()}> 
+            <Button 
+              onClick={() => reset()}
+              statusButton="idle"
+            > 
               Back
             </Button>
             :
             <Button
               size = {0}
               aria-disabled = {selected}
+              statusButton="idle"
               onClick={() => signTypedData({
                 domain, 
                 types, 

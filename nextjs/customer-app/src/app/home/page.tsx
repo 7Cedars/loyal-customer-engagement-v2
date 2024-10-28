@@ -11,6 +11,8 @@ import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { loyaltyProgramAbi } from "@/context/abi";
 import { readContracts } from "wagmi/actions";
 import { wagmiConfig } from "@/context/wagmiConfig";
+import { useDispatch } from "react-redux";
+import { setCardExists } from "@/redux/reducers/cardReducer";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -21,19 +23,28 @@ export default function Page() {
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, loading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const dispatch = useDispatch();
+  const {cardExists} = useAppSelector(state => state.loyaltyCard) 
 
   console.log({qrPoints})
   console.log("@home page: ", {loyaltyCard})
 
+  useEffect(() => {    
+    if (prog.address && embeddedWallet) {
+      fetchLoyaltyCard(prog.address, 123456n, embeddedWallet)
+    }
+  }, [, prog.address, embeddedWallet, fetchLoyaltyCard])
+
   const fetchDataFromProgram = useCallback(  
     async () => {
+      const isDeployed = await loyaltyCard?.isDeployed() 
+      dispatch(setCardExists(isDeployed ? true : false))
+
       if (loyaltyCard && loyaltyCard.address && prog.address && embeddedWallet) {
         const loyaltyProgramContract = {
           address: prog.address, 
           abi: loyaltyProgramAbi,
         } as const
-
-        const isDeployed = await loyaltyCard?.isDeployed() 
 
         const result = await readContracts(wagmiConfig, {
           contracts: [
@@ -49,19 +60,13 @@ export default function Page() {
             }
           ],
         })
-        setPointsOnCard(result[0].result as unknown as number)
+        setPointsOnCard(result[0].result as unknown as number) // this should dispatch to store. 
         setHasVoucherExpired(result[1].result as unknown as boolean)
       }}, 
-    [loyaltyCard, prog.address, qrPoints.signature, embeddedWallet]
+    [loyaltyCard, prog.address, qrPoints.signature, embeddedWallet, dispatch]
   )
-      
-  useEffect(() => {    
-    if (prog.address && embeddedWallet) {
-      fetchLoyaltyCard(prog.address, 123456n, embeddedWallet)
-    }
-  }, [, prog.address, embeddedWallet, fetchLoyaltyCard])
-
-  // updating balance points of card. 
+    
+  // updating balance points of card + if card is deployed. 
   useEffect(() => {
     if (prog) {
       fetchDataFromProgram() 
@@ -72,7 +77,7 @@ export default function Page() {
     <Layout> 
       <TitleText 
         title = {prog.name ? prog.name : "Home"} 
-        subtitle= {pointsOnCard ?  `${pointsOnCard} points` : `0 points`} 
+        subtitle= {cardExists ?  `${pointsOnCard} points` : `You do not have a loyalty card yet`} 
         size = {2} 
         /> 
       <div className="grow flex flex-col justify-start items-center">
@@ -95,7 +100,15 @@ export default function Page() {
           }}
           statusButton={hasVoucherExpired ? "disabled" : "idle"}
           >
-            {hasVoucherExpired ?  `Voucher already claimed` : `Claim ${qrPoints.points} points from voucher`} 
+            {
+            hasVoucherExpired ?  
+              `Voucher already claimed` 
+            : 
+            cardExists ? 
+              `Claim ${qrPoints.points} points from voucher`
+            :
+              `Request card and claim ${qrPoints.points} points`
+            } 
           </Button>
         </div>
         <section 

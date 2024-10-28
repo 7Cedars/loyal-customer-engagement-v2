@@ -14,6 +14,7 @@ import type { PropsWithChildren } from "react";
 import { useRouter } from 'next/navigation'
 import { useEffect } from "react";
 
+
 type NavbarProps = {
   path: string; 
   base: string; 
@@ -21,6 +22,8 @@ type NavbarProps = {
 }
  
 const NavbarTop = ({path, base, accent}: NavbarProps) => {
+  const {cardExists} = useAppSelector(state => state.loyaltyCard) 
+
   return (
     <header className="absolute w-screen top-0 z-20 flex flex-row justify-around h-18 text-sm px-6 pt-2">
       <Link 
@@ -44,8 +47,9 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
       <Link 
         href='/exchangePoints' 
         aria-selected={path == `/exchangePoints`}
-        className={"p-3 px-6 opacity-25 aria-selected:opacity-100"}
-        style={{color:accent}}
+        aria-disabled={!cardExists}
+        className={"p-3 px-6 opacity-25 aria-selected:opacity-100 aria-disabled:opacity-10"}
+        style={cardExists ? {color:accent} : {color:accent, pointerEvents: "none"}}
         >
         Exchange Points
       </Link>
@@ -53,8 +57,9 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
       <Link 
         href='/redeemGifts' 
         aria-selected={path == `/redeemGifts`}
-        className={"p-3 px-6 opacity-25 aria-selected:opacity-100"}
-        style={{color:accent}}
+        aria-disabled={!cardExists}
+        className={"p-3 px-6 opacity-25 aria-selected:opacity-100 aria-disabled:opacity-10"}
+        style={cardExists ? {color:accent} : {color:accent, pointerEvents: "none"}}
         >
         Redeem Gifts
       </Link>
@@ -81,6 +86,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
   }
 
   const NavbarBottom = ({path, base, accent}: NavbarProps) => {
+      const {cardExists} = useAppSelector(state => state.loyaltyCard) 
       const layoutIconBox: string = 'col-span-1 grid text-xs justify-items-center'
       const layoutIcons: string = 'h-7 w-7'
     
@@ -105,20 +111,24 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
           <Link 
           href={"/gifts"} 
           aria-selected={path == "/exchangePoints" } 
-          className={"p-3 px-6 opacity-25 aria-selected:opacity-100"}
+          aria-disabled={!cardExists}
+          className={"p-3 px-6 opacity-25 aria-selected:opacity-100 aria-disabled:opacity-10"}
+          style={cardExists ? {} : {pointerEvents: "none"}}
           >
             <div className={layoutIconBox}> 
               <ShoppingCartIcon
               className={layoutIcons}
               style={{color:accent}}
               />
-            Exchange           
+            Exchange   
             </div>  
          </Link>
          <Link 
           href={"/transactions"} 
           aria-selected={path == "/redeemGifts" } 
-          className={"p-3 px-6 opacity-25 aria-selected:opacity-100"}
+          aria-disabled={!cardExists}
+          style={cardExists ? {} : {pointerEvents: "none"}}
+          className={"p-3 px-6 opacity-25 aria-selected:opacity-100 aria-disabled:opacity-10"}
           >
             <div className={layoutIconBox}> 
               <GiftIcon

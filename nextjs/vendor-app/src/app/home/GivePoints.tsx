@@ -14,7 +14,7 @@ export const GivePoints = () => {
   const { data: signature, status, isPending, isError, error, isSuccess, signTypedData, reset } = useSignTypedData()
   const uniqueNumber = useRef(getRandomBigInt(1157920892373160));
 
-  console.log({uniqueNumber})
+  console.log({error})
   
   const domain = {
     name: prog.name, 
