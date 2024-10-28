@@ -17,13 +17,10 @@ export const programSlice = createSlice({
   name: 'selectedProgram',
   initialState: initialState,
   reducers: {
-    setProgram: (state, action: PayloadAction<Program>) => {
+    setVendor: (state, action: PayloadAction<Program>) => {
       state.selectedProgram = action.payload
-    }, 
-    setBalanceProgram: (state, action: PayloadAction<Number>) => {
-      state.selectedProgram = {...state.selectedProgram, balance: action.payload} 
-    }, 
-    resetProgram: (state, action: PayloadAction<boolean>) => {
+    },
+    resetVendor: (state, action: PayloadAction<boolean>) => {
       if (action.payload === true) {
         state.selectedProgram = {
           colourBase: "#f1f5f9", 
@@ -34,6 +31,6 @@ export const programSlice = createSlice({
   }
 })
 
-export const { setProgram, setBalanceProgram, resetProgram } = programSlice.actions
+export const { setVendor, resetVendor } = programSlice.actions
 export default programSlice.reducer
 

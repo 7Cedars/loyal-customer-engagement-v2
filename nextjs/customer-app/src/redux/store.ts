@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import programReducer from './reducers/programReducer'
+import programReducer from './reducers/vendorReducer'
 import qrPointsReducer from './reducers/qrPointsReducer'
 import abstractAccountReducer from './reducers/abstractAccountReducer'
 

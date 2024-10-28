@@ -23,6 +23,7 @@ export default function Page() {
   const {loyaltyCard, error, loading, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
   console.log({qrPoints})
+  console.log("@home page: ", {loyaltyCard})
 
   const fetchDataFromProgram = useCallback(  
     async () => {
@@ -92,7 +93,8 @@ export default function Page() {
                 123456n
               )
           }}
-          statusButton="idle"> 
+          statusButton={hasVoucherExpired ? "disabled" : "idle"}
+          >
             {hasVoucherExpired ?  `Voucher already claimed` : `Claim ${qrPoints.points} points from voucher`} 
           </Button>
         </div>

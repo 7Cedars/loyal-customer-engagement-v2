@@ -2,7 +2,7 @@
 
 import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi";
 import { wagmiConfig } from "@/context/wagmiConfig";
-import { resetProgram, setProgram } from "@/redux/reducers/programReducer";
+import { resetVendor, setVendor } from "@/redux/reducers/vendorReducer";
 import { setQrPoints } from "@/redux/reducers/qrPointsReducer";
 import { Program, QrPoints } from "@/types";
 import {  parseBigInt, parseHex, parseNumber, parseString } from "@/utils/parsers";
@@ -120,7 +120,7 @@ export default function Home() {
           entryPoint: parseHex(temp[6].result)
         }
         setProg(qrProgram)
-        dispatch(setProgram(qrProgram))
+        dispatch(setVendor(qrProgram))
         dispatch(setQrPoints(qrData.current))
 
         const allPrograms = savedPrograms ? [qrProgram, ...savedPrograms] : [qrProgram]  
@@ -133,7 +133,7 @@ export default function Home() {
 
   const handleSelectionProgram = async (program: Program) => {
     setProg(program)
-    dispatch(setProgram(program))
+    dispatch(setVendor(program))
     router.push('/home')
   }
 

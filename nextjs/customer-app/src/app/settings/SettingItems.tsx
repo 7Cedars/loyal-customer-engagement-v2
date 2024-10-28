@@ -10,7 +10,7 @@ import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagm
 import { loyaltyProgramAbi } from "@/context/abi";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
-import { setProgram } from "@/redux/reducers/programReducer";
+import { setVendor } from "@/redux/reducers/vendorReducer";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { useWallets } from "@privy-io/react-auth";
 import { numberToHex } from "viem";
@@ -34,7 +34,10 @@ export const ClearLocalStorage = () => {
       subtext="This will mean you loose all stored programs, gifts and transaction history. It can be difficult to restore."
       />
       <div className="flex h-12 max-w-96 w-full mt-6">
-        <Button onClick={() => handleClearLocalStorage()}>
+        <Button 
+          onClick={() => handleClearLocalStorage()}
+          statusButton="idle"
+          >
           {cleared ? "Local storage cleared" : "Yes, delete Local Storage." } 
         </Button>
       </div>
@@ -90,7 +93,10 @@ export const LoyaltyCardTests = () => {
       text="Loyalty Card Tests"
       />
       <div className="flex h-12 max-w-96 w-full mt-6">
-        <Button onClick={() => { handleTest(loyaltyCard ? loyaltyCard : undefined) } }>
+        <Button 
+          onClick={() => { handleTest(loyaltyCard ? loyaltyCard : undefined) } }
+          statusButton="idle"
+          >
           Test 
         </Button>
       </div>

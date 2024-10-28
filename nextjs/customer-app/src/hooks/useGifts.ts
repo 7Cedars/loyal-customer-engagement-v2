@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { parseBigIntToNumber, parseBoolean, parseEthAddress, parseMetadata, parseString, parseUri } from "@/utils/parsers";
 import { useReadContract } from "wagmi";
 import { readContract } from "wagmi/actions";
-import { setProgram } from "@/redux/reducers/programReducer";
+import { setVendor } from "@/redux/reducers/vendorReducer";
 
 export const useGifts = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -125,7 +125,7 @@ export const useGifts = () => {
           const giftContractwithMetadata = giftContractData ? await getGiftsMetaData(giftContractData) : []
   
           setGifts(giftContractwithMetadata)
-          dispatch(setProgram({
+          dispatch(setVendor({
             ...prog, 
             gifts: giftContractwithMetadata
           }))
