@@ -92,7 +92,7 @@ export const useGift = () => {
 
   const fetchGift = useCallback(
     async (requestedGift: `0x${string}`) => {
-      setStatus("loading")
+      setStatus("pending")
 
       const giftContractData = await getGiftContractData(requestedGift)
       const giftContractwithMetadata = giftContractData ? await getGiftsMetaData(giftContractData) : undefined

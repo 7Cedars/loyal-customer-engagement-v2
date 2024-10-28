@@ -35,7 +35,7 @@ type gasPriceProps = {
 
 export const useLoyaltyCard = () => { // here types can be added: "exchangePoints", etc 
   const [error, setError] = useState<string | null>(null); 
-  const [loading, setLoading] = useState<boolean>(false); 
+  const [pending, setLoading] = useState<boolean>(false); 
   const [loyaltyCard, setLoyaltyCard] = useState<LoyaltyCard>(); 
   const [userOp, setUserOp] = useState<UserOperation<"v0.7">>(); 
 
@@ -394,7 +394,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     }
   }, [prog, embeddedWallet, fetchLoyaltyCard])
 
-    return { fetchLoyaltyCard, loyaltyCard, loading, error, createUserOp, userOp, sendUserOp};
+    return { fetchLoyaltyCard, loyaltyCard, pending, error, createUserOp, userOp, sendUserOp};
   
   }
 

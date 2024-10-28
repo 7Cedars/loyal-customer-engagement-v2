@@ -116,7 +116,7 @@ export const useGifts = () => {
     async (startBlock: number, endBlock: number) => {
       setStatus("pending")
 
-      // loading gifts saved in localStorage. 
+      // pending gifts saved in localStorage. 
       let localStore = localStorage.getItem("clp_v_gifts")
       const saved: GiftsInBlocks[] = localStore ? JSON.parse(localStore) : [{
         startBlock: 0, 

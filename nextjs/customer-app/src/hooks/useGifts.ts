@@ -105,7 +105,7 @@ export const useGifts = () => {
 
   const fetchGifts = useCallback(
     async () => {
-      setStatus("loading")
+      setStatus("pending")
 
       if (prog.address) {
         const allowedGifts = await readContract(wagmiConfig, {
