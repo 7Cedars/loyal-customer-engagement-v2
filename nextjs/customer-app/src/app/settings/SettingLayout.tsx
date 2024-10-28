@@ -1,5 +1,6 @@
 import { TitleText } from "@/components/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
+import { ChevronDownIcon } from '@heroicons/react/24/outline'
 
 type ButtonProps = {
   selected: boolean; 
@@ -36,10 +37,14 @@ export const SettingLayout = ({
       aria-selected = {selected}
       >
       <button 
-        className={`z-10 w-full h-fit flex flex-row justify-start pt-2`} 
+        className={`z-10 w-full h-fit flex flex-row justify-between items-center pt-2`} 
         onClick={onClick}
         >
-        <TitleText size={1} title={""} subtitle={titleText} /> 
+        <TitleText size={1} title={""} subtitle={titleText} />
+        <ChevronDownIcon 
+          className="w-4 h-4 aria-selected:rotate-180 transition-all ease-in-out duration-300 delay-300" 
+          aria-selected = {selected}
+          />
       </button>
 
       {/* NB transitions do not work with variable height props. (such as h-fit; h-min; etc.)   */}

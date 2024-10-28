@@ -6,10 +6,11 @@ import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth"
 import { ENTRYPOINT_ADDRESS_V07, parseAccount, UserOperation,  } from "permissionless"
 import { useCallback, useEffect, useState } from "react"
 import { encodeFunctionData, numberToHex, pad } from "viem"
-import { getUserOperationHash, ToSmartAccountReturnType } from "viem/account-abstraction"
+import { getUserOperationHash } from "viem/account-abstraction"
 import { toSmartAccount } from 'viem/account-abstraction'
 import { chainSettings } from "../context/chainSettings"
 import { useChainId } from "wagmi"
+import { LoyaltyCard } from "@/types"
 
 // 
 // See the docs at: https://docs.privy.io/guide/react/recipes/account-abstraction/pimlico 
@@ -35,7 +36,7 @@ type gasPriceProps = {
 export const useLoyaltyCard = () => { // here types can be added: "exchangePoints", etc 
   const [error, setError] = useState<string | null>(null); 
   const [loading, setLoading] = useState<boolean>(false); 
-  const [loyaltyCard, setLoyaltyCard] = useState<ToSmartAccountReturnType>(); 
+  const [loyaltyCard, setLoyaltyCard] = useState<LoyaltyCard>(); 
   const [userOp, setUserOp] = useState<UserOperation<"v0.7">>(); 
 
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -234,7 +235,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     }, [])
 
     const createUserOp = useCallback(
-      async (loyaltyProgram:  `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: bigint) => {
+      async (loyaltyProgram:  `0x${string}`, loyaltyCard: LoyaltyCard, functionName: string, args: any[], salt: bigint) => {
         const callGasLimit: bigint = 1659000n
         // £todo. NB! Re gas costs: see https://docs.optimism.io/builders/app-developers/transactions/parameters 
         // ALSO! this needs to be set in chain config! -- calculation differs per chain.. 
@@ -293,6 +294,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
           })
 
           console.log("address @createUserOp", cardAddress)
+          console.log("entrypoint @createUserOp", entryPoint.address)
           
           try {
             nonce = await publicClient.readContract({
@@ -313,6 +315,8 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
             functionName: functionName, 
             args: args
           })
+
+          console.log("functionData @createUserOp", functionData)
 
           //dest, value, functionData)
 
@@ -366,7 +370,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
     }, [])
 
     const sendUserOp = useCallback(
-      async (loyaltyProgram: `0x${string}`, loyaltyCard: ToSmartAccountReturnType, functionName: string, args: any[], salt: bigint) => {
+      async (loyaltyProgram: `0x${string}`, loyaltyCard: LoyaltyCard, functionName: string, args: any[], salt: bigint) => {
         console.log("sendUserOp called")
 
         const userOperation = await createUserOp(loyaltyProgram, loyaltyCard, functionName, args, salt);

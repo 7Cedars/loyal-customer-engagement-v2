@@ -13,6 +13,7 @@ import { readContracts } from "wagmi/actions";
 import { wagmiConfig } from "@/context/wagmiConfig";
 import { useDispatch } from "react-redux";
 import { setCardExists } from "@/redux/reducers/cardReducer";
+import { LoyaltyCard } from "@/types";
 
 export default function Page() {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -26,10 +27,11 @@ export default function Page() {
   const dispatch = useDispatch();
   const {cardExists} = useAppSelector(state => state.loyaltyCard) 
 
-  console.log({qrPoints})
+  console.log("@home page: ", {loading})
+  console.log("@home page: ", {error})
   console.log("@home page: ", {loyaltyCard})
 
-  useEffect(() => {    
+  useEffect(() => {
     if (prog.address && embeddedWallet) {
       fetchLoyaltyCard(prog.address, 123456n, embeddedWallet)
     }
@@ -84,15 +86,17 @@ export default function Page() {
         <div className="w-full sm:w-4/5 lg:w-1/2 h-16 p-2 mt-4">
           <Button onClick={() => {
             if (loyaltyCard && prog.address && embeddedWallet) 
+              console.log("prog.address:", prog.address)
+              console.log("embeddedWallet.address:", embeddedWallet?.address)
               sendUserOp(
-                prog.address, 
-                loyaltyCard, 
+                prog.address as `0x${string}`, 
+                loyaltyCard as LoyaltyCard, 
                 'requestPoints', 
                 [
                   qrPoints.program, 
                   qrPoints.points, 
                   qrPoints.uniqueNumber, 
-                  embeddedWallet.address, 
+                  embeddedWallet?.address as `0x${string}`,  
                   qrPoints.signature
                 ], 
                 123456n

@@ -1,21 +1,13 @@
 import { Button } from "../../components/Button";
-import { InputBox } from "../../components/InputBox";
 import { NoteText, SectionText, TitleText } from "@/components/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
-import { useRouter } from 'next/navigation'
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import QRCode from "react-qr-code";
-import Image from "next/image";
-import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { loyaltyProgramAbi } from "@/context/abi";
 import Link from "next/link";
-import { useDispatch } from "react-redux";
-import { setVendor } from "@/redux/reducers/vendorReducer";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { useWallets } from "@privy-io/react-auth";
-import { numberToHex } from "viem";
-import { ToSmartAccountReturnType } from "viem/account-abstraction";
-import { readContract } from "viem/actions";
+import { LoyaltyCard } from "@/types"; 
 import { readContracts } from "wagmi/actions";
 import { wagmiConfig } from "@/context/wagmiConfig";
 
@@ -53,7 +45,7 @@ export const LoyaltyCardTests = () => {
   console.log("@LoyaltyCardTest:", {loyaltyCard})
 
   const handleTest = useCallback(
-    async (loyaltyCard: ToSmartAccountReturnType | undefined) => {
+    async (loyaltyCard: LoyaltyCard | undefined) => {
       console.log("@LoyaltyCardTest: handleTest triggered")
       if (loyaltyCard && prog.address) {
 

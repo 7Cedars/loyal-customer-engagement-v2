@@ -72,6 +72,8 @@ export type Event = {
   blockData?: Any
 }
 
+export type LoyaltyCard = ToSmartAccountReturnType;  
+
 type GiftListed = {
 
 }

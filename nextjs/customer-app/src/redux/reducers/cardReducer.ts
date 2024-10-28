@@ -1,8 +1,8 @@
+import { LoyaltyCard } from '@/types';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ToSmartAccountReturnType } from 'viem/account-abstraction';
 
 interface cardReducerProps {
-  loyaltyCard: ToSmartAccountReturnType | undefined; 
+  loyaltyCard: LoyaltyCard | undefined; 
   cardExists: boolean; 
 }
 
