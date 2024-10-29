@@ -1,47 +1,70 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<p align="center">
+
+<br />
+<div align="center">
+  <a href="https://github.com/7Cedars/loyal-customer-engagement-v2"> 
+    <img src="./public/logo.png" alt="Logo" width="200" height="200">
+  </a>
+
+<h2 align="center">Customer Loyalty Program: Vendor App</h2>
+  <p align="center">
+    Here subtitle 
+    <br />
+    <br />
+    <!--NB: TO DO --> 
+    <a href="../README.md">Conceptual overview</a>
+    ·
+    <a href="#getting-started">Getting Started</a>
+    ·
+    <a href="#live-version">Live version</a>
+  </p>
+  <br />
+  <br />
+</div>
+
+## What's included
+
+[Next.js](https://nextjs.org/) - Framework<br>
+[ReOwn](https://reown.com/) - Wallet Framework<br>
+[TailwindCSS](https://tailwindcss.com/) - Styling<br>
+[TypeScript](https://www.typescriptlang.org/) - Type safety<br>
+[Redux](redux.js.org) - state management<br>
+
+## Directory Structure
+
+```
+.
+├── .well-known                         # reown appkit id
+ 
+ ... TODO 
+
+├── LICENSE
+└── README.md
+```
 
 ## Getting Started
 
-First, run the development server:
-
+1. Install the dependencies 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn install 
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Copy `.env.example` to `.env` and update the variables.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+# Copy .env.example to .env. Acquire and fill out missing keys. 
+cp apps/api/.env.example apps/api/.env
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+3. run the development server:
 
-## Learn More
+```bash
+yarn dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) with your browser to see dashboard. 
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Live version 
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+A live version can be seen on [vercel](https://clpv.vercel.app/).  
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-
-
-"0x8b6276c3000000000000000000000000fbd745797a0fb50429f0a2b04581092798fdf30b0000000000000000000000000000000000000000000000000000000000001388000000000000000000000000000000000000000000000000034312e4e3ab372000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000f3e62d66a0d0062ce7c439959f85efd61db2f1e200000000000000000000000000000000000000000000000000000000000000412535001e2935ee2b54625ac074f81fde0d9628c3dc2078b7db4d0b07d5d30a05689b0303bc07c1bea1569fea4721b1c0fd3d4073db0d3c01ba5ee85c616ac5231c00000000000000000000000000000000000000000000000000000000000000"
-
-"8b6276c3" == requestPoints
-
-address program, == fbd745797a0fb50429f0a2b04581092798fdf30b
-uint256 points, == 1388 (at least, I think this is 5000 in bytes)
-uint256 uniqueNumber == 0000034312e4e3ab37200
-bytes memory programSignature,
-address ownerCard

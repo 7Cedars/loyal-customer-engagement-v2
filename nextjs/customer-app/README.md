@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<p align="center">
+
+<br />
+<div align="center">
+  <a href="https://github.com/7Cedars/loyal-customer-engagement-v2"> 
+    <img src="./public/logo.png" alt="Logo" width="200" height="200">
+  </a>
+
+<h2 align="center">Customer Loyalty Program: Customer App</h2>
+  <p align="center">
+    Here subtitle 
+    <br />
+    <br />
+    <!--NB: TO DO --> 
+    <a href="../README.md">Conceptual overview</a>
+    ·
+    <a href="#getting-started">Getting Started</a>
+    ·
+    <a href="#live-version">Live version</a>
+  </p>
+  <br />
+  <br />
+</div>
+
+## What's included
+
+[Next.js](https://nextjs.org/) - Framework<br>
+[ReOwn](https://reown.com/) - Wallet Framework<br>
+[TailwindCSS](https://tailwindcss.com/) - Styling<br>
+[TypeScript](https://www.typescriptlang.org/) - Type safety<br>
+[Redux](redux.js.org) - state management<br>
+
+## Directory Structure
+
+```
+.
+├── .well-known                         # reown appkit id
+ 
+ ... TODO 
+
+├── LICENSE
+└── README.md
+```
 
 ## Getting Started
 
-First, run the development server:
-
+1. Install the dependencies 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn install 
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Copy `.env.example` to `.env` and update the variables.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+# Copy .env.example to .env. Acquire and fill out missing keys. 
+cp apps/api/.env.example apps/api/.env
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+3. run the development server:
 
-## Learn More
+```bash
+yarn dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3001](http://localhost:3001) with your browser to see dashboard. 
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Live version 
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+A live version can be seen on [vercel](https://clpc.vercel.app/).  
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
