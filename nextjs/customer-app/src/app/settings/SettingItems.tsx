@@ -1,15 +1,11 @@
 import { Button } from "../../components/Button";
-import { NoteText, SectionText, TitleText } from "@/components/StandardisedFonts";
+import {  SectionText } from "@/components/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
-import { loyaltyProgramAbi } from "@/context/abi";
 import Link from "next/link";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { useWallets } from "@privy-io/react-auth";
-import { LoyaltyCard } from "@/types"; 
-import { readContracts } from "wagmi/actions";
-import { wagmiConfig } from "@/context/wagmiConfig";
 
 export const ClearLocalStorage = () => {
   const [cleared, setCleared] = useState<boolean>(false);
@@ -31,65 +27,6 @@ export const ClearLocalStorage = () => {
           statusButton="idle"
           >
           {cleared ? "Local storage cleared" : "Yes, delete Local Storage." } 
-        </Button>
-      </div>
-    </section>
-)}
-
-export const LoyaltyCardTests = () => {
-  const {wallets, ready: walletsReady} = useWallets();
-  const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const {loyaltyCard, error, pending, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
-  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
-  
-  console.log("@LoyaltyCardTest:", {loyaltyCard})
-
-  const handleTest = useCallback(
-    async (loyaltyCard: LoyaltyCard | undefined) => {
-      console.log("@LoyaltyCardTest: handleTest triggered")
-      if (loyaltyCard && prog.address) {
-
-      const programContract = {
-        address: prog.address,
-        abi: loyaltyProgramAbi,
-      } as const
-
-      const resultCardTest = await readContracts(wagmiConfig, {
-        contracts: [
-          {
-            ...programContract, 
-              functionName: 'balanceOf',
-              args: [loyaltyCard.address] 
-          }]
-        })
-      console.log("@LoyaltyCardTest loyaltyCard.isDeployed:", loyaltyCard.isDeployed())
-      console.log("@LoyaltyCardTest:", {resultCardTest})
-      } else {
-        console.log("@LoyaltyCardTest: no loyalty card found")
-      }
-    } , []
-  )
-
-  // useEffect(() => {
-  //   if (prog.address && embeddedWallet) 
-  //   fetchLoyaltyCard(
-  //     prog.address, 
-  //     numberToHex(123456, {size: 32}), 
-  //     embeddedWallet
-  //   ) 
-  // }, [prog, embeddedWallet, fetchLoyaltyCard])
-
-  return (
-    <section className="my-2"> 
-      <SectionText 
-      text="Loyalty Card Tests"
-      />
-      <div className="flex h-12 max-w-96 w-full mt-6">
-        <Button 
-          onClick={() => { handleTest(loyaltyCard ? loyaltyCard : undefined) } }
-          statusButton="idle"
-          >
-          Test 
         </Button>
       </div>
     </section>

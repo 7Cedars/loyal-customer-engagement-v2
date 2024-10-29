@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useAppSelector } from '@/redux/hooks';
 import { NoteText, SectionText, TitleText } from '@/components/ui/StandardisedFonts';
 import { parseQrData } from '@/utils/parsers';
-import { GiftVoucherFound } from '@/components/application/GiftVoucherFound';
+import { GiftVoucherFound } from '@/app/home/GiftVoucherFound';
 import { Button } from '@/components/ui/Button';
 
 export const RedeemGifts = () => {

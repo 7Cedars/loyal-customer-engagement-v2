@@ -62,7 +62,7 @@ export const ChangeProgramImage = () => {
         ...prog, uriImage: uri
       })) 
     } 
-  }, [successTransaction])
+  }, [successTransaction, dispatch, prog, uri])
 
   const parseImage = async (src: string) => { // I have this now also in parsers. replace at a later stage.     
     const res = await fetch(src);

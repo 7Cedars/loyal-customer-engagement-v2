@@ -52,7 +52,7 @@ export default function Page() {
   useEffect(() => {
     if (prog && prog.uriImage) 
       checkImageUri(prog.uriImage)
-  }, [prog])
+  }, [prog, checkImageUri])
 
   return (
     <Layout> 

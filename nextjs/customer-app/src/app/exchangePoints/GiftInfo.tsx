@@ -2,6 +2,7 @@ import { Button } from "@/components/Button";
 import { NoteText, SectionText } from "@/components/StandardisedFonts";
 import { loyaltyGiftAbi } from "@/context/abi";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
+import useWatchEvent from "@/hooks/useWatchEvent";
 import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
 import { parseRequirementReply } from "@/utils/parsers";
@@ -24,6 +25,7 @@ export const GiftInfo = ({
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error: errorCard, pending: pendingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
+  const { watchEvent, eventLog, status: statusExchange } = useWatchEvent() 
   const { data, error, error: errorReadContract, status, refetch } = useReadContracts({
     contracts: [
       {...giftContract, 
@@ -118,10 +120,11 @@ export const GiftInfo = ({
                   ], 
                   123456n
                 )
+                watchEvent('LoyaltyPointsExchangeForGift')
               }} 
               size = {0}
               aria-disabled = {selected}
-              statusButton="idle"
+              statusButton={statusExchange}
               >
               Exchange points for gift
             </Button>

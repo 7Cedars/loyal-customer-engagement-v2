@@ -27,7 +27,7 @@ export const GiftInfo = ({
     address: address,
     abi: loyaltyGiftAbi,
     functionName: 'tokenOfOwnerByIndex',
-    args: [loyaltyCard && loyaltyCard.address ? loyaltyCard.address  : '0x0', 0n]
+    args: [loyaltyCard && loyaltyCard.address ? loyaltyCard.address  : '0x0', 99999n]
   })
   const uniqueNumber = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
   const chainId = useChainId();  
@@ -55,6 +55,8 @@ export const GiftInfo = ({
     giftId: giftId as bigint ? giftId as bigint : 0n, 
     uniqueNumber: uniqueNumber.current,
   } as const
+
+  console.log("@redeemGift Customer:", {message})
 
   const renderedQrCode: React.JSX.Element = (
     <section className="grow flex flex-col items-center justify-center">

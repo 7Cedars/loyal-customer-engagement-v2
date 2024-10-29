@@ -9,6 +9,10 @@ import { useAccount } from "wagmi";
 import { chainSettings } from "@/context/chainSettings";
 import { useAppSelector } from "@/redux/hooks";
 
+// A custom watch event hook that watches the current loyalty program for selected events.
+// The status return value can be used to update buttons, etc. because it watches for an event to pass (and hence chained transactions to _all_ be successfully completed.)
+// Drawback: it does not properly give an error message: because chained transactions do not explicitly return an error.  
+
 export default function useWatchEvent() {
   const {connector, chainId} = useAccount(); 
   const [eventLog, setEventLog] = useState<Log>()
@@ -26,8 +30,8 @@ export default function useWatchEvent() {
         try {
           setStatus("pending")
           const unwatch = publicClient.watchContractEvent({
-            address: programsFactory,
-            abi: factoryProgramsAbi,
+            address: prog.address,
+            abi: loyaltyProgramAbi,
             eventName: eventName,
             onLogs: logs => {
                 unwatch() 

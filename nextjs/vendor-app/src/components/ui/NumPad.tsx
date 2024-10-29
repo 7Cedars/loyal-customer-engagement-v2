@@ -32,7 +32,7 @@ export const NumPad = ({
           key = {number} 
           className="flex w-24 h-16 p-1"
           >
-          <Button onClick={() => handleChange({target: fullNumberString.concat(number)})} >
+          <Button onClick={() => handleChange({target: fullNumberString.concat(number)})} statusButton="idle" >
                 {number} 
           </Button>
         </div>
@@ -41,7 +41,7 @@ export const NumPad = ({
       <div 
         className="flex w-24 h-16 p-1"
         > 
-        <Button onClick={ () => handleChange({target: fullNumberString.slice(0, -1)})} >
+        <Button onClick={ () => handleChange({target: fullNumberString.slice(0, -1)})} statusButton="idle">
            <div className="w-full h-full flex justify-center">
             <BackspaceIcon
               className='h-7 w-7'

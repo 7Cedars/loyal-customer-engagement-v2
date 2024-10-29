@@ -35,10 +35,10 @@ export type QrData = undefined | {
 }
 
 export type QrPoints = {
-  program: Hex | null; 
-  points: bigint | null; 
-  uniqueNumber: bigint | null; 
-  signature: Hex | null; 
+  program: Hex | null | undefined; 
+  points: bigint | null | undefined; 
+  uniqueNumber: bigint | null | undefined; 
+  signature: Hex | null | undefined; 
   executed?: boolean; 
 }
 

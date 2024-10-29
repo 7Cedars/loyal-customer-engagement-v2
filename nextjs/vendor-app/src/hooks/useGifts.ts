@@ -178,7 +178,7 @@ export const useGifts = () => {
       localStorage.setItem("clp_v_gifts", JSON.stringify(gifts));
       setStatus("success")
 
-    }, [getGiftsContractData]
+    }, [getGiftsContractData, settings?.genesisBlock]
   ) 
 
   return {fetchGifts, fetchedGifts, allGifts, status, error}
