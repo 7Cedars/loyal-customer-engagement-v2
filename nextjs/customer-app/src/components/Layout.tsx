@@ -98,7 +98,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
         <Link 
           href={"/home"}
           aria-selected={path == "/home"}
-          className={"p-3 px-6 opacity-25 aria-selected:opacity-100"}
+          className={"py-2 opacity-50 aria-selected:opacity-100 w-6"}
           > 
             <div className='col-span-1 grid text-xs justify-items-center'> 
                 <HomeIcon
@@ -109,10 +109,10 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
             </div> 
          </Link>
           <Link 
-          href={"/gifts"} 
+          href={"/exchangePoints"} 
           aria-selected={path == "/exchangePoints" } 
           aria-disabled={!cardExists}
-          className={"p-3 px-6 opacity-25 aria-selected:opacity-100 aria-disabled:opacity-10"}
+          className={"py-2 opacity-50 aria-selected:opacity-100 w-6 aria-disabled:opacity-10"}
           style={cardExists ? {} : {pointerEvents: "none"}}
           >
             <div className={layoutIconBox}> 
@@ -124,11 +124,11 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
             </div>  
          </Link>
          <Link 
-          href={"/transactions"} 
+          href={"/redeemGifts"} 
           aria-selected={path == "/redeemGifts" } 
           aria-disabled={!cardExists}
           style={cardExists ? {} : {pointerEvents: "none"}}
-          className={"p-3 px-6 opacity-25 aria-selected:opacity-100 aria-disabled:opacity-10"}
+          className={"py-2 opacity-50 aria-selected:opacity-100 w-6 aria-disabled:opacity-10"}
           >
             <div className={layoutIconBox}> 
               <GiftIcon
@@ -141,7 +141,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
          <Link 
           href={"/settings"} 
           aria-selected={path == "/settings" } 
-          className={"p-3 px-6 opacity-25 aria-selected:opacity-100"}
+          className={"py-2 opacity-50 aria-selected:opacity-100 w-6 aria-disabled:opacity-10"}
           >
             <div className={layoutIconBox}> 
               <Cog6ToothIcon
@@ -179,7 +179,7 @@ export const Layout = ( props: PropsWithChildren<{}> ) => {
         <NavbarBottom path = {path} base = {prog.colourBase} accent = {prog.colourAccent} /> 
       }
 
-      <div className='h-full w-full max-w-4xl flex flex-col justify-start pt-24'> 
+      <div className={`h-full w-full max-w-4xl flex flex-col justify-start ${dimensions.width > 765  ? 'pt-24' : 'pt-0'}`}> 
         {children}
       </div>
 

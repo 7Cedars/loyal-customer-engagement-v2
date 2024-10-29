@@ -32,7 +32,7 @@ export const TabChoice = ({
   return (
     <section className="w-full h-fit grid grid-cols-2 gap-8 p-2"> 
       <button 
-        className={`text-sm text-center border-b-2 content-center h-8`} 
+        className={`text-sm text-center border-b-2 content-center h-fit pb-2`} 
         style = {{
           color: selectedProgram.colourAccent, 
           borderColor: choice == optionOne ? selectedProgram.colourAccent : selectedProgram.colourBase 
@@ -43,7 +43,7 @@ export const TabChoice = ({
       </button>
       
       <button 
-        className={`text-sm text-center border-b-2 content-center h-8`} 
+        className={`text-sm text-center border-b-2 content-center h-fit pb-2`} 
         style = {{
           color: selectedProgram.colourAccent, 
           borderColor: choice == optionTwo ? selectedProgram.colourAccent : selectedProgram.colourBase

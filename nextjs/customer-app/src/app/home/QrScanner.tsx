@@ -28,7 +28,7 @@ export const QrScanner = () => {
   });
 
   return (
-    <section className="grow flex flex-col items-center justify-between">
+    <section className="grow flex flex-col items-center justify-between m-2">
         <>
             <div className='py-2'>
               <TitleText 

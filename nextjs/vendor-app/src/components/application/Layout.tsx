@@ -86,13 +86,13 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
     
       return (
         <header 
-          className="absolute bottom-0 z-20 flex justify-between h-16 w-full text-sm px-4"
+          className="absolute bottom-0 z-20 flex justify-between h-16 w-full text-sm px-4 pe-8"
           style={{color:accent, backgroundColor:base}}
           >
         <Link 
           href={"/home"}
           aria-selected={path == "/home"}
-          className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
+          className={"py-2 opacity-50 aria-selected:opacity-100 w-6"}
           > 
             <div className='col-span-1 grid text-xs justify-items-center'> 
                 <HomeIcon
@@ -105,7 +105,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
           <Link 
           href={"/gifts"} 
           aria-selected={path == "/gifts" } 
-          className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
+          className={"py-2 opacity-50 aria-selected:opacity-100 w-6"}
           >
             <div className={layoutIconBox}> 
               <GiftIcon
@@ -118,20 +118,20 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
          <Link 
           href={"/transactions"} 
           aria-selected={path == "/transactions" } 
-          className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
+          className={"py-2 opacity-50 aria-selected:opacity-100 w-6"}
           >
             <div className={layoutIconBox}> 
               <ShoppingCartIcon
               className={layoutIcons}
               style={{color:accent}}
               />
-            Transactions           
+            Events           
             </div>  
          </Link>
          <Link 
           href={"/settings"} 
           aria-selected={path == "/settings" } 
-          className={"p-3 px-6 opacity-50 aria-selected:opacity-100"}
+          className={"py-2 opacity-50 aria-selected:opacity-100 w-6"}
           >
             <div className={layoutIconBox}> 
               <Cog6ToothIcon
@@ -169,7 +169,7 @@ export const Layout = ( props: PropsWithChildren<{}> ) => {
         <NavbarBottom path = {path} base = {prog.colourBase} accent = {prog.colourAccent} /> 
       }
 
-      <div className='h-full w-full max-w-4xl flex flex-col justify-start pt-24'> 
+      <div className={`h-full w-full max-w-4xl flex flex-col justify-start ${dimensions.width > 765  ? 'pt-24' : 'pt-4'}`}> 
         {children}
       </div>
 
