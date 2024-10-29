@@ -17,7 +17,7 @@ export const GiftInfo = ({
   additionalReq, 
   metadata
 }: Gift) => {
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
   const [selected, setSelected] = useState<boolean>(false) 
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
@@ -33,9 +33,9 @@ export const GiftInfo = ({
   const chainId = useChainId();  
 
   const domain = {
-    name: selectedProgram.name, 
+    name: vendorProgram.name, 
     chainId: chainId,
-    verifyingContract: selectedProgram.address
+    verifyingContract: vendorProgram.address
   } as const
 
   const types = {
@@ -49,7 +49,7 @@ export const GiftInfo = ({
   } as const
 
   const message = {
-    program: selectedProgram.address ? selectedProgram.address : '0x0',
+    program: vendorProgram.address ? vendorProgram.address : '0x0',
     owner: embeddedWallet && embeddedWallet.address ? embeddedWallet.address as `0x${string}` : '0x0', 
     gift: address as `0x${string}`, 
     giftId: giftId as bigint ? giftId as bigint : 0n, 
@@ -66,7 +66,7 @@ export const GiftInfo = ({
       </div>
         <div className="p-1">
           <QRCode 
-            value={`${selectedProgram.address};${embeddedWallet ? embeddedWallet.address : '0x0'};${address};${giftId};${uniqueNumber.current};${signature}`}
+            value={`${vendorProgram.address};${embeddedWallet ? embeddedWallet.address : '0x0'};${address};${giftId};${uniqueNumber.current};${signature}`}
             style={{ 
               height: "350px", 
               width: "350px", 
@@ -96,11 +96,11 @@ export const GiftInfo = ({
   return (
     <main 
       className="flex flex-col border-b"
-      style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} 
+      style = {{color: vendorProgram.colourAccent, borderColor: vendorProgram.colourAccent}} 
     >
       <button 
         className={`w-full h-fit flex flex-row items-center aria-selected:h-fit p-2`} 
-        style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} 
+        style = {{color: vendorProgram.colourAccent, borderColor: vendorProgram.colourAccent}} 
         onClick={() => setSelected(!selected)}
         aria-disabled = {selected}
         >

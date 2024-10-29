@@ -5,7 +5,7 @@ import { TitleText } from "@/components/StandardisedFonts"
 import { useAppSelector } from "@/redux/hooks"
 
 export default function Page() {
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
 
   return (
     <Layout> 

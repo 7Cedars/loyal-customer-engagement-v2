@@ -82,6 +82,7 @@ export default function useEvents() {
           data: log.data
         })
 
+        // avoids events being fetched _before_ deployment of program. 
         event.eventName == 'LoyaltyProgramDeployed' ? genesisReached = true : genesisReached  
 
         return {
@@ -124,17 +125,17 @@ export default function useEvents() {
       }
       console.log({eventsInBlocks})
 
-      prog.events.startBlock == 0 ? prog.events.startBlock = eventsInBlocks.startBlock : null
-
+      // Setting the startBlock and endBlock of all events queried.
+      // Note that a '0' from prog events is ignored: this is the default start value in the redux store.   
       const allEventsTemp = {
-        startBlock: eventsInBlocks.startBlock < prog.events.startBlock ? eventsInBlocks.startBlock : prog.events.startBlock,
+        startBlock: eventsInBlocks.startBlock < prog.events.startBlock && prog.events.startBlock != 0 ? eventsInBlocks.startBlock : prog.events.startBlock,
         endBlock: eventsInBlocks.endBlock > prog.events.endBlock ? eventsInBlocks.endBlock : prog.events.endBlock,
         genesisReached, 
         events: [...prog.events.events, ...eventsInBlocks.events]
       }
       console.log({allEventsTemp})
 
-      // sort queries by block number.  // I might still need to sort events. See later. 
+      // sort queries by block number. 
       allEventsTemp.events.sort((a, b) => {
         return a.blockData.timestamp > b.blockData.timestamp ? -1 : 1 // the latest block, with the largest block number, should end up first in line. 
       })

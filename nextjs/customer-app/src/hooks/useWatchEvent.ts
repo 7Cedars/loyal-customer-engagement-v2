@@ -7,6 +7,7 @@ import { factoryProgramsAbi, loyaltyProgramAbi } from "@/context/abi";
 import { publicClient } from "@/context/clients";
 import { useAccount } from "wagmi";
 import { chainSettings } from "@/context/chainSettings";
+import { useAppSelector } from "@/redux/hooks";
 
 export default function useWatchEvent() {
   const {connector, chainId} = useAccount(); 
@@ -15,7 +16,9 @@ export default function useWatchEvent() {
   const [error, setError] = useState<any>()
   const deployed = chainSettings(chainId ? chainId : 31337) 
   const programsFactory: `0x${string}` = deployed ? deployed.factoryProgramsAddress : '0x0'
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
 
+  console.log("@useWatchEvent:", {eventLog})
   
   const watchEvent = (eventName: string) => { 
       console.log("watchEvent called")

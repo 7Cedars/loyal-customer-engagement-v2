@@ -22,16 +22,16 @@ export const Button = ({
   onClick,
   children,
 }: ButtonProps) => {
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
 
   return (
     <button 
       className={`w-full h-full grid grid-cols-1 disabled:opacity-50 text-center border content-center rounded-lg ${fontSize[size]}`} 
       style = {
         selected ? 
-        {color: selectedProgram.colourBase, borderColor: selectedProgram.colourBase, backgroundColor: selectedProgram.colourAccent}
+        {color: vendorProgram.colourBase, borderColor: vendorProgram.colourBase, backgroundColor: vendorProgram.colourAccent}
         :
-        {color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}
+        {color: vendorProgram.colourAccent, borderColor: vendorProgram.colourAccent}
       } // can add background, but should not be necessary.  
       onClick={onClick} 
       disabled={statusButton != 'idle'}
@@ -42,7 +42,7 @@ export const Button = ({
           <>
           {/* adapted from https://github.com/n3r4zzurr0/svg-spinners/blob/main/svg-smil/180-ring-with-bg.svg?short_path=0bedbc1 */}
           <div> 
-            <TwoSeventyRingWithBg color={selectedProgram.colourAccent}/>
+            <TwoSeventyRingWithBg color={vendorProgram.colourAccent}/>
             </div>
             <div>
               Loading...

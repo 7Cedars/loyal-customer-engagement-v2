@@ -40,7 +40,7 @@ export const LoyaltyCardTests = () => {
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, pending, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
   
   console.log("@LoyaltyCardTest:", {loyaltyCard})
 
@@ -106,7 +106,7 @@ export const Disclaimer = () => {
 )}
 
 export const ShowProgramAddress = () => {
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
 
   return (
     <section className="my-2"> 
@@ -134,7 +134,7 @@ export const ShowProgramAddress = () => {
 )}
 
 export const ShowCardAddress = () => {
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, pending, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
@@ -239,7 +239,7 @@ export const ShowCardOwner = () => {
 )}
 
 export const Logout = () => {
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
 
   return (
     <section className="my-2"> 

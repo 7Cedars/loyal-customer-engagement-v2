@@ -14,7 +14,7 @@ import { readContract } from "wagmi/actions";
 import { setVendor } from "@/redux/reducers/vendorReducer";
 
 export const useGifts = () => {
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
   const [status, setStatus ] = useState<Status>("idle")
   const [error, setError] = useState<any | null>(null)
   const [gifts, setGifts] = useState<Gift[] | undefined>() 

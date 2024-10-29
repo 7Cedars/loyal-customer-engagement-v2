@@ -30,7 +30,7 @@ export const InputButton = ({
 }: NumLineProps) => {
 
   const [ input, setInput ] = useState<string>("") 
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
 
   const handleClick= (input: string) => {
     if(typeof onClick === 'function'){
@@ -44,10 +44,10 @@ export const InputButton = ({
       <input 
         className={`w-full h-full grid grid-cols-1 disabled:opacity-50 text-center border content-center rounded-lg ${fontSize[size]}`}
         style={{
-          color: selectedProgram.colourAccent, 
-          fontPalette: selectedProgram.colourAccent, 
-          borderColor: selectedProgram.colourAccent, 
-          background: selectedProgram.colourBase, 
+          color: vendorProgram.colourAccent, 
+          fontPalette: vendorProgram.colourAccent, 
+          borderColor: vendorProgram.colourAccent, 
+          background: vendorProgram.colourBase, 
           }}
         disabled={disabled}
         type="text" 
@@ -63,11 +63,11 @@ export const InputButton = ({
       <div className="flex min-w-36 w-fit ps-2"> 
           { !pending ? 
 
-          <Button onClick={ () => handleClick(input)} size = {size} >
+          <Button onClick={ () => handleClick(input)} size = {size} statusButton="idle">
               {buttonText}
           </Button>
           : 
-          <Button onClick={() => {}} size = {size}>
+          <Button onClick={() => {}} size = {size} statusButton="idle">
               <div className="flex justify-center items-center">
                 <Image
                   className="rounded-lg opacity-25 flex-none mx-3 animate-spin"

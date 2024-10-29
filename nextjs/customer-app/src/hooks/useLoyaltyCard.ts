@@ -39,7 +39,7 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
   const [loyaltyCard, setLoyaltyCard] = useState<LoyaltyCard>(); 
   const [userOp, setUserOp] = useState<UserOperation<"v0.7">>(); 
 
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
   const {signMessage} = usePrivy();
   const {wallets, ready: walletsReady} = useWallets();
   const chainId = useChainId() 

@@ -1,28 +1,27 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Program } from '../../types'
 
-
-interface SelectedProgram {
-  selectedProgram: Program 
+interface VendorProgram {
+  vendorProgram: Program 
 }
 
-const initialState: SelectedProgram = {
-  selectedProgram: {
+const initialState: VendorProgram = {
+  vendorProgram: {
     colourBase: "#f1f5f9", 
     colourAccent: "#0f172a"
   }
 }
 
-export const programSlice = createSlice({
-  name: 'selectedProgram',
+export const vendorSlice = createSlice({
+  name: 'vendorProgram',
   initialState: initialState,
   reducers: {
     setVendor: (state, action: PayloadAction<Program>) => {
-      state.selectedProgram = action.payload
+      state.vendorProgram = action.payload
     },
     resetVendor: (state, action: PayloadAction<boolean>) => {
       if (action.payload === true) {
-        state.selectedProgram = {
+        state.vendorProgram = {
           colourBase: "#f1f5f9", 
           colourAccent: "#0f172a"
         }
@@ -31,6 +30,6 @@ export const programSlice = createSlice({
   }
 })
 
-export const { setVendor, resetVendor } = programSlice.actions
-export default programSlice.reducer
+export const { setVendor, resetVendor } = vendorSlice.actions
+export default vendorSlice.reducer
 

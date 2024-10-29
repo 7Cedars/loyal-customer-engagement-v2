@@ -19,20 +19,20 @@ export const GiftInfo = ({
   metadata, 
 }: Gift) => {
   const giftContract = { address: address, abi: loyaltyGiftAbi } as const
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
   const [selected, setSelected] = useState<boolean>(false) 
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error: errorCard, pending: pendingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
-  const { data, error, error: errorReadContract, pending, status, refetch } = useReadContracts({
+  const { data, error, error: errorReadContract, status, refetch } = useReadContracts({
     contracts: [
       {...giftContract, 
         functionName: 'balanceOf',
-        args: [selectedProgram.address]
+        args: [vendorProgram.address]
       }, 
       {...giftContract, 
         functionName: 'requirementsExchangeMet',
-        args: [selectedProgram.address]
+        args: [vendorProgram.address]
       }
     ]
   })
@@ -43,16 +43,16 @@ export const GiftInfo = ({
 
   console.log({requirements})
 
-  console.log({data, error, pending, status, walletsReady, errorCard, pendingCard})
+  console.log({data, error, status, walletsReady, errorCard, pendingCard})
 
   return (
     <main 
       className="flex flex-col border-b"
-      style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} 
+      style = {{color: vendorProgram.colourAccent, borderColor: vendorProgram.colourAccent}} 
     >
       <button 
         className={`w-full h-fit flex flex-row items-center aria-selected:h-fit p-2`} 
-        style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} 
+        style = {{color: vendorProgram.colourAccent, borderColor: vendorProgram.colourAccent}} 
         onClick={() => setSelected(!selected)}
         aria-disabled = {selected}
         >
@@ -107,9 +107,9 @@ export const GiftInfo = ({
          {
           requirements && requirements[0] == undefined ? 
             <Button onClick={() => {
-              if (loyaltyCard && selectedProgram && selectedProgram.address) 
+              if (loyaltyCard && vendorProgram && vendorProgram.address) 
                 sendUserOp(
-                  selectedProgram.address, 
+                  vendorProgram.address, 
                   loyaltyCard, 
                   'exchangePointsForGift', 
                   [
@@ -121,6 +121,7 @@ export const GiftInfo = ({
               }} 
               size = {0}
               aria-disabled = {selected}
+              statusButton="idle"
               >
               Exchange points for gift
             </Button>
@@ -129,6 +130,7 @@ export const GiftInfo = ({
             <Button onClick={() => {}}  
               size = {0}
               aria-disabled = {true}
+              statusButton="idle"
               >
               {requirements[0]} 
             </Button>

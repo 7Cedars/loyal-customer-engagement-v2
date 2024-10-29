@@ -17,7 +17,7 @@ import { LoyaltyCard } from "@/types";
 import useWatchEvent from "@/hooks/useWatchEvent";
 
 export default function Page() {
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
   const {voucher} = useAppSelector(state => state.voucher)
   const [mode, setMode]  = useState<"qrscan" | undefined>()
   const [pointsOnCard, setPointsOnCard] = useState<number>()

@@ -20,7 +20,7 @@ export const InputBox = ({
   size = 20, 
   onChange,
 }: InputBoxProps) => {
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
 
   const handleChange = ({event}: {event:ChangeEvent<HTMLInputElement>}) => {
     if(typeof onChange === 'function'){
@@ -33,10 +33,10 @@ export const InputBox = ({
       <input 
         className={`w-full h-full grid grid-cols-1 aria-selected:border-2 text-md text-center border place-items-center rounded-lg p-2`}
         style={{
-          color: selectedProgram.colourAccent, 
-          fontPalette: selectedProgram.colourAccent, 
-          borderColor: selectedProgram.colourAccent, 
-          background: selectedProgram.colourBase, 
+          color: vendorProgram.colourAccent, 
+          fontPalette: vendorProgram.colourAccent, 
+          borderColor: vendorProgram.colourAccent, 
+          background: vendorProgram.colourBase, 
           }}
         disabled={disabled}
         type="text" 

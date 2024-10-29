@@ -28,12 +28,12 @@ export const SettingLayout = ({
   onClick,
   children,
 }: ButtonProps) => {
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
 
   return (
     <div 
       className="w-full grid grid-cols-1 justify-items-start content-start h-fit pt-1 border-b" 
-      style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} // can add background, but should not be necessary.   
+      style = {{color: vendorProgram.colourAccent, borderColor: vendorProgram.colourAccent}} // can add background, but should not be necessary.   
       aria-selected = {selected}
       >
       <button 

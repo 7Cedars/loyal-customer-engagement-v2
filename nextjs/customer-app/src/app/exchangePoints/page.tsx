@@ -14,7 +14,7 @@ import { wagmiConfig } from "@/context/wagmiConfig";
 
 export default function Page() {
   const [pointsOnCard, setPointsOnCard] = useState<number>()
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {status, gifts, fetchGifts} = useGifts()

@@ -158,7 +158,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
 export const Layout = ( props: PropsWithChildren<{}> ) => {
   const dimensions = useScreenDimensions();
   const path = usePathname()
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
   const {children} = props 
   const router = useRouter()
 

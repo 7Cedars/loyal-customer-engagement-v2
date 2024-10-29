@@ -47,14 +47,14 @@ export const TitleText = ({
   subtitle, 
   size = 1
 }: TitleTextProps) => {
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
 
   return (
     <div className="grid grid-cols-1 px-2">
-      <div className={`text-center font-bold break-words ${appearanceTitle[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-center font-bold break-words ${appearanceTitle[size]}`} style = {{color: `${vendorProgram.colourAccent}`}}>
         {title}
       </div>
-      <div className={`text-center text-slate-400 break-words ${appearanceSubtitle[size]}` } style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-center text-slate-400 break-words ${appearanceSubtitle[size]}` } style = {{color: `${vendorProgram.colourAccent}`}}>
         {subtitle}
       </div>
     </div>
@@ -66,14 +66,14 @@ export const SectionText = ({
   subtext, 
   size = 1
 }: SectionTextProps) => {
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
 
   return (
     <div className="grid grid-cols-1 px-2">
-      <div className={`text-start font-bold break-words select-all ${appearanceTitle[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-start font-bold break-words select-all ${appearanceTitle[size]}`} style = {{color: `${vendorProgram.colourAccent}`}}>
         {text}
       </div>
-      <div className={`text-start text-slate-400 break-words select-all ${appearanceSubtitle[size]}` } style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`text-start text-slate-400 break-words select-all ${appearanceSubtitle[size]}` } style = {{color: `${vendorProgram.colourAccent}`}}>
         {subtext}
       </div>
     </div>
@@ -85,11 +85,11 @@ export const NoteText = ({
   size = 1,
   align = 0
 }: NoteTextProps) => {
-  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
 
   return (
     <div className={`grid grid-cols-1 px-2 gap-1 break-words text-gray-500 font-sm`}>
-      <div className={`${alignText[align]} italic select-all ${appearanceNote[size]}`} style = {{color: `${selectedProgram.colourAccent}`}}>
+      <div className={`${alignText[align]} italic select-all ${appearanceNote[size]}`} style = {{color: `${vendorProgram.colourAccent}`}}>
         {message}
       </div>
     </div>

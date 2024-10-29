@@ -19,7 +19,7 @@ import { parseNumber } from "@/utils/parsers";
 export default function Page() {
   const {status, gifts, fetchGifts} = useGifts()
   const [allGifts, setAllGifts] = useState<Gift[]>() 
-  const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, pending, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 

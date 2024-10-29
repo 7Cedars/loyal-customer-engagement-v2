@@ -61,7 +61,6 @@ export const ChangeProgramImage = () => {
       dispatch(setProgram({
         ...prog, uriImage: uri
       })) 
-
     } 
   }, [successTransaction])
 
