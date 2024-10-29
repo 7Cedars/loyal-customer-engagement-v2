@@ -231,7 +231,7 @@ export const ExitProgram = () => {
       <Link 
           href='/' 
           className={`w-full h-full grid grid-cols-1 text-md text-center border content-center rounded-lg p-2 h-12 z-30`} 
-          style={{color: prog.colourAccent}}
+          style={{color: prog.colourAccent, borderColor: prog.colourAccent}}
           >
           Exit 
       </Link>

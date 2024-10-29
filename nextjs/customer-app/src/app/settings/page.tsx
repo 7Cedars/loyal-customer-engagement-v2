@@ -18,7 +18,7 @@ export default function Page() {
           selected = {selectedItem == 'localStore'} 
           onClick={() => selectedItem == 'localStore' ? setSelectedItem(undefined) : setSelectedItem('localStore') }
           titleText="Clear local storage"
-          sizeFoldout={1}
+          sizeFoldout={3}
           >
            <ClearLocalStorage/>
         </SettingLayout>
@@ -27,7 +27,7 @@ export default function Page() {
           selected = {selectedItem == 'progAddress'} 
           onClick={() => selectedItem == 'progAddress' ? setSelectedItem(undefined) : setSelectedItem('progAddress') }
           titleText="Show program address"
-          sizeFoldout={5}
+          sizeFoldout={6}
           >
            <ShowProgramAddress /> 
         </SettingLayout>
@@ -36,7 +36,7 @@ export default function Page() {
           selected = {selectedItem == 'cardAddress'} 
           onClick={() => selectedItem == 'cardAddress' ? setSelectedItem(undefined) : setSelectedItem('cardAddress') }
           titleText="Show card address"
-          sizeFoldout={5}
+          sizeFoldout={6}
           >
            <ShowCardAddress /> 
         </SettingLayout>
@@ -45,7 +45,7 @@ export default function Page() {
           selected = {selectedItem == 'ownerAddress'} 
           onClick={() => selectedItem == 'ownerAddress' ? setSelectedItem(undefined) : setSelectedItem('ownerAddress') }
           titleText="Show card owner address"
-          sizeFoldout={5}
+          sizeFoldout={6}
           >
            <ShowCardOwner /> 
         </SettingLayout>
@@ -54,7 +54,7 @@ export default function Page() {
           selected = {selectedItem == 'disclaimer'} 
           onClick={() => selectedItem == 'disclaimer' ? setSelectedItem(undefined) : setSelectedItem('disclaimer') }
           titleText="Disclaimer"
-          sizeFoldout={0}
+          sizeFoldout={2}
           >
             <Disclaimer /> 
         </SettingLayout>
@@ -63,7 +63,7 @@ export default function Page() {
           selected = {selectedItem == 'logout'} 
           onClick={() => selectedItem == 'logout' ? setSelectedItem(undefined) : setSelectedItem('logout') }
           titleText="Exit program"
-          sizeFoldout={1}
+          sizeFoldout={3}
           >
            <Logout />
         </SettingLayout>
