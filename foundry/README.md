@@ -34,8 +34,8 @@
 - [About](#about)
   - [Concepts](#concepts)
   - [Diagram](#diagram)
-- [Directory Structure](#directory-structure)
   - [Built With](#built-with)
+- [Directory Structure](#directory-structure)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Quickstart](#quickstart)
@@ -60,9 +60,9 @@ The Loyal protocol provides a modular, composable and gas efficient framework fo
 
 ### Concepts
 The Loyal protocol revolves around three concepts 
--  Loyalty Program: A contract that creates ERC-4337 loyalty cards, distributes ERC-20 loyalty points, white lists ERC-721 loyalty gift and mints their gift vouchers. 
--  Loyalty Card: A account abstraction that can only interact with the Loyalty Program that created it. All its transactions are funded by the Loyalty program. 
--  Loyalty Gift: A contract that receives loyalty points and exchanges them for an ERC-721 gift voucher. Gift contracts are interoperable, but their vouchers are program exclusive.     
+-  _Program_: A contract that creates ERC-4337 loyalty cards, distributes ERC-20 loyalty points, white lists ERC-721 loyalty gift and mints their gift vouchers. 
+-  _Card_: A account abstraction that can only interact with the Loyalty Program that created it. All its transactions are funded by the Loyalty program. 
+-  _Gift_: A contract that receives loyalty points and exchanges them for an ERC-721 gift voucher. Gift contracts are interoperable, but their vouchers are program exclusive.     
 
 ### Diagram
 See the following schema for more detail:
@@ -70,6 +70,22 @@ See the following schema for more detail:
   <a href="https://github.com/7Cedars/loyalty-program-contracts/blob/master/public/PoCModularLoyaltyProgram.png"> 
     <img src="public/PoCModularLoyaltyProgram.png" alt="Schema Protocol" width="100%" height="100%">
   </a>
+
+### Built With
+- Solidity v0.8.19
+- Foundry v0.2.0
+- OpenZeppelin v5.0.2
+- eth-infinitism's account-abstraction v0.7.0
+- Pimlico 
+
+- It builds on the following ERC standards:  
+  - [ERC-20 & ERC-721: Fungible and Non-Fungible Token standard]: the Loyalty Program contract mints fungible points; Gift contracts mint non-fungible loyalty Cards. 
+  - [ERC-4337: Account Abstraction]: Loyalty Cards are abstracted accounts. 
+  - [EIP-712: Typed structured data hashing and signing]: customer requests are executed through signed messages (transferred in front-end app as Qr codes) to the vendor. It allows the vendor to cover all gas costs. 
+  - [ERC-165: Standard Interface Detection]: gift contracts are checked if they follow they ILoyaltyGift interface.  
+
+For a previous version that builds on ERC-1155 (multi-token standard) and ERC-6551 (token based accounts) see [here](https://github.com/7Cedars/loyalty-program-contracts).
+
 
 ## Directory Structure
 ```
@@ -82,19 +98,6 @@ See the following schema for more detail:
 └── README.md
 ```
 
-### Built With
-- Solidity v0.8.19
-- Foundry v0.2.0
-- OpenZeppelin v5.0.2
-- eth-infinitism's account-abstraction v0.7.0
-
-- It builds on the following ERC standards:  
-  - [ERC-20 & ERC-721: Fungible and Non-Fungible Token standard]: the Loyalty Program contract mints fungible points; Gift contracts mint non-fungible loyalty Cards. 
-  - [ERC-4337: Account Abstraction]: Loyalty Cards are abstracted accounts. 
-  - [EIP-712: Typed structured data hashing and signing]: customer requests are executed through signed messages (transferred in front-end app as Qr codes) to the vendor. It allows the vendor to cover all gas costs. 
-  - [ERC-165: Standard Interface Detection]: gift contracts are checked if they follow they ILoyaltyGift interface.  
-
-For a previous version that builds on ERC-1155 (multi-token standard) and ERC-6551 (token based accounts) see [here](https://github.com/7Cedars/loyalty-program-contracts).
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -109,11 +112,11 @@ Foundry
 
 Docker 
   - ... 
-  -  
+  - 
 
-A blockchain with an ERC-6551 registry (v.0.3.1) deployed at address 0x000000006551c19487814612e58FE06813775758. 
-  - To check what chains have an ERC-6551 registry deployed, see [tokenbound.org](https://docs.tokenbound.org/contracts/deployments). 
-  - To deploy yourself (or on a local chain) follow the steps at [tokenbound.org](https://docs.tokenbound.org/guides/deploy-registry).
+Pimlico's Mock Bundler  
+  - ... 
+  - 
 
 ### Quickstart
 1. Clone the repo

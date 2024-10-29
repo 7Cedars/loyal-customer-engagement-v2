@@ -50,7 +50,8 @@
 ## About
 The Loyal protocol provides a modular, composable and gas efficient framework for blockchain based customer engagement programs. 
 
-It uses a bespoke implementation of ERC-4337 Account Abstraction to abstract away any blockchain interaction from customers, while greatly simplifying setting up a paying account for vendors.    
+- It uses a bespoke implementation of ERC-4337 Account Abstraction to abstract away any blockchain interaction from customers, while greatly simplifying setting up a paying account for vendors.    
+- It uses an ERC-20 token as loyalty points, allowing loyalty programs to access a global pool of loyalty gift contracts. Meanwhile, it retains exclusivity by linking points and gift vouchers to their parent loyalty program.
 
 ### The problem 
 The use of blockchains for points based customer programs has been explored extensively. Blockchains potentially allow for  <!-- Here add some refs -->
@@ -58,27 +59,30 @@ The use of blockchains for points based customer programs has been explored exte
 - Transparency and interoperability between engagement programs.   
 - A more intimate customer experience with ownership of vouchers and points transferred from the vendor to the customer.  
 
-They have not yet been widely used, because of the following challenges. 
+They have not yet been widely used though. 
 1. Blockchain interactions used to be too expensive for these uses cases.  
 2. Interaction with blockchains through web3 wallets is too cumbersome for most customers. 
 3. Tokens on blockchains can be used from one program to another. This goes against exclusivity of customer loyalty programs.
 
 ### Solutions
-In order of the above stated problems. 
-1. The cost of blockchain interactions on most L2 have recently dropped to make the use case of loyalty programs viable. 
+1. The cost of blockchain interactions on most L2 chains has dropped dramatically, making this use case viable. 
 
 2. Loyal uses a bespoke implementation of ERC-4337 Account Abstraction. 
-   - Every customer loyalty card is a bespoke account abstraction that is only allowed to interact with its parent Loyalty Program. 
-   - The loyalty program is set to pay for all interactions that loyalty cards enact. 
-   - As such, Loyal avoids setting up a complex paymaster-account flow, while still retaining the necessary security that its funds will not be abused.    
+   - Every Loyalty Card is a bespoke account abstraction that can only interact with its parent Loyalty Program. 
+   - The parent Loyalty Program pays for all interactions of its Loyalty Cards. 
+   - The Loyal protocol avoids setting up a complex paymaster-account workflow, while still retaining necessary protocol security.    
 
 3. The Loyal protocol strikes a balance between interoperability and exclusivity in loyalty programs. 
-   -  Loyal revolves around three entities: Loyalty program, cards and gifts.
    -  Loyal **allows** anyone to act as a vendor, deploying a loyalty program, minting loyalty points and cards, and distributing points to loyalty cards. 
    -  Loyal **allows** anyone to deploy gifts that exchange loyalty points for gift vouchers. 
    -  Loyal **disallows** the use of loyalty points and vouchers in any other loyalty program than the one in which they were minted.
 
 In short, gift contracts can be used across programs to exchange points; but points and gifts themselves are exclusive to programs.
+
+### Concepts
+-  _Program_: A contract that creates loyalty cards, distributes (ERC-20) loyalty points, white lists (ERC-721) loyalty gift and mints their gift vouchers. 
+-  _Card_: An account abstraction that can only interact with the Loyalty Program that created it. All its transactions are funded by the Loyalty program. 
+-  _Gift_: A contract that receives loyalty points and exchanges them for an gift voucher. Gift contracts are interoperable, but their vouchers are program exclusive.  
 
 ### How it works 
 CONTINUE HERE 
