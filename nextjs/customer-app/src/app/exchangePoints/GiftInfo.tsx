@@ -43,10 +43,6 @@ export const GiftInfo = ({
     return parseRequirementReply(item.error)
   }) 
 
-  console.log({requirements})
-
-  console.log({data, error, status, walletsReady, errorCard, pendingCard})
-
   return (
     <main 
       className="flex flex-col border-b"

@@ -34,8 +34,6 @@ export const TransferFunds = () => {
     } 
   }, [isSuccess, balanceData, dispatch, refetch])
 
-  console.log("fetchStatus:", fetchStatus)
-
   return (
     <section className="grow flex flex-col items-center justify-center"> 
       <a 

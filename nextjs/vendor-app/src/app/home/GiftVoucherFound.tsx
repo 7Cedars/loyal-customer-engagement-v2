@@ -21,8 +21,6 @@ export const GiftVoucherFound = ({
   const {status, gift, fetchGift, error} = useGift()
   const { data: dataWriteContract, error: errorWriteConrtact, writeContract } = useWriteContract()
 
-  console.log({errorWriteConrtact, data})
-
   useEffect(() => {
     if (data && status == "idle") fetchGift(data.gift)
   }, [data, fetchGift, status])

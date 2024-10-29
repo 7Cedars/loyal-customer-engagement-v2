@@ -17,8 +17,7 @@ export default function useWatchEvent() {
   const programsFactory: `0x${string}` = deployed ? deployed.factoryProgramsAddress : '0x0'
 
   
-  const watchEvent = (eventName: string) => { 
-      console.log("watchEvent called")
+  const watchEvent = (eventName: string) => {
       if (status == "idle") {
         try {
           setStatus("pending")

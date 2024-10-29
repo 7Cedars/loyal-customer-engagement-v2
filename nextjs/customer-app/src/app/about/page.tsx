@@ -2,11 +2,9 @@
 
 import { Layout } from "@/components/Layout"
 import { TitleText } from "@/components/StandardisedFonts"
-import { useAppSelector } from "@/redux/hooks"
 
 export default function Page() {
-  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
-
+  
   return (
     <Layout> 
       <TitleText title = "About" size = {2} /> 

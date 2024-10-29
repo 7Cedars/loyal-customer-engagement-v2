@@ -54,14 +54,10 @@ export const GiftSelected = ({
       },
     ]
   })
-
-  console.log({variables})
  
   const requirements = data?.map(item => {
     return parseRequirementReply(item.error)
   }) 
-
-  console.log(data ? data[4]?.result : "no data")
 
   useEffect(() => {
     if (statusReceipt == "success") {

@@ -30,8 +30,6 @@ export const DeployProgram = () => {
   const deployed = chainSettings(chainId) 
   const programsFactory: Hex = deployed ? deployed.factoryProgramsAddress : '0x0'
 
-  console.log({eventLog, watchStatus})
-
   const OPTIONS: EmblaOptionsType = {}
   const savedPrograms = useRef<Program[]>([]) ; 
 
@@ -49,8 +47,6 @@ export const DeployProgram = () => {
 
   const handlePostDeployment = async (log: Log[]) => {
     const deployEvents = parseDeployLogs(log)
-    console.log("deployEvents: ", deployEvents)
-
     const deployedProgram = {
       address: deployEvents[0].args.programAddress,
       abi: loyaltyProgramAbi,
@@ -93,7 +89,6 @@ export const DeployProgram = () => {
           }
         })
         localStorage.setItem("clp_v_programs", JSON.stringify(savedPrograms.current)); 
-        console.log("savedPrograms:", savedPrograms.current)
       } else {
         console.log("error data: ", programInfo)
       }
@@ -102,15 +97,12 @@ export const DeployProgram = () => {
   const parseImage = async (src: string) => { // I have this now also in parsers. replace at a later stage.     
     const res = await fetch(src);
     const buff = await res.blob();
-    console.log("buff: ", buff)
     const isImage = buff.type.startsWith('image/png')
 
     if (isImage) {
       setUri(src)
-      console.log("image successfully set")
     } else {
       setUri("/logo.png") // "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC") 
-      console.log("image did not pass test")
     }
   }
 

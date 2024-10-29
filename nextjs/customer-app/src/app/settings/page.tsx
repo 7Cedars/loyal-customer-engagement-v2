@@ -8,7 +8,6 @@ import { ClearLocalStorage, Disclaimer, ShowProgramAddress, Logout, ShowCardAddr
 
 export default function Page() {
   const [selectedItem, setSelectedItem] = useState<string>(); 
-  console.log("selectedItem: ", selectedItem) 
 
   return (
     <Layout> 

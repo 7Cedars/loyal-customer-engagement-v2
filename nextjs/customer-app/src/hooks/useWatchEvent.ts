@@ -21,11 +21,8 @@ export default function useWatchEvent() {
   const deployed = chainSettings(chainId ? chainId : 31337) 
   const programsFactory: `0x${string}` = deployed ? deployed.factoryProgramsAddress : '0x0'
   const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
-
-  console.log("@useWatchEvent:", {eventLog})
   
   const watchEvent = (eventName: string) => { 
-      console.log("watchEvent called")
       if (status == "idle") {
         try {
           setStatus("pending")

@@ -31,8 +31,6 @@ export default function Page() {
     }
   }, [ blockNumberIsFetched, allEvents, blockNumber, fetchEvents, settings ])
 
-  console.log({allEvents})
-
   return (
     <Layout> 
       <TitleText title = "Transactions" size = {2} /> 

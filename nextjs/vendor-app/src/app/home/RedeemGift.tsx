@@ -14,8 +14,6 @@ export const RedeemGifts = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const [parsedResult, setParsedResult] = useState<QrData | null | undefined>();
   const [qrScanOn, setQrScanOn] = useState<boolean>(false); 
-
-  console.log({qrScanOn})
   
   const { ref } = useZxing({
     constraints: {video: qrScanOn, audio: false}, 

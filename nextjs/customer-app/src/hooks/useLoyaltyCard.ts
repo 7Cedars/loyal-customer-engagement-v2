@@ -96,7 +96,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
           if (calls.length > 1) {
             setError("LoyaltyCard only supports single calls"); // should actually exit function. Implement later. 
           } 
-          console.log("calls:", calls)
           try {
             return encodeFunctionData({
               abi: entryPointAbi,
@@ -211,7 +210,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
               sender: cardAddress,
             },
           })
-          console.log("viems userOpHash:", userOpHash)
 
           try {
             const uiConfig = {
@@ -259,9 +257,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
         setError(null);
         
         const fetchedGasPrice: gasPriceProps = await bundlerClient.getUserOperationGasPrice() 
-
-        console.log("fetchedGasPrice.standard.maxFeePerGas: ", fetchedGasPrice.standard.maxFeePerGas)
-        console.log("preVerificationGas: ", preVerificationGas)
         const owner = parseAccount(embeddedWallet.address as `0x${string}`)
         const entryPoint = {
           abi: entryPointAbi,
@@ -292,9 +287,6 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
             functionName: 'getAddress',
             args: [embeddedWallet.address, loyaltyProgram, salt]
           })
-
-          console.log("address @createUserOp", cardAddress)
-          console.log("entrypoint @createUserOp", entryPoint.address)
           
           try {
             nonce = await publicClient.readContract({
@@ -303,12 +295,9 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
               functionName: 'getNonce', 
               args: [cardAddress, key],
             })
-            console.log("getNonce result @customer:", nonce)
           } catch {
             nonce = 0n
           } 
-
-          console.log("nonce @createUserOp", nonce)
 
           const functionData = encodeFunctionData({
             abi: loyaltyProgramAbi,
@@ -316,17 +305,11 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
             args: args
           })
 
-          console.log("functionData @createUserOp", functionData)
-
-          //dest, value, functionData)
-
           const callData = encodeFunctionData({
             abi: loyaltyCardAbi,
             functionName: 'execute', 
             args: [prog.address, 0n, functionData]
           })
-
-          console.log("callData @createUserOp", callData)
 
           const userOperation: UserOperation<"v0.7"> = {
             /** The data to pass to the `sender` during the main execution call. */
@@ -371,14 +354,11 @@ export const useLoyaltyCard = () => { // here types can be added: "exchangePoint
 
     const sendUserOp = useCallback(
       async (loyaltyProgram: `0x${string}`, loyaltyCard: LoyaltyCard, functionName: string, args: any[], salt: bigint) => {
-        console.log("sendUserOp called")
-
         const userOperation = await createUserOp(loyaltyProgram, loyaltyCard, functionName, args, salt);
         if (userOperation) {
           const signature = await loyaltyCard.signUserOperation(userOperation);
           const userOpSigned = {...userOperation, signature: signature} 
           const hash = await bundlerClient.sendUserOperation({userOperation: userOpSigned}) 
-          console.log("HASH: ", hash)     
         } else {
           Error("sendUserOp: userOperation did not come through")
         }

@@ -48,8 +48,6 @@ export default function Home() {
   const [savedPrograms, setSavedPrograms] = useState<Program[]>([]); 
   const dispatch = useDispatch() 
 
-  console.log({connector, status, address})
-
   useEffect(()=>{
     let localStore = localStorage.getItem("clp_v_programs")
     const saved: Program[] = localStore ? JSON.parse(localStore) : []

@@ -47,10 +47,6 @@ export const ChangeProgramImage = () => {
     {  confirmations: 1, hash: hex })
   const dispatch = useDispatch() 
 
-  console.log("connector wagmi account: ", connector)
-  console.log("error: ", error)
-  console.log("errorTransaction: ", errorTransaction)
-
   useEffect(() => {
     setHex(undefined)
     if (hexTransaction) setHex(hexTransaction) 
@@ -67,16 +63,12 @@ export const ChangeProgramImage = () => {
   const parseImage = async (src: string) => { // I have this now also in parsers. replace at a later stage.     
     const res = await fetch(src);
     const buff = await res.blob();
-    console.log("buff: ", buff)
-    console.log("failureReason: ", failureReason)
     const isImage = buff.type.startsWith('image/png')
 
     if (isImage) {
       setUri(src)
-      console.log("image successfully set")
     } else {
       setUri("/logo.png") // "https://aqua-famous-sailfish-288.mypinata.cloud/ipfs/QmaGkjPQq1oGBfYfazGTBM96pcG1AoH3xYBMkNAgi5MfjC") 
-      console.log("image did not pass test")
     }
   }
 
@@ -191,8 +183,6 @@ export const ShowProgramOwner = () => {
     abi: loyaltyProgramAbi,
     functionName: 'owner'
   })
-
-  console.log({dataProgramOwner: data})
 
   return (
     <section className="my-2"> 

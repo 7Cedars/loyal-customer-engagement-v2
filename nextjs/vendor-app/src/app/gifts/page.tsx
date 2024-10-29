@@ -28,9 +28,6 @@ export default function Page() {
   const chainId = useChainId()
   const settings = chainSettings(chainId)
 
-  console.log({allowedGifts})
-  console.log({status, allGifts, error})
-
   const renderFetchButton = (allGifts: GiftsInBlocks[], i: number) => {
     const nextBlock: number = i + 1
     if (i + 1 <= allGifts.length - 1 && allGifts[i].startBlock - allGifts[nextBlock].endBlock > 2) {

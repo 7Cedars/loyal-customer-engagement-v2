@@ -44,7 +44,6 @@ const LoadVoucher = () => {
   useEffect(()=>{
     if (!savedPrograms) {
       let localStore = localStorage.getItem("clp_c_programs")
-      console.log({localStore})
       const saved: Program[] = localStore ? JSON.parse(localStore) : []
       setSavedPrograms(saved)
     }
@@ -57,7 +56,6 @@ const LoadVoucher = () => {
     signature: params.get('sig') ? parseHex(params.get('sig')) : undefined, 
     executed: false 
   })
-  console.log({qrRaw})
 
   const handleSelectionProgram = async (program: Program) => {
     dispatch(setVendor(program))
@@ -144,8 +142,6 @@ const LoadVoucher = () => {
         }
       },[dispatch, savedPrograms]
     )
-
-    console.log( "qrRaw.current: ",  qrRaw.current)
 
   return (
     <>

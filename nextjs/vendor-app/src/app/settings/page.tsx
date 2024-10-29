@@ -8,7 +8,6 @@ import { ChangeProgramImage, ClearLocalStorage, Disclaimer, ExitProgram, ShowPro
 
 export default function Page() {
   const [selectedItem, setSelectedItem] = useState<string>(); 
-  console.log("selectedItem: ", selectedItem) 
 
   return (
     <Layout> 

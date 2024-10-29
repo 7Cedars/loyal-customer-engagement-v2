@@ -56,8 +56,6 @@ export const GiftInfo = ({
     uniqueNumber: uniqueNumber.current,
   } as const
 
-  console.log("@redeemGift Customer:", {message})
-
   const renderedQrCode: React.JSX.Element = (
     <section className="grow flex flex-col items-center justify-center">
       <div className="py-4">

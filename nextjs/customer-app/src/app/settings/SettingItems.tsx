@@ -85,8 +85,6 @@ export const ShowCardAddress = () => {
     ) 
   }, [prog, embeddedWallet, fetchLoyaltyCard])
 
-  console.log({error, pending})
-
   return (
     <section className="my-2"> 
       { loyaltyCard ? 

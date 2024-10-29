@@ -45,8 +45,6 @@ export default function useEvents() {
 
   const fetchEvents = useCallback(
     async (startBlock: number, endBlock: number) => {
-      console.log("fetch events called")
-
       let genesisReached = prog.events.genesisReached
       setAllEvents(prog.events)
 
@@ -58,13 +56,6 @@ export default function useEvents() {
         return;  
       }
 
-      console.log(
-        "BigInt(startBlock): ", BigInt(startBlock)
-      )
-      console.log(
-        "BigInt(endBlock): ", BigInt(endBlock)
-      )
-      
       // if checks pass: 
       // fetch events
       const logs: Log[] = await publicClient.getContractEvents({
@@ -115,7 +106,6 @@ export default function useEvents() {
           )
         )
       )) : null; 
-      console.log("eventsParsed:", eventsParsed)
 
       const eventsInBlocks: EventsInBlocks = {
         startBlock: Number(startBlock), 
@@ -123,7 +113,6 @@ export default function useEvents() {
         genesisReached, 
         events: eventsParsed ? eventsParsed as Event[] : [] 
       }
-      console.log({eventsInBlocks})
 
       // Setting the startBlock and endBlock of all events queried.
       // Note that a '0' from prog events is ignored: this is the default start value in the redux store.   
@@ -133,7 +122,6 @@ export default function useEvents() {
         genesisReached, 
         events: [...prog.events.events, ...eventsInBlocks.events]
       }
-      console.log({allEventsTemp})
 
       // sort queries by block number. 
       allEventsTemp.events.sort((a, b) => {

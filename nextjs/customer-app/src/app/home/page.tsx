@@ -29,8 +29,6 @@ export default function Page() {
   const {cardExists} = useAppSelector(state => state.loyaltyCard) 
   const { watchEvent, eventLog, status: statusTransfer } = useWatchEvent() 
 
-  console.log("@home page: ", {embeddedWallet})
-
   useEffect(() => {
     if (prog.address && embeddedWallet) {
       fetchLoyaltyCard(prog.address, 123456n, embeddedWallet)
@@ -74,7 +72,6 @@ export default function Page() {
       fetchDataFromProgram() 
     }
   }, [prog, fetchDataFromProgram])
-  console.log("voucher.points:", voucher.points)
   
   return (
     <Layout> 
@@ -89,8 +86,6 @@ export default function Page() {
           <div className="w-full sm:w-4/5 lg:w-1/2 h-16 p-2 mt-4">
             <Button onClick={() => {
               if (loyaltyCard && prog.address && embeddedWallet) 
-                
-                console.log("embeddedWallet.address:", embeddedWallet?.address)
                 sendUserOp(
                   prog.address as `0x${string}`, 
                   loyaltyCard as LoyaltyCard, 

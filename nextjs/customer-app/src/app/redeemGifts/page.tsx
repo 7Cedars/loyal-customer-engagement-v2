@@ -24,8 +24,6 @@ export default function Page() {
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
   const {loyaltyCard, error, pending, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
 
-  console.log({allGifts})
-
   const fetchGiftsAmount = useCallback(
     async (gifts: Gift[]) => {
       let gift: Gift
@@ -44,7 +42,6 @@ export default function Page() {
             })
             result.forEach(item => {giftBalances.push(Number(item.result))})
           }
-          console.log({giftBalances})
           const allGiftsRaw = allGiftsBuilder(giftBalances, gifts) 
           setAllGifts(allGiftsRaw)
         }

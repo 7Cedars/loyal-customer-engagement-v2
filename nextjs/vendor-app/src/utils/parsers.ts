@@ -315,10 +315,8 @@ export const parseDeployLogs = (logs: Log[]): Event[] => {
   };
 
   export const parseImageUri = async (src: string): Promise<string> => {
-    
     const res = await fetch(src);
     const buff = await res.blob();
-    console.log("buff: ", buff)
     const isPng = buff.type.startsWith('image/png')
 
     if (isPng) {

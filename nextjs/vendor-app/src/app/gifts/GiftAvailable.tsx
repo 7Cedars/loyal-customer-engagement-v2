@@ -30,8 +30,6 @@ export const GiftAvailable = ({
     args: [selectedProgram.address]
   })
 
-  console.log({allowed})
-
   return (
     <main 
       className="flex flex-col border-b"

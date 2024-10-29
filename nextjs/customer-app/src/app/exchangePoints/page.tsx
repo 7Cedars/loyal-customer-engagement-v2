@@ -49,8 +49,6 @@ export default function Page() {
     }
   }, [prog, fetchGifts, fetchDataFromProgram])
 
-  console.log({gifts})
-
   return (
     <Layout>  
       <TitleText 
