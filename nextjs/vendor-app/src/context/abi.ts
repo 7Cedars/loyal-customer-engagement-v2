@@ -1371,3 +1371,4 @@ export const loyaltyGiftAbi: Abi = [
     ]
   }
 ]
+ 
