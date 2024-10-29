@@ -23,7 +23,7 @@ const privyConfig: PrivyClientConfig = {
   appearance: {
       theme: 'light',
       accentColor: '#676FFF',
-      logo: 'your-logo-url'
+      logo: '/logo.png'
   }
 };
 
