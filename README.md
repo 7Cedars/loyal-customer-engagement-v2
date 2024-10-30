@@ -19,7 +19,7 @@
     <br />
     <br />
     <!--NB: TO DO --> 
-    <a href="/solidity">Solidity protocol</a> ·
+    <a href="/foundry">Solidity protocol</a> ·
     <a href="/nextjs/vendor-app/">Vendor dApp</a> ·
     <a href="/nextjs/customer-app/">Customer dApp</a> ·
     <a href="https://clpv.vercel.app">Deploy a Loyalty Program</a>
