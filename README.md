@@ -110,26 +110,28 @@ As a flowchart
     <img src="public/flowchart loyalty_program.png" alt="Schema Protocol" width="100%" height="100%">
   </a>
 
-### Broader significance 
-- In the Loyal protocol, loyalty points do not have value of themselves, but give easy-access to a wide range of customer experiences. The protocol showcases how tokens can be used as a utility, rather than store of value.
-- It implements an alternative workflow for funded transactions of ERC-4337 account abstractions.  
-
 ### Important files and folders
 
 ```
 .
-├── frontend          # App workspace
-|    ├── README.md    # All information needed to run the dApp locally. 
-│    └── ...
-│
-├── public            # Images
 |
-├── solidity          # Contains all the contracts, interfaces and tests. 
-│    ├── README.md    # All information needed to run contracts locally, test and deploy contracts.   
+├── foundry               # Contains all the contracts, interfaces and tests. 
+│    ├── README.md        # All information needed to run contracts locally, test and deploy contracts.   
 │    └── ...                     
 | 
+├── nextjs                # App workspace
+|     ├── customer-app    # Project documentation for customer-app
+|     │    ├── README.md   
+|     │    └── ...   
+│     └── vendor-app 
+|          ├── README.md  # Project documentation for vendor-app 
+│          └── ...   
+│
+├── public                # Images
+│    └── ...   
+|
 ├── LICENSE
-└── README.md         # This file
+└── README.md             # Project documentation.
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -140,12 +142,14 @@ As a flowchart
 * Solidity 0.8.26
 * Foundry 0.2.0
 * OpenZeppelin 5.0.2
+* Eth-infinitism account-abstraction v0.7.0
 * React 18
 * NextJS 14
-* Tailwind css
 * Wagmi / viem
+* Pimlico permisionless.js 
 * Reown appkit v1.1.7 (previously walletConnect)
 * Privy.io
+* Tailwind css
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
