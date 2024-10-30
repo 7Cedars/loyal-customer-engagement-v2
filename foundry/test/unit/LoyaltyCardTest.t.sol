@@ -66,7 +66,6 @@ contract LoyaltyCardTest is Test {
   // EIP712 domain separator
   struct EIP712Domain {
       string name;
-      uint256 version;
       uint256 chainId;
       address verifyingContract;
   }
@@ -138,7 +137,6 @@ contract LoyaltyCardTest is Test {
     DOMAIN_SEPARATOR =_hashDomain(
           EIP712Domain({
               name: "Highstreet Hopes",
-              version: LOYALTY_PROGRAM_VERSION,
               chainId: block.chainid,
               verifyingContract: address(loyaltyProgram)
           })
@@ -174,7 +172,6 @@ contract LoyaltyCardTest is Test {
     DOMAIN_SEPARATOR =_hashDomain(
           EIP712Domain({
               name: "Highstreet Hopes",
-              version: LOYALTY_PROGRAM_VERSION,
               chainId: block.chainid,
               verifyingContract: address(loyaltyProgram)
           })
@@ -219,7 +216,6 @@ contract LoyaltyCardTest is Test {
     DOMAIN_SEPARATOR =_hashDomain(
           EIP712Domain({
               name: "Highstreet Hopes",
-              version: LOYALTY_PROGRAM_VERSION,
               chainId: block.chainid,
               verifyingContract: address(loyaltyProgram)
           })
@@ -227,14 +223,14 @@ contract LoyaltyCardTest is Test {
     uint256 points = 50000; 
       
     // loyalty program owner creates voucher for 5000 points. 
-    PointsToRequest memory message = PointsToRequest({
+    PointsToRequest memory pointsToRequest = PointsToRequest({
         program: address(loyaltyProgram),
         points: points, 
         uniqueNumber: uniqueNumber
     });
 
     // vender signs the voucher
-    bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(message));
+    bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(pointsToRequest));
     console2.logBytes32(digest);
 
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
@@ -393,51 +389,6 @@ contract LoyaltyCardTest is Test {
     /////////// quick helper function. ///////////
 
 
-  function testRetrieveAddressFromCalldata() public giveCustomerCardAndPoints(customerAddress) {
-    // DeployLoyaltyProgram deployer = new DeployLoyaltyProgram();
-    // (loyaltyProgram, helperConfig) = deployer.run();
-
-    // address dest = address(loyaltyProgram);
-    // uint256 value = 0;
-
-    // bytes memory functionData = abi.encodeWithSelector(LoyaltyProgram.exchangePointsForGift.selector, address(fridayFifteen), customerAddress);
-    // executeCallData = abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData);
-
-    // address cardAddress = _getAddress(customerAddress, payable(address(loyaltyProgram)), SALT);
-    // vm.prank(config.entryPoint); 
-    // (bool success , bytes memory returnData) = cardAddress.call{value: 0}(executeCallData);
-
-    // console2.logBytes(returnData); 
-    
-    // (bytes4 sig, address target, address sender)  = cardImplementation.funcParams(); 
-
-    // logCalldata(abi.encodeWithSelector(LoyaltyCard.execute.selector, dest, value, functionData)); 
-
-    // bytes32 selected;
-    // assembly {
-    //           selected:= executeCallData[:4]
-    //         }
-    
-    // bytes4 selector; 
-    // assembly {
-    //     selector := calldataload(executeCallData.offset)
-    // }
-
-
-    // bytes4 selector = bytes4(executeCallData[:4]);
-    
-    // console2.logBytes32(selected); 
-    // console2.logAddress(dest); 
-    // console2.logBytes(executeCallData); 
-  }
-
-  /* helper functions */  
-
-  function logCalldata(bytes calldata data) external {
-    bytes4 selector = bytes4(data[:4]);
-    console2.logBytes4(selector); 
-  }
-
   ///////////////////////////////////////////////////////////////////////
   //                        Helper Functions                           //
   /////////////////////////////////////////////////////////////////////// 
@@ -451,12 +402,14 @@ contract LoyaltyCardTest is Test {
           )));
   }
 
+  /**
+    * @notice helper function to create EIP712 Domain separator.
+    */
   function _hashDomain(EIP712Domain memory domain) private pure returns (bytes32) {
       return keccak256(
           abi.encode(
-              keccak256("EIP712Domain(string name,uint256 version,uint256 chainId,address verifyingContract)"),
+              keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)"),
               keccak256(bytes(domain.name)),
-              domain.version,
               domain.chainId,
               domain.verifyingContract
           )

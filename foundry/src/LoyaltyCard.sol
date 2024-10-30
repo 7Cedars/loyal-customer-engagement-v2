@@ -128,8 +128,7 @@ contract LoyaltyCard is BaseAccount, IERC721Receiver, UUPSUpgradeable, Initializ
             // return SIG_VALIDATION_SUCCESS; 
     }
     
-    // Fixed the bug below - but it still does not deploy with this bit included. 
-    // NB! I think this is the cause of the AA23 reverted - arithmetic overflow/underflow error! YEP! Without it the calls PASS! 
+    // 
     function _validateTarget(
         bytes calldata data
         ) internal virtual returns (uint256 validationData) {

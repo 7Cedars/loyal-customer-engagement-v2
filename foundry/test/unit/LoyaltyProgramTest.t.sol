@@ -110,7 +110,7 @@ contract LoyaltyProgramTest is Test {
 
     /* Events */
     event Log(string func, uint256 gas);
-    event LoyaltyProgramDeployed(address indexed s_owner, address indexed loyaltyProgramAddress, string LOYALTY_PROGRAM_VERSION);
+    event LoyaltyProgramDeployed(address indexed s_owner, address indexed loyaltyProgramAddress);
     event LoyaltyGiftAdded(address indexed loyaltyGift);
     event LoyaltyGiftNoLongerExchangable(address indexed loyaltyGift);
     event LoyaltyGiftNoLongerRedeemable(address indexed loyaltyGift);
@@ -167,7 +167,6 @@ contract LoyaltyProgramTest is Test {
             })
         );
       uint256 points = 5000; 
-       
         
       // loyalty program owner creates voucher for 5000 points. 
       PointsToRequest memory message = PointsToRequest({
@@ -202,7 +201,7 @@ contract LoyaltyProgramTest is Test {
       _; 
     }
 
-    modifier giveCustomerCardPointsAndGift(address customer) {
+    modifier giveCustomerCardPointsAndGift(address customer)  {
       LoyaltyCard loyaltyCard = factoryCards.createAccount(customer, payable(address(loyaltyProgram)), SALT);
       uint256 amountGifts = 20; 
       DOMAIN_SEPARATOR =_hashDomain(
@@ -264,7 +263,6 @@ contract LoyaltyProgramTest is Test {
       _; 
     }
 
-
     ///////////////////////////////////////////////
     ///                   Setup                 ///
     ///////////////////////////////////////////////
@@ -309,7 +307,7 @@ contract LoyaltyProgramTest is Test {
         string memory cardImageUri = "";
 
         vm.expectEmit(true, false, false, false);
-        emit LoyaltyProgramDeployed(vendorAddress, address(loyaltyProgram), LOYALTY_PROGRAM_VERSION);
+        emit LoyaltyProgramDeployed(vendorAddress, address(loyaltyProgram));
 
         vm.prank(vendorAddress);
         loyaltyProgram = new LoyaltyProgram(
@@ -467,7 +465,6 @@ contract LoyaltyProgramTest is Test {
       bytes memory signature = abi.encodePacked(r, s, v);
       
       // this info is encoded in the QR code. 
-      
       requestRedeemGift = RedeemGiftRequest({
         program: address(loyaltyProgram),
         owner: customerAddress, 
@@ -477,6 +474,7 @@ contract LoyaltyProgramTest is Test {
         signature: signature
       }); 
 
+      // vendor get the signature and calls redeem gift. 
       vm.prank(vendorAddress);  
       loyaltyProgram.redeemGift(
         requestRedeemGift.program, 
