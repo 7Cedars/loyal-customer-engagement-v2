@@ -61,7 +61,7 @@ The Loyal protocol provides a modular, composable and gas efficient framework fo
 ### Concepts
 The Loyal protocol revolves around three concepts 
 -  _Program_: A contract that creates ERC-4337 loyalty cards, distributes ERC-20 loyalty points, white lists ERC-721 loyalty gift and mints their gift vouchers. 
--  _Card_: A account abstraction that can only interact with the Loyalty Program that created it. All its transactions are funded by the Loyalty program. 
+-  _Card_: An account abstraction that can only interact with the Loyalty Program that created it. All its transactions are funded by the Loyalty program. 
 -  _Gift_: A contract that receives loyalty points and exchanges them for an ERC-721 gift voucher. Gift contracts are interoperable, but their vouchers are program exclusive.     
 
 ### Diagram
@@ -89,15 +89,56 @@ For a previous version that builds on ERC-1155 (multi-token standard) and ERC-65
 
 ## Directory Structure
 ```
-.
-├── .well-known                         # reown appkit id
- 
- ... TODO 
+foundry
 
-├── LICENSE
-└── README.md
+│
+├── lib                               # Foundry libraries
+│   ├── account-abstraction           # eth-infinitism account abstraction library
+│   │   └── ...                       
+│   ├── forge-std                     # forge contracts library 
+│   │   └── ...
+│   ├── openzeppelin-contracts        # OpenZeppelin contracts library
+│   │   └── ...
+│   └── ...
+│
+├── script                            # Foundry libraries
+│   ├── DeployFactoryPrograms.s.sol   # Deploy script of loyalty program factory
+│   ├── DeployLoyaltyGifts.s.sol      # Deploy script for example gift contracts
+│   ├── HelperConfig.s.sol            # Helper config 
+│   └── SendPackedUser.s.sol          # Script to create packed user operations. 
+|
+├── src                               # Smart contract source code
+│   ├── interfaces                    # Contracts interfaces
+│   │   ├── ILoyaltyCard.sol          # Loyalty card interface
+│   │   ├── ILoyaltyGift.sol          # Loyalty gift interface
+│   │   └── ILoyaltyProgram.sol       # Loyalty program interface
+│   ├── sample-gifts                  # Example gift contracts
+│   │   ├── giftsMetadata             # Metadata for loyalty gifts 
+│   │   │     └──...                   
+│   │   ├── FreeCoffee.sol            # Example of points for gift exchange
+│   │   ├── FreeCupCake.sol           # Example of points for gift exchange
+│   │   ├── FridayFifteen.sol         # Example of time constrained exchange
+│   │   └── GoldToken.sol             # Example of tiered access 
+│   ├── FactoryCards.sol              # Factory contract to create loyalty cards.
+│   ├── FactoryPrograms.sol           # Factory contract to create loyalty programs.
+│   ├── LoyaltyCard.sol               # Bespoke ERC-4337 loyalty card contract.
+│   ├── LoyaltyGift.sol               # ERC-721 base gift contract.
+│   ├── LoyaltyProgram.sol            # ERC-20 loyalty program contract.
+│   └── ...
+│
+├── test              # Foundry tests
+│   ├── fuzz          # Fuzz tests.
+│   │     └── ...
+│   ├── invariant     # Invariant tests (tbi).
+│   │     └── ...
+│   └── unit          # Unit tests.
+│         └── ...
+│
+├── .env.example      # Example .env file 
+├── Makefile          # Deployment scripts
+├── foundry.toml      # Foundry configuration file
+└── README.md         # Foundry project README
 ```
-
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -110,13 +151,12 @@ Foundry
   - Install following the directions at [getfoundry.sh](https://getfoundry.sh/).
   - You'll know you did it right if you can run `forge --version` and you see a response like `forge 0.2.0 (816e00b 2023-03-16T00:05:26.396218Z)`
 
-Docker 
-  - ... 
-  - 
-
-Pimlico's Mock Bundler  
-  - ... 
-  - 
+Docker and Pimlico's local testing setup
+  - Install following the directions at [[docs.pimlico](https://docs.pimlico.io/permissionless/how-to/local-testing)](https://docs.pimlico.io/permissionless/how-to/local-testing).
+  - You'll know that everything works if you can run `docker compose up` and can access 
+    - Anvil at localhost:8545
+    - Alto Bundler at localhost:4337
+    - Mock Paymaster at localhost:3000
 
 ### Quickstart
 1. Clone the repo

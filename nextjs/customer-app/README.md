@@ -8,7 +8,7 @@
 
 <h2 align="center">Customer Loyalty Program: Customer App</h2>
   <p align="center">
-    Here subtitle 
+    A composable solidity protocol and lightweight dApp for real-world customer engagement
     <br />
     <br />
     <!--NB: TO DO --> 
@@ -31,15 +31,43 @@
 [Redux](redux.js.org) - state management<br>
 
 ## Directory Structure
-
 ```
-.
-├── .well-known                         # reown appkit id
- 
- ... TODO 
-
-├── LICENSE
-└── README.md
+./nextjs/customer-app
+├── .well-known             # ReOwn appKit id
+├── public                  # Public assets
+├── src                     # Source code
+│   ├── app                 # Reusable components
+|   │   ├── about           # About page
+|   |   │   └── ...         
+|   │   ├── exchangePoints  # Exchange points page
+|   |   │   └── ...         
+|   │   ├── home            # Home page
+|   |   │   └── ...         
+|   │   ├── redeemGifts     # Redeem Gifts page
+|   |   │   └── ...         
+|   │   ├── settings        # Settings page
+|   |   │   └── ...         
+|   │   ├── globals.css     # Styling files
+|   │   ├── layout.tsx      # Layout
+|   │   ├── Loader.tsx      # Loader components
+|   │   └── page.tsx        # landing page
+│   ├── components          # Reusable components
+|   │   └── ...             
+│   ├── context             # Abi, chains, clients, providers. 
+|   │   └── ...             
+│   ├── hooks               # Custom hooks
+|   │   ├── useLoyaltyCards # Hook interacting with bespoke ERC-4337 implementation 
+|   │   └── ...             
+│   ├── redux               # Redux store 
+|   │   └── ...             
+│   ├── types               # Type safety 
+|   │   └── index.d.ts      
+│   └── utils               # Utility functions
+|       └── parsers.ts      # parsers
+├── .env.example            # Example environment variables
+├── LICENSE                 # License information
+├── README.md               # Project documentation
+└── ...                     
 ```
 
 ## Getting Started

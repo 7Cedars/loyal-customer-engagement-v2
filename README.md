@@ -53,8 +53,10 @@ The Loyal protocol provides a modular, composable and gas efficient framework fo
 - It uses a bespoke implementation of ERC-4337 Account Abstraction to abstract away any blockchain interaction from customers, while greatly simplifying setting up a paying account for vendors.    
 - It uses an ERC-20 token as loyalty points, allowing loyalty programs to access a global pool of loyalty gift contracts. Meanwhile, it retains exclusivity by linking points and gift vouchers to their parent loyalty program.
 
+<b> IMPORTANT: Do not use this project in any kind of production setting. </b> The project is meant as a Proof of Concept for a new kind of blockchain based customer engagement programs. The code is in active development and has not been audited. It has only been deployed on a testnet - for good reason. 
+
 ### The problem 
-The use of blockchains for points based customer programs has been explored extensively. Blockchains potentially allow for  <!-- Here add some refs -->
+The use of blockchains for points based customer programs has been explored extensively. Blockchains potentially allow  <!-- Here add some refs -->
 - Dynamic customer experiences that are truly global.
 - Transparency and interoperability between engagement programs.   
 - A more intimate customer experience with ownership of vouchers and points transferred from the vendor to the customer.  
@@ -81,52 +83,36 @@ In short, gift contracts can be used across programs to exchange points; but poi
 
 ### Concepts
 -  _Program_: A contract that creates loyalty cards, distributes (ERC-20) loyalty points, white lists (ERC-721) loyalty gift and mints their gift vouchers. 
--  _Card_: An account abstraction that can only interact with the Loyalty Program that created it. All its transactions are funded by the Loyalty program. 
 -  _Gift_: A contract that receives loyalty points and exchanges them for an gift voucher. Gift contracts are interoperable, but their vouchers are program exclusive.  
+-  _Card_: An account abstraction that can only interact with the Loyalty Program that created it. All its transactions are funded by the Loyalty program. 
 
-### How it works 
-CONTINUE HERE 
 
-To introduce role restrictions to governance processes, the Separated Powers protocol forces all governance actions to refer to whitelisted and role restricted external contracts. 
+### How it works
+Loyalty Programs (ERC-20)
+- Are given a practically endless amount of loyalty points at construction. 
+- Can whitelist loyalty gifts. 
+- Automatically creates new loyalty cards every time a new account calls `requestPoints`. 
+- Can disallow the creation of new loyalty cards.  <!-- Check if this actually works -->
 
-These contracts 
-- are restricted to one role Id. 
-- give this role Id privileges to call specific outside functions.
-- constrain these privileges through specific conditions. 
+Loyalty Gifts (ERC-721) 
+- Allow Loyalty Programs to mint gift vouchers. 
+- Have a `requirementsExchangeMet` function that checks if a loyalty card meets requirements for exchange of points to a gift voucher. The requirement logic can be anything: number pf points, time of day, randomisation, anything goes. 
+- Have a `requirementsRedeemMet` function that checks if a loyalty card meets requirements for exchange of a gift voucher to a gift. Again, any logic goes.  
 
-Because the role restricted external contracts closely resemble **laws**, they are referred as such throughout the protocol.
-
-Governance actions are only allowed for accounts that hold the role of the target law. An account that holds role A, can only propose proposals, vote on proposals and execute proposals in relation to laws that have access role id A.     
+Loyalty Cards (ERC-4337)
+- Are bespoke Account Abstractions that are only allowed to interact with their parent loyalty program. 
+- They can also only interact with white listed gift contracts. 
+- They can collect points, exchange points for gift vouchers and exchange vouchers for actual gifts at the vendor. 
+- All interactions are paid for by the parent loyalty contract.  
 
 As a flowchart 
-  <a href="https://github.com/7Cedars/separated-powers/blob/master/public/SeparatedPowers_introLaws.png"> 
-    <img src="public/SeparatedPowers_introLaws.png" alt="Schema Protocol" width="100%" height="100%">
+  <a href="https://github.com/7Cedars/loyal-customer-engagement-v2/blob/master/public/flowchart loyalty_program.png"> 
+    <img src="public/flowchart loyalty_program.png" alt="Schema Protocol" width="100%" height="100%">
   </a>
-
 
 ### Broader significance 
-In the Loyal protocol, loyalty points do not have value of themselves, but give easy-access to a wide range of customer experiences. The protocol showcases how tokens can be used as a utility, rather than store of value.
-
-#### Creating checks and balance 
-Crucially, laws allow proposals to be chained. It means that accounts with role A can balance or check decisions of accounts that hold role B.  
-
-Consider the following steps:  
-- A user with role A proposes a proposal directed at law A. Its vote succeeds, but nothing happens.   
-- A user with role B proposes a proposal directed at law B. The law _only allows the exact same calldata that was included in the proposal to law A_. 
-- When a user with role B calls the execute function of law B, it checks if _both_ proposal A and proposal B have passed. If this is the case, the intended action is executed.
-- The proposal chain can be made as long as required.
-
-It allows, for instance, users with role A to propose a change and users with role B to accept that change. In such a case, power becomes balanced between the two roles: A has power of initiative, B power of execution. 
-
-As a flowchart
-  <a href="https://github.com/7Cedars/separated-powers/blob/master/public/SeparatedPowers_flowchart2.png"> 
-    <img src="public/SeparatedPowers_flowchart2.png" alt="Flowchart Governance.sol" width="100%" height="100%">
-  </a>
-
-#### Gaining a deeper understanding of Separated Powers 
-For now, the protocol does not have extensive documentation. It does have extensive natspecs throughout the protocol contracts. 
-
-The best way to gain a deeper understanding of the protocol is to start at `solidity/src/SeparatedPowers.sol` and `solidity/src/ISeparatedPowers.sol` and read through the code and natspecs.  
+- In the Loyal protocol, loyalty points do not have value of themselves, but give easy-access to a wide range of customer experiences. The protocol showcases how tokens can be used as a utility, rather than store of value.
+- It implements an alternative workflow for funded transactions of ERC-4337 account abstractions.  
 
 ### Important files and folders
 
@@ -158,6 +144,7 @@ The best way to gain a deeper understanding of the protocol is to start at `soli
 * NextJS 14
 * Tailwind css
 * Wagmi / viem
+* Reown appkit v1.1.7 (previously walletConnect)
 * Privy.io
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -173,8 +160,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 ## Contact
 
 Seven Cedars - [Github profile](https://github.com/7Cedars) - cedars7@proton.me
-
-Niy42 - [Github profile](https://github.com/niy42)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

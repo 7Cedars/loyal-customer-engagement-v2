@@ -8,7 +8,7 @@
 
 <h2 align="center">Customer Loyalty Program: Vendor App</h2>
   <p align="center">
-    Here subtitle 
+    A composable solidity protocol and lightweight dApp for real-world customer engagement
     <br />
     <br />
     <!--NB: TO DO --> 
@@ -33,13 +33,44 @@
 ## Directory Structure
 
 ```
-.
-├── .well-known                         # reown appkit id
- 
- ... TODO 
-
-├── LICENSE
-└── README.md
+./nextjs/vendor-app
+├── .well-known             # ReOwn appKit id
+├── public                  # Public assets
+├── src                     # Source code
+│   ├── app                 # Reusable components
+|   │   ├── about           # About page
+|   |   │   └── ...         
+|   │   ├── gifts           # select gifts page
+|   |   │   └── ...         
+|   │   ├── home            # Home page
+|   |   │   └── ...         
+|   │   ├── transactions    # Transaction overview page
+|   |   │   └── ...         
+|   │   ├── settings        # Settings page
+|   |   │   └── ...         
+|   │   ├── globals.css     # Styling files
+|   │   ├── layout.tsx      # Layout
+|   │   ├── Loader.tsx      # Loader components
+|   │   └── page.tsx        # landing page
+│   ├── components          # Reusable components
+|   │   ├── application     # Components for app functionality   
+|   |   │    └── ...         
+|   │   └── ui              # Basic UI components 
+|   |        └── ...         
+│   ├── context             # Abi, chains, clients, providers. 
+|   │   └── ...             
+│   ├── hooks               # Custom hooks
+|   │   └── ...             
+│   ├── redux               # Redux store 
+|   │   └── ...             
+│   ├── types               # Type safety 
+|   │   └── index.d.ts      
+│   └── utils               # Utility functions
+|       └── parsers.ts      # parsers
+├── .env.example            # Example environment variables
+├── LICENSE                 # License information
+├── README.md               # Project documentation
+└── ...                     
 ```
 
 ## Getting Started
@@ -63,6 +94,14 @@ yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see dashboard. 
+
+4. To set up a deployment that interacts with a locally deployed chain using foundry 
+
+    - Install following the directions at [[docs.pimlico](https://docs.pimlico.io/permissionless/how-to/local-testing)](https://docs.pimlico.io/permissionless/how-to/local-testing).
+    - You'll know that everything works if you can run `docker compose up` and can access 
+      - Anvil at localhost:8545
+      - Alto Bundler at localhost:4337
+      - Mock Paymaster at localhost:3000 
 
 ## Live version 
 

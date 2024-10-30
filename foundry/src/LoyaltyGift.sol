@@ -115,7 +115,7 @@ abstract contract LoyaltyGift is ERC721, ERC721Enumerable, ERC721URIStorage, ERC
 
   
     /** 
-        @notice currently does not implement a functionality. Always returns true.  
+        @notice currently does not implement a functionality. Always returns true.  -- is this true? or does it return false? 
      */
     function requirementsExchangeMet(address payable /* _card */) external virtual returns (bool);
 
