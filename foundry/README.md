@@ -32,8 +32,6 @@
   <summary>Table of Contents</summary>
 
 - [About](#about)
-  - [Concepts](#concepts)
-  - [Diagram](#diagram)
   - [Built With](#built-with)
 - [Directory Structure](#directory-structure)
 - [Getting Started](#getting-started)
@@ -46,7 +44,6 @@
   - [Deploy](#deploy)
   - [Live example](#live-example)
 - [Known Issues](#known-issues)
-- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
@@ -57,19 +54,6 @@
 <!-- ABOUT  -->
 ## About
 The Loyal protocol provides a modular, composable and gas efficient framework for blockchain based customer engagement programs. 
-
-### Concepts
-The Loyal protocol revolves around three concepts 
--  _Program_: A contract that creates ERC-4337 loyalty cards, distributes ERC-20 loyalty points, white lists ERC-721 loyalty gift and mints their gift vouchers. 
--  _Card_: An account abstraction that can only interact with the Loyalty Program that created it. All its transactions are funded by the Loyalty program. 
--  _Gift_: A contract that receives loyalty points and exchanges them for an ERC-721 gift voucher. Gift contracts are interoperable, but their vouchers are program exclusive.     
-
-### Diagram
-See the following schema for more detail:
-
-  <a href="https://github.com/7Cedars/loyalty-program-contracts/blob/master/public/PoCModularLoyaltyProgram.png"> 
-    <img src="public/PoCModularLoyaltyProgram.png" alt="Schema Protocol" width="100%" height="100%">
-  </a>
 
 ### Built With
 - Solidity v0.8.19
@@ -151,13 +135,6 @@ Foundry
   - Install following the directions at [getfoundry.sh](https://getfoundry.sh/).
   - You'll know you did it right if you can run `forge --version` and you see a response like `forge 0.2.0 (816e00b 2023-03-16T00:05:26.396218Z)`
 
-Docker and Pimlico's local testing setup
-  - Install following the directions at [[docs.pimlico](https://docs.pimlico.io/permissionless/how-to/local-testing)](https://docs.pimlico.io/permissionless/how-to/local-testing).
-  - You'll know that everything works if you can run `docker compose up` and can access 
-    - Anvil at localhost:8545
-    - Alto Bundler at localhost:4337
-    - Mock Paymaster at localhost:3000
-
 ### Quickstart
 1. Clone the repo
     ```
@@ -218,22 +195,11 @@ Try it out at [https://loyalty-program-psi.vercel.app/](https://loyalty-program-
 <!-- KNOWN ISSUES -->
 ## Known Issues
 This contract has not been audited. Do not deploy on anything else than a test chain. More specifically:
-- Testing coverage is still low. Fuzz tests especially are still underdeveloped.   
-- ERC-1155 and ERC-6551 combination ... WIP 
-- Centralisation. Owner has core priviledges in a consumer program. 
-- I use a simple self build onlyOwner() modifier, instead of OpenZeppelin's implemntation. Keep gas cost down. 
-- Owner of a loyalty program is set at construction, cannot be changed later on. 
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [ ] Further develop testing. Basic unit, integration and invariant tests have been implemented, but fuzz tests not yet. Test coverage is only around 50 percent.  
-- [ ] Implement deployment to multiple testnets. 
-- [ ] ... 
+- Testing coverage is still low. Fuzz tests especially are still underdeveloped.
+- The function `_validateTarget` at LoyaltyCard.sol is likely still insecure. 
+- ... 
 
 See the [open issues](https://github.com/7Cedars/loyalty-program-contracts/issues) for a full list of proposed features (and known issues).
-
 
 <!-- CONTRIBUTING -->
 ## Contributing
@@ -244,8 +210,6 @@ Contributions and suggestions are more than welcome. If you have a suggestion th
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-
 
 <!-- LICENSE -->
 ## License
@@ -263,15 +227,8 @@ GitHub profile [https://github.com/7Cedars](https://github.com/7Cedars)
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
-- This project was build while following [PatrickCollins](https://www.youtube.com/watch?v=wUjYK5gwNZs&t) amazing Learn Solidity, Blockchain Development, & Smart Contracts Youtube course. Not only does the course come highly recommended (it's really a fantastic course!) many parts of this repo started out as direct rip offs from his examples. I have tried to note all specific cases, but please forgive me when I missed some.
-- An [introduction to ERC-6551](https://www.youtube.com/watch?v=GLTVd5P5LCw) by Pinata's Kelly Kim was really useful. 
-- When it comes to EIP-712, the Foundry book was immensly helpful. See https://book.getfoundry.sh/tutorials/testing-eip712. Some other sources I used were: 
-  - https://learnweb3.io/lessons/using-metatransaction-to-pay-for-your-users-gas
-  - this also goes for: https://medium.com/coinmonks/eip-712-example-d5877a1600bd
-- As was the documentation from [Tokenbound](https://docs.tokenbound.org/) (an organisation advocating the implementation of Tokan Based Accounts). 
-- I took the template for the readme file from [Drew Othneil](https://github.com/othneildrew/Best-README-Template/blob/master/README.md?plain=1). 
-- And a special thanks should go out to [SpeedRunEthereum](https://speedrunethereum.com/) and [LearnWeb3](https://learnweb3.io/) for providing the first introductions to solidity coding. 
-
+- This project was build while following [PatrickCollins](https://www.youtube.com/watch?v=wUjYK5gwNZs&t) amazing Learn Solidity, Blockchain Development, & Smart Contracts Youtube course. 
+- ... 
 
 [issues-shield]: https://img.shields.io/github/issues/7Cedars/loyalty-program-contracts.svg?style=for-the-badge
 [issues-url]: https://github.com/7Cedars/loyalty-program-contracts/issues/

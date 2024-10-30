@@ -35,7 +35,8 @@
       <a href="#about">About</a>
       <ul>
         <li><a href="#the-problem">The problem</a></li>
-        <li><a href="#the-solution">The solution</a></li>
+        <li><a href="#solutions">Solutions</a></li>
+        <li><a href="#concepts">Concepts</a></li>
         <li><a href="#how-it-works">How it works</a></li>
         <li><a href="#important-files-and-folders">Important files and folders</a></li>
         <li><a href="#built-with">Built With</a></li>
@@ -105,10 +106,16 @@ Loyalty Cards (ERC-4337)
 - They can collect points, exchange points for gift vouchers and exchange vouchers for actual gifts at the vendor. 
 - All interactions are paid for by the parent loyalty contract.  
 
-As a flowchart 
+A simplified flowchart 
   <a href="https://github.com/7Cedars/loyal-customer-engagement-v2/blob/master/public/flowchart loyalty_program.png"> 
     <img src="public/flowchart loyalty_program.png" alt="Schema Protocol" width="100%" height="100%">
   </a>
+
+### Legacy projects
+This project emerged from a previous loyalty program, build on the ERC-6551 token based account standard. See the following repositories: 
+- [Solidity Protocol](https://github.com/7Cedars/loyalty-program-contracts) 
+- [Solidity Gift Contracts](https://github.com/7Cedars/loyalty-gifts-contracts)
+- [Front end UI/UX](https://github.com/7Cedars/loyalty-program-next)  
 
 ### Important files and folders
 
