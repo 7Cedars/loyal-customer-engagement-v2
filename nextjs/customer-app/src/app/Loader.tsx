@@ -151,7 +151,7 @@ const LoadVoucher = () => {
     <>
     { 
       qrRaw.current.program != '0x0' && qrRaw.current.program != undefined ? 
-      <CustomButton onClick={()=> {loadProgData()}} >
+      <CustomButton onClick={()=> loadProgData()} >
         Load Voucher
       </CustomButton>
       :
