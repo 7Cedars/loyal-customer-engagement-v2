@@ -28,7 +28,7 @@ export const NoGifts = () => {
       <SectionText 
       size={1}
       text=""
-      subtext="Your vendor needs to whitelist gifts for you to be able to exchange them. If you do not see any gifts, please contact your vendor and ask to whitelist one or more gifts."
+      subtext="Your vendor needs to whitelist gifts for you to be able to exchange them. If you do not see any gifts, please contact your vendor and ask to whitelist one or more gifts. "
       />
     </section>
 )}
