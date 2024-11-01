@@ -142,7 +142,7 @@ contract LoyaltyProgramTest is Test {
 
       // vender signs the voucher
       bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(message));
-      console2.logBytes32(digest);
+      // console2.logBytes32(digest);
 
       (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
       bytes memory signature = abi.encodePacked(r, s, v);
@@ -177,7 +177,7 @@ contract LoyaltyProgramTest is Test {
 
       // vender signs the voucher
       bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(message));
-      console2.logBytes32(digest);
+      // console2.logBytes32(digest);
 
       (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
       bytes memory signature = abi.encodePacked(r, s, v);
@@ -223,7 +223,7 @@ contract LoyaltyProgramTest is Test {
 
       // vender signs the voucher
       bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashPointsToRequest(message));
-      console2.logBytes32(digest);
+      // console2.logBytes32(digest);
 
       (uint8 v, bytes32 r, bytes32 s) = vm.sign(vendorKey, digest);
       bytes memory signature = abi.encodePacked(r, s, v);
@@ -277,7 +277,7 @@ contract LoyaltyProgramTest is Test {
       config = helperConfig.getConfig();
       // factoryCards = FactoryCards(config.factoryCards);  
 
-      console2.log(address(factoryCards)); 
+      // console2.log(address(factoryCards)); 
 
       loyaltyProgram = factoryPrograms.deployLoyaltyProgram(
         name, 
@@ -358,13 +358,13 @@ contract LoyaltyProgramTest is Test {
       uint256 points = 250; 
       uint256 burnerWalletKey = vm.envUint("BURNET_WALLET_KEY");
       address burnerWallet = vm.envAddress("BURNER_WALLET");
-      console2.log("burnerWalletKey", burnerWalletKey); 
+      // console2.log("burnerWalletKey", burnerWalletKey); 
       address programAddress = address(loyaltyProgram); //  0x0Ad4017904Acf30DD74f3A7C18D8A18fA3931686; 
 
-      console2.log("DOMAIN SEPRATOR DATA CONTRACT");
-      console2.log("Highstreet Hopes"); 
-      console2.logUint(block.chainid); 
-      console2.logAddress(programAddress); 
+      // console2.log("DOMAIN SEPRATOR DATA CONTRACT");
+      // console2.log("Highstreet Hopes"); 
+      // console2.logUint(block.chainid); 
+      // console2.logAddress(programAddress); 
 
       bytes32 DOMAIN_SEPARATOR_TEMP =_hashDomain(
             EIP712Domain({
@@ -373,8 +373,8 @@ contract LoyaltyProgramTest is Test {
                 verifyingContract: programAddress
             })
         );
-      console2.log("DOMAIN_SEPARATOR_TEMP in TEST"); 
-      console2.logBytes32(DOMAIN_SEPARATOR_TEMP); 
+      // console2.log("DOMAIN_SEPARATOR_TEMP in TEST"); 
+      // console2.logBytes32(DOMAIN_SEPARATOR_TEMP); 
       
       // loyalty program owner creates voucher for 5000 points. 
       PointsToRequest memory message = PointsToRequest({
@@ -385,18 +385,18 @@ contract LoyaltyProgramTest is Test {
 
       // vender signs the voucher
       bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR_TEMP, hashPointsToRequest(message));
-      console2.log("DIGEST IN TEST"); 
-      console2.logBytes32(digest);
+      // console2.log("DIGEST IN TEST"); 
+      // console2.logBytes32(digest);
 
       (uint8 v, bytes32 r, bytes32 s) = vm.sign(burnerWalletKey, digest);
       bytes memory signature = abi.encodePacked(r, s, v);
 
-      console2.logBytes(signature); 
+      // console2.logBytes(signature); 
 
       // transferring ownership of program to burnetWallet
       vm.prank(vendorAddress); 
       loyaltyProgram.transferOwnership(burnerWallet);
-      console2.log("ownerProgram", loyaltyProgram.owner()); 
+      // console2.log("ownerProgram", loyaltyProgram.owner()); 
 
       loyaltyProgram.requestPoints({
         program: programAddress,
@@ -459,7 +459,7 @@ contract LoyaltyProgramTest is Test {
 
       // vender signs the voucher
       bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashRedeemGift(message));
-      console2.logBytes32(digest);
+      // console2.logBytes32(digest);
 
       (uint8 v, bytes32 r, bytes32 s) = vm.sign(customerKey, digest);
       bytes memory signature = abi.encodePacked(r, s, v);
@@ -486,6 +486,124 @@ contract LoyaltyProgramTest is Test {
       ); 
 
     }
+
+    // Testing for a bug in front end. 
+    function testRetrievalAddressVoucher() public  {
+      bytes32 DOMAIN_SEPARATOR_TEMP = _hashDomain(
+      EIP712Domain({
+            name: "test2",
+            // version: LOYALTY_PROGRAM_VERSION,
+            chainId: 11155420,
+            verifyingContract: 0xf673c7aF9aED0244512B3fCA084a235B9Eb4464d
+        })
+      );
+      
+      // customer owner creates & signs request to redeem gift. 
+      GiftToRedeem memory giftToRedeem = GiftToRedeem({
+          program: // 0xf673c7af9aed0244512b3fca084a235b9eb4464d,
+                      0xf673c7aF9aED0244512B3fCA084a235B9Eb4464d, 
+          owner: // 0xc5aace2527d6503c75d893a4bb824e5585398618,
+                    0xC5aAcE2527d6503c75D893A4bb824e5585398618 , 
+          gift: //0x135f2f30aaef9579efd0615e723c0036dbd9035a, 
+                  0x135f2F30aaEf9579EFd0615E723C0036dbd9035a,
+          giftId: 25, 
+          uniqueNumber: 368377109246287 
+      });
+      bytes memory signature = hex"7779e7a700f4df149d33640786bc51fbdac49aa244dffd3cf8b800f3bebcd94f591aeffe4dfa7e36af700264744731546d8365c16b11c77bd7daca4ca1e82f1e1b"; 
+
+      // vender signs the voucher
+      bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR_TEMP, hashRedeemGift(giftToRedeem));
+      address signer = digest.recover(signature);
+      console2.logAddress(signer);  
+
+    }
+
+      struct GiftToRedeemTemp {
+        address program;
+        address owner; // = owner loyalty card.
+        address gift;
+        uint256 giftId;
+        uint256 uniqueNumber; // this can be any number - as long as it makes the request (and its signature) unique.
+      }
+
+    function testSigningPrivyGiftToRedeem() public  {
+      bytes32 DOMAIN_SEPARATOR_TEMP = _hashDomain(
+        EIP712Domain({
+              name: "test2",
+              // version: LOYALTY_PROGRAM_VERSION,
+              chainId: 11155420,
+              verifyingContract: 0xf673c7aF9aED0244512B3fCA084a235B9Eb4464d
+          })
+      );
+      uint256 privyKey = vm.envUint("PRIVY_BURNER_WALLET_KEY");
+      address privyAddress = vm.addr(privyKey);
+      console2.logAddress(privyAddress);  
+
+      // customer owner creates & signs request to redeem gift. 
+      GiftToRedeemTemp memory giftToRedeem = GiftToRedeemTemp({
+          program: // 0xf673c7af9aed0244512b3fca084a235b9eb4464d,
+                      0xf673c7aF9aED0244512B3fCA084a235B9Eb4464d,
+          owner: // 0xc5aace2527d6503c75d893a4bb824e5585398618,
+                    0xC5aAcE2527d6503c75D893A4bb824e5585398618, 
+          gift: //0x135f2f30aaef9579efd0615e723c0036dbd9035a, 
+                  0x135f2F30aaEf9579EFd0615E723C0036dbd9035a,
+          giftId: 25,
+          uniqueNumber: 878794630064237 
+      });
+
+      bytes32 hashTemp = 
+          keccak256(
+            abi.encode(
+                keccak256("redeemGift(address program,address owner,address gift,uint256 giftId,uint256 uniqueNumber)"),
+                giftToRedeem.program,
+                giftToRedeem.owner,
+                giftToRedeem.gift,
+                giftToRedeem.giftId,
+                giftToRedeem.uniqueNumber
+            )
+        );
+
+      // vender signs the voucher
+      bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR_TEMP, hashTemp);
+      // console2.logBytes32(digest);
+
+      (uint8 v, bytes32 r, bytes32 s) = vm.sign(privyKey, digest);
+      bytes memory signature = abi.encodePacked(r, s, v);
+      console2.logBytes(signature); 
+  
+    }
+
+    // Testing for a bug in front end. 
+    function testRetrievalAddressPoints() public {
+
+
+    console2.logAddress(vendorAddress);
+      
+
+      bytes32 DOMAIN_SEPARATOR_TEMP = _hashDomain(
+            EIP712Domain({
+                name: "test2",
+                // version: LOYALTY_PROGRAM_VERSION,
+                chainId: 11155420,
+                verifyingContract: 0xf673c7aF9aED0244512B3fCA084a235B9Eb4464d
+            })
+        );
+
+      // customer owner creates & signs request to redeem gift. 
+      PointsToRequest memory pointsToRequest = PointsToRequest({
+          program: 0xf673c7aF9aED0244512B3fCA084a235B9Eb4464d, 
+          points: 500, 
+          uniqueNumber: 1151308709814906
+      });
+      bytes memory signature = hex"aa9466bcd1bd4f1c5dcde1efeaeb9749840b35cd61b629788b6a8ad0530a77fd64b4d996530743a66b1c81b22d75c412421b68aa8f8f6f932579410e197b3cdf1b"; 
+
+      // vender signs the voucher
+      bytes32 digest = MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR_TEMP, hashPointsToRequest(pointsToRequest));
+      address signer = digest.recover(signature);
+      console2.logAddress(signer);  
+
+    }
+
 
 
     ///////////////////////////////////////////////////////////////////////

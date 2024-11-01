@@ -9,7 +9,7 @@ import { setBalanceProgram } from "@/redux/reducers/programReducer";
 
 export const TransferFunds = () => {
   const [ transferAmount, setTransferAmount ] = useState<number>(0)
-  const { sendTransaction, data: dataTransaction, status } = useSendTransaction()
+  const { sendTransaction, data: dataTransaction, status, error: sendTransactionError } = useSendTransaction()
   const [hex, setHex] = useState<Hex | undefined>()
   const dispatch = useDispatch()
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
@@ -17,7 +17,9 @@ export const TransferFunds = () => {
   const decimals = 10 ** 3
   const { data, error, status: statusTransaction, isSuccess } = useWaitForTransactionReceipt(
     {  confirmations: 1, hash: hex })
-    
+  
+    console.log({error, sendTransactionError})
+
   useEffect(() => {
     setHex(undefined)
     if (dataTransaction) setHex(dataTransaction) 

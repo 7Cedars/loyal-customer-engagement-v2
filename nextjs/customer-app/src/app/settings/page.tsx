@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout"
 import { TitleText } from "../../components/StandardisedFonts"
 import { SettingLayout } from "./SettingLayout"
 import { useState } from "react"
-import { ClearLocalStorage, Disclaimer, ShowProgramAddress, Logout, ShowCardAddress, ShowCardOwner } from "./SettingItems"
+import { ClearLocalStorage, Disclaimer, ShowProgramAddress, Logout, ShowCardAddress, ShowCardOwner, ExportWalletKey } from "./SettingItems"
 
 export default function Page() {
   const [selectedItem, setSelectedItem] = useState<string>(); 
@@ -13,6 +13,16 @@ export default function Page() {
     <Layout> 
       <TitleText title = "Settings" size = {2} /> 
       <div className="grow flex flex-col justify-start items-start overflow-auto p-2">
+
+      <SettingLayout 
+          selected = {selectedItem == 'exportKey'} 
+          onClick={() => selectedItem == 'exportKey' ? setSelectedItem(undefined) : setSelectedItem('exportKey') }
+          titleText="Export wallet key"
+          sizeFoldout={3}
+          >
+           <ExportWalletKey /> 
+        </SettingLayout>
+
         <SettingLayout 
           selected = {selectedItem == 'localStore'} 
           onClick={() => selectedItem == 'localStore' ? setSelectedItem(undefined) : setSelectedItem('localStore') }
@@ -48,6 +58,7 @@ export default function Page() {
           >
            <ShowCardOwner /> 
         </SettingLayout>
+
 
         <SettingLayout 
           selected = {selectedItem == 'disclaimer'} 

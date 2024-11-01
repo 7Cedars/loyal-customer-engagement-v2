@@ -19,7 +19,7 @@ export const GiftVoucherFound = ({
   data
 }: GiftVoucherFoundProps)  => {
   const {status, gift, fetchGift, error} = useGift()
-  const { data: dataWriteContract, error: errorWriteConrtact, writeContract } = useWriteContract()
+  const { data: dataWriteContract, error: errorWriteContract, variables, writeContract } = useWriteContract()
 
   useEffect(() => {
     if (data && status == "idle") fetchGift(data.gift)
@@ -67,12 +67,12 @@ export const GiftVoucherFound = ({
                   address: program.address,
                   functionName: 'redeemGift',
                   args: [
-                    program.address,
-                    data.owner, 
-                    data.gift,
-                    data.giftId, 
-                    data.uniqueNumber,
-                    data.signature
+                    program.address as `0x${string}`,
+                    data.owner as `0x${string}`,
+                    data.gift as `0x${string}`,
+                    data.giftId as bigint, 
+                    data.uniqueNumber as bigint,
+                    data.signature as `0x${string}`
                   ]
                 })
               }

@@ -4,11 +4,13 @@ import { loyaltyGiftAbi } from "@/context/abi";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { useAppSelector } from "@/redux/hooks";
 import { Gift } from "@/types";
+import { getRandomBigInt } from "@/utils/misc";
+import { parseBigInt, parseBigIntToNumber } from "@/utils/parsers";
 import { useWallets } from "@privy-io/react-auth";
 import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
 import QRCode from "react-qr-code";
-import { useChainId, useReadContract, useSignTypedData, useWriteContract } from "wagmi";
+import { useAccount, useChainId, useReadContract, useSignTypedData, useWriteContract } from "wagmi";
 
 export const GiftInfo = ({
   address,  
@@ -21,40 +23,82 @@ export const GiftInfo = ({
   const [selected, setSelected] = useState<boolean>(false) 
   const {wallets, ready: walletsReady} = useWallets();
   const embeddedWallet = wallets.find((wallet) => (wallet.walletClientType === 'privy'));
-  const { data: signature, isPending, error: errorSignTypedData, signTypedData, reset } = useSignTypedData()
+  const {address: addressAccount} = useAccount()
+  const [signature, setSignature] = useState<`0x${string}`>() 
+  // const { data: signature, isPending, error: errorSignTypedData, signTypedData, reset } = useSignTypedData()
   const {loyaltyCard, error: errorCard, pending: pendingCard, fetchLoyaltyCard, sendUserOp} = useLoyaltyCard(); 
   const { data: giftId, isError, status, refetch, error: tokenOfOwnerByIndexError } = useReadContract({
     address: address,
     abi: loyaltyGiftAbi,
     functionName: 'tokenOfOwnerByIndex',
-    args: [loyaltyCard && loyaltyCard.address ? loyaltyCard.address  : '0x0', 99999n]
+    args: [loyaltyCard && loyaltyCard.address ? loyaltyCard.address  : '0x0', 0n]
   })
-  const uniqueNumber = useRef<bigint>(BigInt(Math.random() * 10 ** 18))
+  const uniqueNumber = useRef<bigint>(getRandomBigInt(1157920892373160)); 
   const chainId = useChainId();  
 
-  const domain = {
-    name: vendorProgram.name, 
-    chainId: chainId,
-    verifyingContract: vendorProgram.address
-  } as const
+  console.log({giftId, wallets, embeddedWallet, addressAccount, signature, status})
 
-  const types = {
-    GiftToRedeem: [
-      { name: 'program', type: 'address' },
-      { name: 'owner', type: 'address' },
-      { name: 'gift', type: 'address' },
-      { name: 'giftId', type: 'uint256' },
-      { name: 'uniqueNumber', type: 'uint256' }
-    ],
-  } as const
+  const signTypedRedeemRequest = useCallback(
+    async () => {
 
-  const message = {
-    program: vendorProgram.address ? vendorProgram.address : '0x0',
-    owner: embeddedWallet && embeddedWallet.address ? embeddedWallet.address as `0x${string}` : '0x0', 
-    gift: address as `0x${string}`, 
-    giftId: giftId as bigint ? giftId as bigint : 0n, 
-    uniqueNumber: uniqueNumber.current,
-  } as const
+      console.log("signTypedRedeemRequest TRIGGERED")
+
+      const domain = {
+        name: vendorProgram.name, 
+        chainId: chainId,
+        verifyingContract: vendorProgram.address
+      } as const
+
+      console.log("waypoint 1")
+    
+      const types = {
+        redeemGift: [
+          { name: 'program', type: 'address' },
+          { name: 'owner', type: 'address' },
+          { name: 'gift', type: 'address' },
+          { name: 'giftId', type: 'uint256' }, 
+          { name: 'uniqueNumber', type: 'uint256' }
+        ],
+      } as const
+
+      console.log("waypoint 2")
+
+      
+      console.log({uniqueNumber})
+      console.log("uniqueNumber as string: ", String(uniqueNumber.current))
+    
+      console.log("waypoint 3")
+      
+      if (embeddedWallet && giftId) {
+        const message = {
+          program: vendorProgram.address ? vendorProgram.address as `0x${string}` : '0x0',
+          owner: embeddedWallet && embeddedWallet.address ? embeddedWallet.address as `0x${string}` : '0x0', 
+          gift: address as `0x${string}`, 
+          giftId: String(giftId), 
+          uniqueNumber: String(uniqueNumber.current)
+        } as const
+
+        try {
+          const provider = await embeddedWallet.getEthereumProvider();
+          const address = embeddedWallet.address
+          const signedTypedData = await provider.request({
+            method: 'eth_signTypedData_v4',
+            params: [address, {
+              domain, 
+              types, 
+              primaryType: 'redeemGift',
+              message
+            }],
+          });
+          setSignature(signedTypedData)
+          console.log({signedTypedData}) 
+        } catch (error) {
+          console.log(`Error @signTypedData: ${error}`)
+          return '0x'
+        }
+      }
+    }, [embeddedWallet,  chainId, vendorProgram.address, vendorProgram.name, address, giftId]
+  )
 
   const renderedQrCode: React.JSX.Element = (
     <section className="grow flex flex-col items-center justify-center">
@@ -147,7 +191,7 @@ export const GiftInfo = ({
         <div className="px-2 h-10 my-4"> 
           { signature? 
             <Button 
-              onClick={() => reset()}
+              onClick={() => setSignature(undefined)}
               statusButton="idle"
             > 
               Back
@@ -157,12 +201,7 @@ export const GiftInfo = ({
               size = {0}
               aria-disabled = {selected}
               statusButton="idle"
-              onClick={() => signTypedData({
-                domain, 
-                types, 
-                primaryType: 'GiftToRedeem',
-                message
-              })} >
+              onClick={() => signTypedRedeemRequest() } >
               Create Qr Code to Redeem gift 
             </Button>
           }

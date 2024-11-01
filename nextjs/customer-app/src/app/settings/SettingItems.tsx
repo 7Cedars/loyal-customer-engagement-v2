@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import Link from "next/link";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
-import { useWallets } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 
 export const ClearLocalStorage = () => {
   const [cleared, setCleared] = useState<boolean>(false);
@@ -135,6 +135,35 @@ export const ShowCardAddress = () => {
         }
     </section>
 )}
+
+export const ExportWalletKey = () => {
+  const {ready, authenticated, user, exportWallet} = usePrivy();
+  // Check that your user is authenticated
+  const isAuthenticated = ready && authenticated;
+  // Check that your user has an embedded wallet
+  const hasEmbeddedWallet = !!user?.linkedAccounts.find(
+    (account) => account.type === 'wallet' && account.walletClientType === 'privy',
+  );
+
+  console.log({hasEmbeddedWallet, isAuthenticated})
+
+  return (
+    <section className="my-2"> 
+      <SectionText 
+      text="Are you sure you want to export your secret wallet key?"
+      subtext=""
+      />
+      <div className="flex h-12 max-w-96 w-full mt-6 z-20">
+        <Button 
+          onClick={exportWallet} 
+          statusButton = {"idle"}
+          >
+          Export Wallet
+        </Button>
+      </div>
+    </section>
+)}
+
 
 export const ShowCardOwner = () => {
   const {wallets, ready: walletsReady} = useWallets();

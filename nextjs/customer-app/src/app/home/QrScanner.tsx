@@ -36,7 +36,9 @@ export const QrScanner = () => {
               subtitle='Scan customer Qr code and redeem their gift'
               /> 
             </div>
-            <video ref={ref} />
+            <div className='h-full w-full max-h-96 max-w-96 '>
+              <video ref={ref} />
+            </div>
             <div className='h-12 w-full max-w-96 m-2 mb-20'>
               <Button 
                 statusButton={'idle'}

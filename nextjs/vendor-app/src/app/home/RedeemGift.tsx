@@ -43,8 +43,10 @@ export const RedeemGifts = () => {
               subtitle='Scan customer Qr code and redeem their gift'
               /> 
             </div>
-            <video ref={ref} />
-            <div className='h-12 w-full m-2'>
+            <div className='h-full w-full max-h-96 max-w-96 '>
+              <video ref={ref} />
+            </div>
+            <div className='h-12 w-full m-4'>
               <Button 
                 statusButton={'idle'}
                 onClick={()=> setQrScanOn(!qrScanOn)}>
