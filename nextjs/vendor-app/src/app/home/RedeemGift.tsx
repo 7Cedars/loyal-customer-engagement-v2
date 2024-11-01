@@ -55,9 +55,9 @@ export const RedeemGifts = () => {
   });
 
   return (
-    <section className="grow flex flex-col items-center justify-center mt-4 mb-20">
+    <section className="h-full flex flex-col items-center justify-center mt-20 mb-20">
        <div 
-        className="px-2 w-full h-full flex flex-col items-center justify-between"
+        className="px-2 w-full h-full flex flex-col items-center justify-between overflow-y-auto overflow-x-hidden"
         style = {{color: prog.colourAccent, borderColor: prog.colourAccent}}
         >
 
@@ -74,7 +74,7 @@ export const RedeemGifts = () => {
               subtitle='Scan customer Qr code and redeem their gift'
               /> 
             </div>
-            <div className='h-full w-full max-h-96 max-w-96 '>
+            <div className='grow max-h-96 max-w-96'>
               <video ref={ref} />
             </div>
             <div className='h-12 w-full mx-4 my-1'>
