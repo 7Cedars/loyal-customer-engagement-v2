@@ -14,11 +14,36 @@ import { useMediaDevices } from "react-media-devices";
 export const RedeemGifts = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const [parsedResult, setParsedResult] = useState<QrData | null | undefined>();
-  const [qrScanOn, setQrScanOn] = useState<boolean>(false); 
+  const constraints: MediaStreamConstraints = {video: true, audio: false}
   // see https://www.npmjs.com/package/react-zxing for how to manage qrreader
-  const constraints: MediaStreamConstraints = {video: qrScanOn, audio: false}
-  const { devices } = useMediaDevices({ constraints });
-  const deviceId = devices?.[1]?.deviceId;
+  const { devices } = useMediaDevices({ constraints }); 
+  const [deviceId, setDeviceId] = useState<string | undefined>()
+  
+  console.log({devices, deviceId})
+
+  const handleSelectionCamera = () => {
+    console.log("handleSelectionCamera triggered")
+    if (devices && devices.length > 1) {
+      const devicesIds: string[] = []
+      devices.forEach((device: MediaDeviceInfo) => {
+        if (device.deviceId.length > 0) devicesIds.push(device.deviceId)   
+      })
+      console.log({devicesIds})
+      
+      const index = deviceId ? devicesIds.indexOf(deviceId) : -1 
+      console.log({index})
+
+      if (devicesIds.length == 0) { 
+        setDeviceId(undefined)
+      } 
+      else if (devicesIds.length > 0 && index == devicesIds.length - 1) {
+        setDeviceId(devicesIds[0])
+      }
+      else {
+        setDeviceId(devicesIds[index + 1])
+      }
+    } 
+  }
   
   const { ref } = useZxing({
     paused: !deviceId,
@@ -30,9 +55,9 @@ export const RedeemGifts = () => {
   });
 
   return (
-    <section className="grow flex flex-col items-center justify-center mt-8 mb-20">
+    <section className="grow flex flex-col items-center justify-center mt-4 mb-20">
        <div 
-        className="p-2 w-full h-full flex flex-col items-center justify-between"
+        className="px-2 w-full h-full flex flex-col items-center justify-between"
         style = {{color: prog.colourAccent, borderColor: prog.colourAccent}}
         >
 
@@ -43,7 +68,7 @@ export const RedeemGifts = () => {
             data = {parsedResult} />
           : 
           <>
-            <div className='py-2'>
+            <div className=''>
               <TitleText 
               title='Scan Qr Code'
               subtitle='Scan customer Qr code and redeem their gift'
@@ -52,13 +77,26 @@ export const RedeemGifts = () => {
             <div className='h-full w-full max-h-96 max-w-96 '>
               <video ref={ref} />
             </div>
-            <div className='h-12 w-full m-4'>
+            <div className='h-12 w-full mx-4 my-1'>
               <Button 
                 statusButton={'idle'}
-                onClick={()=> setQrScanOn(!qrScanOn)}>
-                  {qrScanOn ? "Close qr scanner" : "Show qr scanner"} 
+                onClick={()=> deviceId ? setDeviceId(undefined) : handleSelectionCamera()}>
+                  {deviceId ? "Close qr scanner" : "Show qr scanner"} 
               </Button>
             </div>
+            {/* if multiple camera exist on device, user can toggle through cameras. I might need to save preference this in localStorage later on.  */}
+            { devices && devices.length > 1 ?
+              <div className='h-12 w-full mx-4 my-1'>
+                <Button 
+                  statusButton={'idle'}
+                  onClick={()=> handleSelectionCamera()}>
+                    Different camera 
+                </Button>
+              </div>
+            :
+            null
+            }
+
           {
             parsedResult === null ?  
             <div className='pt-4'>
