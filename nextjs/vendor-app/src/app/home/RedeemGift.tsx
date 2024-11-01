@@ -77,7 +77,7 @@ export const RedeemGifts = () => {
             <div className='grow max-h-96 max-w-96'>
               <video ref={ref} />
             </div>
-            <div className='h-12 w-full mx-4 my-1'>
+            <div className='h-12 w-full mx-4 my-1 z-20'>
               <Button 
                 statusButton={'idle'}
                 onClick={()=> deviceId ? setDeviceId(undefined) : handleSelectionCamera()}>
@@ -86,7 +86,7 @@ export const RedeemGifts = () => {
             </div>
             {/* if multiple camera exist on device, user can toggle through cameras. I might need to save preference this in localStorage later on.  */}
             { devices && devices.length > 1 ?
-              <div className='h-12 w-full mx-4 my-1'>
+              <div className='h-12 w-full mx-4 my-1 z-20'>
                 <Button 
                   statusButton={'idle'}
                   onClick={()=> handleSelectionCamera()}>

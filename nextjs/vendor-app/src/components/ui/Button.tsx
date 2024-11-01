@@ -31,7 +31,7 @@ export const Button = ({
         selected ? 
         {color: selectedProgram.colourBase, borderColor: selectedProgram.colourBase, backgroundColor: selectedProgram.colourAccent}
         :
-        {color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}
+        {color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent, backgroundColor: selectedProgram.colourBase}
       } // can add background, but should not be necessary.  
       onClick={onClick} 
       disabled={statusButton != 'idle'}

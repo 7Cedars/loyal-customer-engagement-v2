@@ -86,7 +86,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
     
       return (
         <header 
-          className="absolute bottom-0 z-20 flex justify-between h-16 w-full text-sm px-4"
+          className="absolute bottom-0 z-20 flex justify-between h-16 w-full text-sm ps-4 pe-8 mx-4"
           style={{color:accent, backgroundColor:base}}
           >
         <Link 
