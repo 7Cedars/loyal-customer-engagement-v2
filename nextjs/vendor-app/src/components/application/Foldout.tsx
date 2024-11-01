@@ -1,4 +1,4 @@
-import { TitleText } from "@/components/StandardisedFonts";
+import { TitleText } from "@/components/ui/StandardisedFonts";
 import { useAppSelector } from "@/redux/hooks";
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 
@@ -21,26 +21,26 @@ const heights = [
   "aria-selected:h-[42rem]"
 ]
 
-export const SettingLayout = ({
+export const Foldout = ({
   titleText, 
   selected = false, 
   sizeFoldout = 0, 
   onClick,
   children,
 }: ButtonProps) => {
-  const {vendorProgram} = useAppSelector(state => state.vendorProgram)
+  const {selectedProgram} = useAppSelector(state => state.selectedProgram)
 
   return (
     <div 
       className="w-full grid grid-cols-1 justify-items-start content-start h-fit pt-1 border-b" 
-      style = {{color: vendorProgram.colourAccent, borderColor: vendorProgram.colourAccent}} // can add background, but should not be necessary.   
+      style = {{color: selectedProgram.colourAccent, borderColor: selectedProgram.colourAccent}} // can add background, but should not be necessary.   
       aria-selected = {selected}
       >
       <button 
         className={`z-10 w-full h-fit flex flex-row justify-between items-center pt-2`} 
         onClick={onClick}
         >
-        <TitleText size={1} title={""} subtitle={titleText} />
+        <TitleText size={1} title={""} subtitle={titleText} /> 
         <ChevronDownIcon 
           className="w-4 h-4 aria-selected:rotate-180 transition-all ease-in-out duration-300 delay-300" 
           aria-selected = {selected}

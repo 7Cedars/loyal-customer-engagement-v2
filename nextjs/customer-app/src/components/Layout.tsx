@@ -92,7 +92,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
     
       return (
         <header 
-          className="absolute bottom-0 z-20 flex justify-between h-16 w-full text-sm ps-4 pe-8 mx-4"
+          className="absolute bottom-0 z-20 flex flex-row justify-between h-16 w-full text-sm ps-4 pe-8 mx-4"
           style={{color:accent, backgroundColor:base}}
           >
         <Link 
@@ -100,7 +100,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
           aria-selected={path == "/home"}
           className={"py-2 opacity-50 aria-selected:opacity-100 w-6"}
           > 
-            <div className='col-span-1 grid text-xs justify-items-center'> 
+            <div className={layoutIconBox}> 
                 <HomeIcon
                   className={layoutIcons}
                   style={{color:accent}} // instead of using aria selected, I can make opacity conditional here. 
@@ -141,7 +141,7 @@ const NavbarTop = ({path, base, accent}: NavbarProps) => {
          <Link 
           href={"/settings"} 
           aria-selected={path == "/settings" } 
-          className={"py-2 opacity-50 aria-selected:opacity-100 w-6 aria-disabled:opacity-10"}
+          className={"py-2 opacity-50 aria-selected:opacity-100 w-6"}
           >
             <div className={layoutIconBox}> 
               <Cog6ToothIcon

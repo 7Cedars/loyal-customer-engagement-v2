@@ -49,7 +49,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About
-The Loyal protocol provides a modular, composable and gas efficient framework for blockchain based customer engagement programs. 
+The Loyal protocol provides a modular framework for blockchain based customer engagement programs. 
 
 - It uses a bespoke implementation of ERC-4337 Account Abstraction to abstract away any blockchain interaction from customers, while greatly simplifying setting up a paying account for vendors.    
 - It uses an ERC-20 token as loyalty points, allowing loyalty programs to access a global pool of loyalty gift contracts. Meanwhile, it retains exclusivity by linking points and gift vouchers to their parent loyalty program.

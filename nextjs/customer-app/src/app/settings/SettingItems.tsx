@@ -202,6 +202,26 @@ export const ShowCardOwner = () => {
     </section>
 )}
 
+export const AboutSection = () => {
+  const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
+
+  return (
+    <section className="my-2"> 
+      <SectionText 
+      text="Want to know more?"
+      />
+      <div className="flex h-12 max-w-96 w-full mt-6 z-10">
+      <Link 
+          href='/about' 
+          className={`w-full h-full grid grid-cols-1 text-md text-center border content-center rounded-lg p-2 h-12 z-30`} 
+          style={{color: prog.colourAccent, borderColor: prog.colourAccent}}
+          >
+          Visit the about section      
+          </Link>
+      </div>
+    </section>
+)}
+
 export const Logout = () => {
   const {vendorProgram: prog} = useAppSelector(state => state.vendorProgram)
 
