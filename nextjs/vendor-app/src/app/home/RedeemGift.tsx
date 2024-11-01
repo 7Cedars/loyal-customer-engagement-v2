@@ -9,14 +9,20 @@ import { NoteText, SectionText, TitleText } from '@/components/ui/StandardisedFo
 import { parseQrData } from '@/utils/parsers';
 import { GiftVoucherFound } from '@/app/home/GiftVoucherFound';
 import { Button } from '@/components/ui/Button';
+import { useMediaDevices } from "react-media-devices";
 
 export const RedeemGifts = () => {
   const {selectedProgram: prog} = useAppSelector(state => state.selectedProgram)
   const [parsedResult, setParsedResult] = useState<QrData | null | undefined>();
   const [qrScanOn, setQrScanOn] = useState<boolean>(false); 
+  // see https://www.npmjs.com/package/react-zxing for how to manage qrreader
+  const constraints: MediaStreamConstraints = {video: qrScanOn, audio: false}
+  const { devices } = useMediaDevices({ constraints });
+  const deviceId = devices?.[1]?.deviceId;
   
   const { ref } = useZxing({
-    constraints: {video: qrScanOn, audio: false}, 
+    paused: !deviceId,
+    deviceId,
     onDecodeResult(result) {
       const parsedResultRaw = parseQrData(result.getText());
       setParsedResult(parsedResultRaw)
