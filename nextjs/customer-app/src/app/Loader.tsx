@@ -5,7 +5,7 @@ import { loyaltyProgramAbi } from '@/context/abi';
 import { wagmiConfig } from '@/context/wagmiConfig';
 import { setVendor } from '@/redux/reducers/vendorReducer';
 import { setVoucher } from '@/redux/reducers/voucherReducer';
-import { Program, QrPoints } from '@/types';
+import { Program, QrPoints, Status } from '@/types';
 import { parseBigInt, parseHex, parseString } from '@/utils/parsers';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
@@ -40,6 +40,7 @@ const LoadVoucher = () => {
   const dispatch = useDispatch(); 
   const router = useRouter()
   const [savedPrograms, setSavedPrograms] = useState<Program[]>();  
+  const [status, setStatus] = useState<Status>('idle')
   
   useEffect(()=>{
     if (!savedPrograms) {
@@ -68,13 +69,13 @@ const LoadVoucher = () => {
     localStorage.setItem("clp_v_programs", JSON.stringify(filteredPrograms)); 
   }
 
-  const handleLoadVoucher = () => {
-    loadProgData() 
-    router.push('/home')
-  }
+  useEffect(() => {
+    if(status == 'success') router.push('/home')
+  }, [status, router])
 
   const loadProgData = useCallback(
       async() => {
+        setStatus('pending')
         const programContract = {
           address: qrRaw.current.program ? qrRaw.current.program  : '0x', 
           abi: loyaltyProgramAbi,
@@ -139,6 +140,9 @@ const LoadVoucher = () => {
           }
           // reset qrRaw data. 
           qrRaw.current.program = '0x0' 
+          setStatus('success')
+        } else {
+          setStatus('error')
         }
       },[dispatch, savedPrograms]
     )
@@ -147,7 +151,7 @@ const LoadVoucher = () => {
     <>
     { 
       qrRaw.current.program != '0x0' && qrRaw.current.program != undefined ? 
-      <CustomButton onClick={()=> {handleLoadVoucher()}} >
+      <CustomButton onClick={()=> {loadProgData()}} >
         Load Voucher
       </CustomButton>
       :
